@@ -194,7 +194,8 @@ func (p *Parser) GetValue() (Value, error) {
 				"Line %d: Invalid # sequence", p.line))
 		}
 
-	case p.data[0] == '\'':
+	case p.data[0] == '\'' || p.data[0] == ',' || p.data[0] == '`':
+		ch := p.data[0]
 		p.data = p.data[1:]
 		val, err := p.GetValue()
 		if err != nil {
@@ -202,7 +203,16 @@ func (p *Parser) GetValue() (Value, error) {
 		}
 
 		var tail Value = Pair{val, &Nil}
-		return Pair{Quote, &tail}, nil
+		switch ch {
+		case '\'':
+			return Pair{Quote, &tail}, nil
+		case ',':
+			return Pair{Unquote, &tail}, nil
+		case '`':
+			return Pair{Quasiquote, &tail}, nil
+		default:
+			panic("Unreachable")
+		}
 
 	default:
 		str := ""

@@ -14,12 +14,14 @@ func (Boolean) isValue() {}
 
 type Symbol uint
 func (Symbol) isValue() {}
-var SymbolNames = []string{"nil", "quote", "lambda"}
+var SymbolNames = []string{"nil", "quote", "lambda", "unquote", "quasiquote"}
 
 var (
-	Nil Value = Symbol(0)
-	Quote Value = Symbol(1)
- 	Lambda Value = Symbol(2)
+	Nil Value        = Symbol(0)
+	Quote Value      = Symbol(1)
+ 	Lambda Value     = Symbol(2)
+ 	Unquote Value    = Symbol(3)
+ 	Quasiquote Value = Symbol(4)
 )
 
 type Character rune
