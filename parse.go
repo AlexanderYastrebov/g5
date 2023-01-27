@@ -46,7 +46,7 @@ func (p *Parser) GetValue() (Value, error) {
 					p.line))
 			}
 			var i big.Int
-			i.SetString(digits, 64)
+			i.SetString(digits, 10)
 			return IntegerV(i), nil
 		}
 
@@ -140,6 +140,69 @@ func (p *Parser) GetValue() (Value, error) {
 		*cur = Nil
 		p.data = p.data[1:] // Ending paren
 		return res, nil
+	
+	case p.data[0] == '#':
+		p.data = p.data[1:]
+		if len(p.data) == 0 {
+			return nil, errors.New(fmt.Sprintf(
+				"Line %d: Early EOF (#)", p.line))
+		}
+
+		if ch := p.data[0]; ch == 't' || ch == 'f' {
+			p.data = p.data[1:]
+			if len(p.data) > 0 && !unicode.IsSpace(p.data[0]) {
+				return nil, errors.New(fmt.Sprintf(
+					"Line %d: Invalid # sequence", p.line))
+			}
+			return Boolean(ch == 't'), nil
+		} else if p.data[0] == '\\' {
+			p.data = p.data[1:]
+			if len(p.data) == 0 {
+				return nil, errors.New(fmt.Sprintf(
+					"Line %d: Early EOF (character)", p.line))
+			}
+
+			ch := p.data[0]
+			p.data = p.data[1:]
+			if len(p.data) > 0 && !unicode.IsSpace(p.data[0]) {
+				return nil, errors.New(fmt.Sprintf(
+					"Line %d: Invalid # sequence", p.line))
+			}
+
+			return Character(ch), nil
+		} else if p.data[0] == '(' {
+			p.data = p.data[1:]
+
+			vec := Vector{}
+			for p.data[0] != ')' {
+				p.skipWs()
+				new, err := p.GetValue()
+				if err != nil {
+					return nil, err
+				}
+				vec = append(vec, new)
+				p.skipWs()
+
+				if len(p.data) == 0 {
+					return nil, errors.New(fmt.Sprintf(
+						"Line %d: Early EOF (vector)", p.line))
+				}
+			}
+			return vec, nil
+		} else {
+			return nil, errors.New(fmt.Sprintf(
+				"Line %d: Invalid # sequence", p.line))
+		}
+
+	case p.data[0] == '\'':
+		p.data = p.data[1:]
+		val, err := p.GetValue()
+		if err != nil {
+			return nil, err
+		}
+
+		var tail Value = Pair{val, &Nil}
+		return Pair{Quote, &tail}, nil
 
 	default:
 		str := ""
@@ -147,6 +210,13 @@ func (p *Parser) GetValue() (Value, error) {
 			str += string(p.data[0])
 			p.data = p.data[1:]
 		}
+
+		for i, v := range SymbolNames {
+			if v == str {
+				return Symbol(i), nil
+			}
+		}
+
 		SymbolNames = append(SymbolNames, str)
 		return Symbol(len(SymbolNames) - 1), nil
 	}

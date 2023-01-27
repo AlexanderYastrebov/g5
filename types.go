@@ -10,22 +10,22 @@ type Value interface {
 }
 
 type Boolean bool
-
 func (Boolean) isValue() {}
 
 type Symbol uint
-
 func (Symbol) isValue() {}
+var SymbolNames = []string{"nil", "quote", "lambda"}
 
-var SymbolNames = []string{"nil"}
-var Nil Value = Symbol(0)
+var (
+	Nil Value = Symbol(0)
+	Quote Value = Symbol(1)
+ 	Lambda Value = Symbol(2)
+)
 
 type Character rune
-
 func (Character) isValue() {}
 
 type Vector []Value
-
 func (Vector) isValue() {}
 
 // TODO: Procedures
@@ -34,7 +34,6 @@ type Pair struct {
 	Car Value
 	Cdr *Value
 }
-
 func (Pair) isValue() {}
 
 type Number interface {
@@ -48,9 +47,7 @@ type Rational interface {
 	Number
 	isRational()
 }
-
 type RationalV big.Rat
-
 func (RationalV) isValue()    {}
 func (RationalV) isNum()      {}
 func (RationalV) isRational() {}
@@ -60,14 +57,12 @@ type Integer interface {
 	isInteger()
 }
 type IntegerV big.Int
-
 func (IntegerV) isValue()    {}
 func (IntegerV) isNum()      {}
 func (IntegerV) isRational() {}
 func (IntegerV) isInteger()  {}
 
 type String string
-
 func (String) isValue() {}
 
 // TODO: Ports
@@ -83,7 +78,7 @@ func PrintValue(v Value) {
 	case Symbol:
 		fmt.Print(SymbolNames[v.(Symbol)])
 	case Character:
-		fmt.Print("#\\%r", v.(Character))
+		fmt.Printf("#\\%c", v.(Character))
 	case Vector:
 		fmt.Print("#(")
 		for i, item := range v.(Vector) {
@@ -92,6 +87,7 @@ func PrintValue(v Value) {
 			}
 			PrintValue(item)
 		}
+		fmt.Print(")")
 	case Pair:
 		fmt.Print("(")
 
@@ -111,8 +107,11 @@ func PrintValue(v Value) {
 			}
 
 		}
-
 		fmt.Print(")")
+	
+	case IntegerV:
+		i := big.Int(v.(IntegerV))
+		fmt.Print(i.String())
 
 	default:
 		fmt.Print("[something]")

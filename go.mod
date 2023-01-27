@@ -1,3 +1,3 @@
-module goscm
+module gosc
 
 go 1.19
