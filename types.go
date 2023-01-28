@@ -38,31 +38,11 @@ type Pair struct {
 func (Pair) isValue() {}
 var Empty Value = Pair{nil, nil}
 
-type Number interface {
-	Value
-	isNum()
-}
+type Rational big.Rat
+func (Rational) isValue() {}
 
-// No Real or Complex numbers
-
-type Rational interface {
-	Number
-	isRational()
-}
-type RationalV big.Rat
-func (RationalV) isValue()    {}
-func (RationalV) isNum()      {}
-func (RationalV) isRational() {}
-
-type Integer interface {
-	Number
-	isInteger()
-}
-type IntegerV big.Int
-func (IntegerV) isValue()    {}
-func (IntegerV) isNum()      {}
-func (IntegerV) isRational() {}
-func (IntegerV) isInteger()  {}
+type Integer big.Int
+func (Integer) isValue() {}
 
 type String string
 func (String) isValue() {}
@@ -120,9 +100,13 @@ func PrintValue(v Value) {
 		}
 		fmt.Print(")")
 	
-	case IntegerV:
-		i := big.Int(v.(IntegerV))
+	case Integer:
+		i := big.Int(v.(Integer))
 		fmt.Print(i.String())
+
+	case Rational:
+		r := big.Rat(v.(Rational))
+		fmt.Print(r.String())
 
 	default:
 		fmt.Print("[something]")

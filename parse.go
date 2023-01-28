@@ -62,7 +62,7 @@ func (p *Parser) GetValue() (Value, error) {
 			}
 			var i big.Int
 			i.SetString(digits, 10)
-			return IntegerV(i), nil
+			return Integer(i), nil
 		}
 
 		// Decimal value
@@ -80,7 +80,7 @@ func (p *Parser) GetValue() (Value, error) {
 
 		var r big.Rat
 		r.SetString(digits)
-		return RationalV(r), nil
+		return Rational(r), nil
 
 	case p.data[0] == '"':
 		p.data = p.data[1:]
