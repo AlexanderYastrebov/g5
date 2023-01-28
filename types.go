@@ -80,7 +80,15 @@ func PrintValue(v Value) {
 	case Symbol:
 		fmt.Print(SymbolNames[v.(Symbol)])
 	case Character:
-		fmt.Printf("#\\%c", v.(Character))
+		ch := rune(v.(Character))
+
+		if ch == '\n' {
+			fmt.Print("#\\newline")
+		} else if ch == ' ' {
+			fmt.Print("#\\space")
+		} else {
+			fmt.Printf("#\\%c", ch)
+		}
 	case Vector:
 		fmt.Print("#(")
 		for i, item := range v.(Vector) {

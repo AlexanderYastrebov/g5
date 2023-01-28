@@ -5,7 +5,17 @@ import (
 	"fmt"
 	"math/big"
 	"unicode"
+	"strings"
 )
+
+var delim = map[rune]bool{
+	';': true,
+	')': true,
+	' ': true,
+	'\n': true,
+	'\r': true,
+	'\t': true,
+}
 
 type Parser struct {
 	data []rune
@@ -17,7 +27,12 @@ func NewParser(code string) Parser {
 }
 
 func (p *Parser) skipWs() {
-	for len(p.data) > 0 && unicode.IsSpace(p.data[0]) {
+	for len(p.data) > 0 && (unicode.IsSpace(p.data[0]) || p.data[0] == ';') {
+		if p.data[0] == ';' {
+			for p.data[0] != '\n' {
+				p.data = p.data[1:]
+			}
+		}
 		if p.data[0] == '\n' {
 			p.line++
 		}
@@ -58,10 +73,7 @@ func (p *Parser) GetValue() (Value, error) {
 			p.data = p.data[1:]
 		}
 		rs := []rune(digits)
-		if rs[len(rs)-1] == '.' ||
-			(len(p.data) != 0 &&
-				!unicode.IsSpace(p.data[0]) &&
-				p.data[0] != ')') {
+		if rs[len(rs)-1] == '.' || (len(p.data) != 0 && !delim[p.data[0]]) {
 			return nil, errors.New(fmt.Sprintf("Line %d: Invalid real (%s)",
 				p.line, digits))
 		}
@@ -150,27 +162,40 @@ func (p *Parser) GetValue() (Value, error) {
 
 		if ch := p.data[0]; ch == 't' || ch == 'f' {
 			p.data = p.data[1:]
-			if len(p.data) > 0 && !unicode.IsSpace(p.data[0]) {
+			if len(p.data) > 0 && !delim[p.data[0]] {
 				return nil, errors.New(fmt.Sprintf(
 					"Line %d: Invalid # sequence", p.line))
 			}
 			return Boolean(ch == 't'), nil
-		} else if p.data[0] == '\\' {
+		} else if ch == '\\' {
 			p.data = p.data[1:]
 			if len(p.data) == 0 {
 				return nil, errors.New(fmt.Sprintf(
 					"Line %d: Early EOF (character)", p.line))
 			}
 
-			ch := p.data[0]
-			p.data = p.data[1:]
-			if len(p.data) > 0 && !unicode.IsSpace(p.data[0]) {
-				return nil, errors.New(fmt.Sprintf(
-					"Line %d: Invalid # sequence", p.line))
+			if len(p.data) == 1 || delim[p.data[1]] {
+				ch, p.data = p.data[0], p.data[1:]
+				return Character(ch), nil
 			}
 
-			return Character(ch), nil
-		} else if p.data[0] == '(' {
+			for _, v := range []string{"space", "newline"} {
+				slen := len(v)
+				if len(p.data) >= slen - 1 {
+					if len(p.data) == slen || delim[p.data[slen]] {
+						str := string(p.data[:slen])
+						p.data = p.data[slen:]
+						if strings.ToLower(str) == "space" {
+							return Character(' '), nil
+						} else if strings.ToLower(str) == "newline" {
+							return Character('\n'), nil
+						}
+					}
+				}
+			}
+			return nil, errors.New(fmt.Sprintf(
+				"Line %d: Invalid # sequence", p.line))
+		} else if ch == '(' {
 			p.data = p.data[1:]
 
 			vec := Vector{}
@@ -214,12 +239,14 @@ func (p *Parser) GetValue() (Value, error) {
 			panic("Unreachable")
 		}
 
-	default:
+	default: // Symbol
 		str := ""
-		for len(p.data) > 0 && !unicode.IsSpace(p.data[0]) && p.data[0] != ')' {
+		for len(p.data) > 0 && !delim[p.data[0]] {
 			str += string(p.data[0])
 			p.data = p.data[1:]
 		}
+
+		str = strings.ToLower(str) // Symbols are case-insensitive
 
 		for i, v := range SymbolNames {
 			if v == str {
