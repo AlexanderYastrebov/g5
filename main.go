@@ -7,6 +7,8 @@ import (
 )
 
 func main() {
+	Top.scope = TopScope // Put builtins into top-level scope
+
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("> ")
 
@@ -18,4 +20,9 @@ func main() {
 	}
 	PrintValue(v)
 	fmt.Println()
+
+	Gen(&Top, v)
+	for _, v := range Top.ins {
+		v.Print()
+	}
 }

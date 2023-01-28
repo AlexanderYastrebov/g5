@@ -14,13 +14,21 @@ func (Boolean) isValue() {}
 
 type Symbol uint
 func (Symbol) isValue() {}
-var SymbolNames = []string{"quote", "unquote", "quasiquote", "unquote-splicing"}
+var SymbolNames = []string{
+	"quote",
+	"unquote",
+	"quasiquote",
+	"unquote-splicing",
+	"+",
+}
 
 var (
 	Quote Value           = Symbol(0)
  	Unquote Value         = Symbol(1)
  	Quasiquote Value      = Symbol(2)
 	UnquoteSplicing Value = Symbol(3)
+
+	SymAdd = Symbol(4)
 )
 
 type Character rune
@@ -29,7 +37,14 @@ func (Character) isValue() {}
 type Vector []Value
 func (Vector) isValue() {}
 
-// TODO: Procedures
+type Procedure struct {
+	super *Procedure
+	scope map[Symbol]Value
+	names []Symbol
+	ins []Ins
+	builtin func(int)
+}
+func (Procedure) isValue() {}
 
 type Pair struct {
 	Car Value
@@ -107,8 +122,11 @@ func PrintValue(v Value) {
 	case Rational:
 		r := big.Rat(v.(Rational))
 		fmt.Print(r.String())
+	
+	case Procedure:
+		fmt.Print("[procedure]")
 
 	default:
-		fmt.Print("[something]")
+		fmt.Print("[UNHANDLED TYPE]")
 	}
 }
