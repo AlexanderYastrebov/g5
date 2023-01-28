@@ -37,9 +37,14 @@ func (Character) isValue() {}
 type Vector []Value
 func (Vector) isValue() {}
 
+type Scope struct {
+	m map[Symbol]Value
+	super *Scope
+}
+
 type Procedure struct {
 	super *Procedure
-	scope map[Symbol]Value
+	scope *Scope
 	names []Symbol
 	ins []Ins
 	builtin func(int)

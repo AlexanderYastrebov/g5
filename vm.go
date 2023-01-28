@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+)
 
 type Stack []Value
 var stack Stack
@@ -28,6 +31,37 @@ type Ins struct {
 	op Op
 	imm Value
 	nargs int
+}
+
+func (p *Procedure) Eval() {
+	for _, ins := range p.ins {
+		switch ins.op {
+		case Imm:
+			stack.Push(ins.imm)
+		case GetVar:
+			cur := p.scope
+			for cur != nil {
+				v, ok := cur.m[ins.imm.(Symbol)]
+				if ok {
+					stack.Push(v)
+					break
+				}
+			}
+			if cur == nil {
+				log.Fatalf("Could not find variable: %s",
+					SymbolNames[ins.imm.(Symbol)])
+			}
+		case Call:
+			callee := stack.Pop()
+			if p, ok := callee.(*Procedure); ok {
+				if p.builtin != nil {
+					p.builtin(ins.nargs)
+				}
+			} else {
+				log.Fatalln("Call to non-procedure")
+			}
+		}
+	}
 }
 
 func (ins Ins) Print() {

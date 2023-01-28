@@ -10,6 +10,7 @@ func FnAdd(nargs int) {
 
 	for nargs > 0 {
 		n := stack.Pop()
+		nargs--
 		n_rat, n_israt := n.(Rational)
 		n_int, n_isint := n.(Integer)
 
@@ -26,7 +27,6 @@ func FnAdd(nargs int) {
 			x.SetInt(&x_bi)
 			sum.Add(&sum, &x)
 		}
-		nargs--
 	}
 
 	if sum.IsInt() {
@@ -36,10 +36,13 @@ func FnAdd(nargs int) {
 	stack.Push(Value(Rational(sum)))
 }
 
-var ProcAdd = Procedure{super: &Top, builtin: FnAdd}
+var ProcAdd = Procedure{super: Top, builtin: FnAdd}
 
-var TopScope = map[Symbol]Value{
-	SymAdd: ProcAdd,
+var TopScope = Scope{
+	map[Symbol]Value{
+		SymAdd: &ProcAdd,
+	},
+	nil,
 }
 
-var Top = Procedure{}
+var Top = &Procedure{}
