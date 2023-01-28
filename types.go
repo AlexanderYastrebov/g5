@@ -14,14 +14,13 @@ func (Boolean) isValue() {}
 
 type Symbol uint
 func (Symbol) isValue() {}
-var SymbolNames = []string{"nil", "quote", "lambda", "unquote", "quasiquote"}
+var SymbolNames = []string{"quote", "unquote", "quasiquote", "unquote-splicing"}
 
 var (
-	Nil Value        = Symbol(0)
-	Quote Value      = Symbol(1)
- 	Lambda Value     = Symbol(2)
- 	Unquote Value    = Symbol(3)
- 	Quasiquote Value = Symbol(4)
+	Quote Value           = Symbol(0)
+ 	Unquote Value         = Symbol(1)
+ 	Quasiquote Value      = Symbol(2)
+	UnquoteSplicing Value = Symbol(3)
 )
 
 type Character rune
@@ -37,6 +36,7 @@ type Pair struct {
 	Cdr *Value
 }
 func (Pair) isValue() {}
+var Empty Value = Pair{nil, nil}
 
 type Number interface {
 	Value
@@ -105,11 +105,12 @@ func PrintValue(v Value) {
 		for {
 			PrintValue(cur.Car)
 
-			if _, ok := (*cur.Cdr).(Pair); ok {
+			if p, ok := (*cur.Cdr).(Pair); ok {
+				if p.Car == nil && p.Cdr == nil {
+					break
+				}
 				fmt.Print(" ")
 				cur = (*cur.Cdr).(Pair)
-			} else if *cur.Cdr == Nil {
-				break
 			} else {
 				fmt.Print(" . ")
 				PrintValue(*cur.Cdr)

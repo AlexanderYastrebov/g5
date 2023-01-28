@@ -149,7 +149,7 @@ func (p *Parser) GetValue() (Value, error) {
 			*cur = Pair{car, &next}
 			cur = &next
 		}
-		*cur = Nil
+		*cur = Empty
 		p.data = p.data[1:] // Ending paren
 		return res, nil
 	
@@ -218,23 +218,30 @@ func (p *Parser) GetValue() (Value, error) {
 			return nil, errors.New(fmt.Sprintf(
 				"Line %d: Invalid # sequence", p.line))
 		}
+	
+	case p.data[0] == '\''|| p.data[0] == '`' || p.data[0] == ',':
+		str := string(p.data[0])
 
-	case p.data[0] == '\'' || p.data[0] == ',' || p.data[0] == '`':
-		ch := p.data[0]
 		p.data = p.data[1:]
+		if len(p.data) != 0 && p.data[0] == '@' {
+			str += "@"
+			p.data = p.data[1:]
+		}
 		val, err := p.GetValue()
 		if err != nil {
 			return nil, err
 		}
 
-		var tail Value = Pair{val, &Nil}
-		switch ch {
-		case '\'':
+		var tail Value = Pair{val, &Empty}
+		switch str {
+		case "\\":
 			return Pair{Quote, &tail}, nil
-		case ',':
+		case ",":
 			return Pair{Unquote, &tail}, nil
-		case '`':
+		case "`":
 			return Pair{Quasiquote, &tail}, nil
+		case ",@":
+			return Pair{UnquoteSplicing, &tail}, nil
 		default:
 			panic("Unreachable")
 		}
