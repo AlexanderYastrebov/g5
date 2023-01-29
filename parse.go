@@ -108,7 +108,7 @@ func (p *Parser) GetValue() (Value, error) {
 
 	case p.data[0] == '(':
 		p.data = p.data[1:]
-		var res Value
+		var res Value = Empty
 		var cur *Value = &res
 		for p.data[0] != ')' {
 			p.skipWs()

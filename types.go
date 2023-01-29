@@ -14,22 +14,7 @@ func (Boolean) isValue() {}
 
 type Symbol uint
 func (Symbol) isValue() {}
-var SymbolNames = []string{
-	"quote",
-	"unquote",
-	"quasiquote",
-	"unquote-splicing",
-	"+",
-}
-
-var (
-	Quote Value           = Symbol(0)
- 	Unquote Value         = Symbol(1)
- 	Quasiquote Value      = Symbol(2)
-	UnquoteSplicing Value = Symbol(3)
-
-	SymAdd = Symbol(4)
-)
+// Builtin symbols are listed in builtins.go
 
 type Character rune
 func (Character) isValue() {}
@@ -43,7 +28,6 @@ type Scope struct {
 }
 
 type Procedure struct {
-	super *Procedure
 	scope *Scope
 	names []Symbol
 	ins []Ins
@@ -103,6 +87,10 @@ func PrintValue(v Value) {
 
 		cur := v.(Pair)
 		for {
+			if (cur.Car == nil) {
+				break
+			}
+
 			PrintValue(cur.Car)
 
 			if p, ok := (*cur.Cdr).(Pair); ok {

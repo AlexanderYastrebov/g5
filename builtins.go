@@ -5,6 +5,23 @@ import (
 	"log"
 )
 
+var SymbolNames = []string{
+	"quote",
+	"unquote",
+	"quasiquote",
+	"unquote-splicing",
+	"+",
+}
+
+var (
+	Quote Value           = Symbol(0)
+ 	Unquote Value         = Symbol(1)
+ 	Quasiquote Value      = Symbol(2)
+	UnquoteSplicing Value = Symbol(3)
+
+	SymAdd = Symbol(4)
+)
+
 func FnAdd(nargs int) {
 	sum := big.Rat{}
 
@@ -36,11 +53,11 @@ func FnAdd(nargs int) {
 	stack.Push(Value(Rational(sum)))
 }
 
-var ProcAdd = Procedure{super: Top, builtin: FnAdd}
+var ProcAdd = &Procedure{builtin: FnAdd}
 
-var TopScope = Scope{
+var TopScope = &Scope{
 	map[Symbol]Value{
-		SymAdd: &ProcAdd,
+		SymAdd: ProcAdd,
 	},
 	nil,
 }

@@ -5,26 +5,14 @@ import (
 	"log"
 )
 
-type Stack []Value
-var stack Stack
-
-func (s *Stack) Push(v Value) {
-	*s = append(*s, v)
-}
-
-func (s *Stack) Pop() Value {
-	v := (*s)[len(*s) - 1]
-	*s = (*s)[:len(*s) - 1]
-	return v
-}
-
-
 type Op uint8
 
 const (
 	Imm Op = iota
 	GetVar
 	Call
+	Lambda
+	Set
 )
 
 type Ins struct {
@@ -34,7 +22,8 @@ type Ins struct {
 }
 
 func (p *Procedure) Eval() {
-	for _, ins := range p.ins {
+begin:
+	for i, ins := range p.ins {
 		switch ins.op {
 		case Imm:
 			stack.Push(ins.imm)
@@ -46,6 +35,7 @@ func (p *Procedure) Eval() {
 					stack.Push(v)
 					break
 				}
+				cur = cur.super
 			}
 			if cur == nil {
 				log.Fatalf("Could not find variable: %s",
@@ -53,13 +43,32 @@ func (p *Procedure) Eval() {
 			}
 		case Call:
 			callee := stack.Pop()
-			if p, ok := callee.(*Procedure); ok {
-				if p.builtin != nil {
-					p.builtin(ins.nargs)
+			if newp, ok := callee.(*Procedure); ok {
+				if newp.builtin != nil {
+					newp.builtin(ins.nargs)
+				} else {
+					for _, name := range newp.names {
+						newp.scope.m[name] = stack.Pop()
+					}
+					if i == len(p.ins) - 1 {
+						p = newp
+						goto begin
+					}
+					newp.Eval()
 				}
 			} else {
-				log.Fatalln("Call to non-procedure")
+				log.Fatalf("Call to non-procedure (%T)", callee)
 			}
+		case Lambda: // Procedure -> *Procedure
+			lambda := ins.imm.(Procedure)
+			lambda.scope = new(Scope)
+			lambda.scope.m = map[Symbol]Value{}
+			lambda.scope.super = p.scope
+			stack.Push(Value(&lambda))
+		case Set:
+			dest := ins.imm.(Symbol)
+			src := stack.Top()
+			p.scope.m[dest] = src
 		}
 	}
 }
@@ -79,5 +88,14 @@ func (ins Ins) Print() {
 	case Call:
 		fmt.Print("CALL")
 		fmt.Printf("(%d)\n", ins.nargs)
+	case Set:
+		fmt.Print("SET!")
+		fmt.Print("[")
+		PrintValue(ins.imm)
+		fmt.Println("]")
+	case Lambda:
+		fmt.Println("LAMBDA")
+	default:
+		fmt.Println("[unknown]")
 	}
 }
