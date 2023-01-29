@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"log"
 )
 
 func validate(code string) bool {
@@ -37,13 +38,14 @@ func main() {
 		p := NewParser(code)
 		v, err := p.GetValue()
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 		PrintValue(v)
 		fmt.Println()
 
+		Top.ins = []Ins{}
 		if err := Gen(Top, v); err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 		for _, v := range Top.ins {
 			v.Print()
