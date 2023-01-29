@@ -6,6 +6,18 @@ import (
 	"os"
 )
 
+func validate(code string) bool {
+	count := 0
+	for _, r := range []rune(code) {
+		if r == '(' {
+			count++
+		} else if r == ')' {
+			count--
+		}
+	}
+	return count == 0
+}
+
 func main() {
 	Top.scope = TopScope // Put builtins into top-level scope
 
@@ -14,8 +26,15 @@ func main() {
 	for {
 		fmt.Print("> ")
 
-		first, _ := reader.ReadString('\n')
-		p := NewParser(first)
+		code, _ := reader.ReadString('\n')
+
+		for !validate(code) {
+			fmt.Print(">> ")
+			next, _ := reader.ReadString('\n')
+			code += next
+		}
+
+		p := NewParser(code)
 		v, err := p.GetValue()
 		if err != nil {
 			panic(err)
