@@ -36,26 +36,26 @@ func main() {
 		}
 
 		p := NewParser(code)
-		v, err := p.GetValue()
-		if err != nil {
-			log.Fatalln(err)
-		}
-		PrintValue(v)
-		fmt.Println()
+		
+		for len(p.data) > 0 {
+			v, err := p.GetValue()
+			p.skipWs()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			fmt.Println()
 
-		Top.ins = []Ins{}
-		if err := Gen(Top, v); err != nil {
-			log.Fatalln(err)
-		}
-		for _, v := range Top.ins {
-			v.Print()
-		}
+			Top.ins = []Ins{}
+			if err := Gen(Top, v); err != nil {
+				log.Fatalln(err)
+			}
 
-		Top.Eval()
+			Top.Eval()
 
-		if len(stack) > 0 {
-			PrintValue(stack[len(stack) - 1])
+			if len(stack) > 0 {
+				PrintValue(stack[len(stack) - 1])
+			}
+			fmt.Println()
 		}
-		fmt.Println()
 	}
 }

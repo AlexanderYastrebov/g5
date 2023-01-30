@@ -34,6 +34,7 @@ func (scope *Scope) Lookup(sym Symbol) *Scope {
 func (p *Procedure) Eval() {
 begin:
 	for i, ins := range p.ins {
+		ins.Print()
 		switch ins.op {
 		case Imm:
 			stack.Push(ins.imm)
