@@ -14,6 +14,7 @@ const (
 	Lambda
 	Set
 	Define
+	If
 )
 
 type Ins struct {
@@ -59,7 +60,7 @@ begin:
 				if newp.builtin != nil {
 					newp.builtin(ins.nargs)
 				} else {
-					for _, name := range newp.names {
+					for _, name := range *newp.names {
 						newp.scope.m[name] = stack.Pop()
 					}
 					if i == len(p.ins) - 1 {
@@ -86,6 +87,21 @@ begin:
 				fmt.Println("WARNING: Redefining variable")
 			}
 			scope.m[sym] = stack.Pop()
+		case If:
+			cond, isbool := stack.Pop().(Boolean)
+			if !isbool {
+				cond = true
+			}
+			lt := stack.Pop().(Procedure)
+			if ins.nargs == 3 {
+				lf := stack.Pop().(Procedure)
+				if !cond {
+					lf.Eval()
+				}
+			}
+			if cond {
+				lt.Eval()
+			}
 		}
 	}
 }

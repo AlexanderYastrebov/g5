@@ -29,7 +29,7 @@ type Scope struct {
 
 type Procedure struct {
 	scope *Scope
-	names []Symbol
+	names *[]Symbol
 	ins []Ins
 	builtin func(int)
 }

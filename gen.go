@@ -56,7 +56,7 @@ func Gen(p *Procedure, v Value) error {
 			case "lambda":
 				lambda := Procedure{
 					nil,
-					[]Symbol{},
+					new([]Symbol),
 					nil,
 					nil,
 				}
@@ -74,11 +74,29 @@ func Gen(p *Procedure, v Value) error {
 				}
 				
 				for _, v := range names {
-					lambda.names = append(lambda.names, v.(Symbol))
+					*lambda.names = append(*lambda.names, v.(Symbol))
 				}
 
 				Gen(&lambda, args[2])
 				p.ins = append(p.ins, Ins{Lambda, lambda, 0})
+				return nil
+			case "if":
+				lt := Procedure{
+					p.scope,
+					p.names,
+					[]Ins{},
+					nil,
+				}
+				lf := lt
+
+				Gen(&lt, args[2])
+				if len(args) == 4 {
+					Gen(&lf, args[3])
+					p.ins = append(p.ins, Ins{Imm, lf, 0})
+				}
+				p.ins = append(p.ins, Ins{Imm, lt, 0})
+				Gen(p, args[1])
+				p.ins = append(p.ins, Ins{If, nil, len(args) - 1})
 				return nil
 			}
 		}
