@@ -21,6 +21,16 @@ type Ins struct {
 	nargs int
 }
 
+func (scope *Scope) Lookup(sym Symbol) *Scope {
+	if _, ok := scope.m[sym]; !ok {
+		if scope.super == nil {
+			return nil
+		}
+		return scope.super.Lookup(sym)
+	}
+	return scope
+}
+
 func (p *Procedure) Eval() {
 begin:
 	for i, ins := range p.ins {
@@ -66,9 +76,12 @@ begin:
 			lambda.scope.super = p.scope
 			stack.Push(Value(&lambda))
 		case Set:
-			dest := ins.imm.(Symbol)
-			src := stack.Top()
-			p.scope.m[dest] = src
+			sym := ins.imm.(Symbol)
+			scope := p.scope.Lookup(sym)
+			if scope == nil {
+				scope = p.scope
+			}
+			scope.m[sym] = stack.Pop()
 		}
 	}
 }

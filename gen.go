@@ -26,14 +26,14 @@ func Gen(p *Procedure, v Value) error {
 		if sym, ok := args[0].(Symbol); ok {
 			switch SymbolNames[sym] {
 			case "set!":
-				if len(args) != 2 {
+				if len(args) != 3 {
 					return errors.New("set! takes 2 args")
 				}
-				if _, ok := args[0].(Symbol); !ok {
+				if _, ok := args[1].(Symbol); !ok {
 					return errors.New("First arg to set! must be a symbol")
 				}
-				Gen(p, args[1])
-				p.ins = append(p.ins, Ins{Set, args[0], 1})
+				Gen(p, args[2])
+				p.ins = append(p.ins, Ins{Set, args[1], 1})
 				return nil
 			case "lambda":
 				lambda := Procedure{
