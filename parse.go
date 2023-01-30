@@ -46,11 +46,20 @@ func (p *Parser) GetValue() (Value, error) {
 	}
 
 	switch {
-	case unicode.IsDigit(p.data[0]):
+	case unicode.IsDigit(p.data[0]) ||  p.data[0] == '-':
 		digits := ""
+		if p.data[0] == '-' {
+			digits = "-"
+			p.data = p.data[1:]
+		}
+
 		for len(p.data) > 0 && unicode.IsDigit(p.data[0]) {
 			digits += string(p.data[0])
 			p.data = p.data[1:]
+		}
+
+		if digits == "-" {
+			return Value(SymSub), nil
 		}
 
 		if len(p.data) == 0 || p.data[0] != '.' {

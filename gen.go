@@ -5,6 +5,19 @@ import (
 	"fmt"
 )
 
+func list2vec(cur Pair) ([]Value, error) {
+	res := []Value{}
+	for cur.Car != nil {
+		var ok bool
+		res = append(res, cur.Car)
+		cur, ok = (*cur.Cdr).(Pair)
+		if !ok {
+			return nil, errors.New("Dotted list when regular list expected")
+		}
+	}
+	return res, nil
+}
+
 func Gen(p *Procedure, v Value) error {
 	switch v.(type) {
 	case Boolean, String, Character, Vector, Integer, Rational:
@@ -13,14 +26,9 @@ func Gen(p *Procedure, v Value) error {
 		p.ins = append(p.ins, Ins{GetVar, v, 0})
 	case Pair:
 		var args []Value
-		cur := v.(Pair)
-		for cur.Car != nil {
-			var ok bool
-			args = append(args, cur.Car)
-			cur, ok = (*cur.Cdr).(Pair)
-			if !ok {
-				return errors.New("Dotted list when regular list expected")
-			}
+		args, err := list2vec(v.(Pair))
+		if err != nil {
+			return err
 		}
 
 		if sym, ok := args[0].(Symbol); ok {
@@ -33,6 +41,15 @@ func Gen(p *Procedure, v Value) error {
 					return errors.New("First arg to set! must be a symbol")
 				}
 				Gen(p, args[2])
+				p.ins = append(p.ins, Ins{Set, args[1], 1})
+				return nil
+			case "defined?":
+				if len(args) != 2 {
+					return errors.New("defined? takes 1 args")
+				}
+				if _, ok := args[1].(Symbol); !ok {
+					return errors.New("Arg to defined? must be a symbol")
+				}
 				p.ins = append(p.ins, Ins{Set, args[1], 1})
 				return nil
 			case "lambda":
@@ -48,18 +65,15 @@ func Gen(p *Procedure, v Value) error {
 					return errors.New(
 						fmt.Sprintf("Expected argument list (%T)", args[1]))
 				}
-				cur := pair
-				for cur.Car != nil {
-					name, ok := cur.Car.(Symbol)
-					if !ok {
-						return errors.New("Non-symbol in argument list")
-					}
-					lambda.names = append(lambda.names, name)
-					cur, ok = (*cur.Cdr).(Pair)
-					if !ok {
-						return errors.New(
-							"Dotted list for args, not yet implemented")
-					}
+
+				var names []Value
+				names, err = list2vec(pair)
+				if err != nil {
+					return err
+				}
+				
+				for _, v := range names {
+					lambda.names = append(lambda.names, v.(Symbol))
 				}
 
 				Gen(&lambda, args[2])
