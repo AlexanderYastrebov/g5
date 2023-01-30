@@ -13,6 +13,7 @@ const (
 	Call
 	Lambda
 	Set
+	Define
 )
 
 type Ins struct {
@@ -76,11 +77,13 @@ begin:
 			lambda.scope.m = map[Symbol]Value{}
 			lambda.scope.super = p.scope
 			stack.Push(Value(&lambda))
-		case Set:
+		case Set, Define:
 			sym := ins.imm.(Symbol)
 			scope := p.scope.Lookup(sym)
 			if scope == nil {
 				scope = p.scope
+			} else if ins.op == Define {
+				fmt.Println("WARNING: Redefining variable")
 			}
 			scope.m[sym] = stack.Pop()
 		}
@@ -104,6 +107,11 @@ func (ins Ins) Print() {
 		fmt.Printf("(%d)\n", ins.nargs)
 	case Set:
 		fmt.Print("SET!")
+		fmt.Print("[")
+		PrintValue(ins.imm)
+		fmt.Println("]")
+	case Define:
+		fmt.Print("DEFINE")
 		fmt.Print("[")
 		PrintValue(ins.imm)
 		fmt.Println("]")

@@ -43,7 +43,6 @@ func main() {
 			if err != nil {
 				log.Fatalln(err)
 			}
-			fmt.Println()
 
 			Top.ins = []Ins{}
 			if err := Gen(Top, v); err != nil {

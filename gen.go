@@ -43,14 +43,15 @@ func Gen(p *Procedure, v Value) error {
 				Gen(p, args[2])
 				p.ins = append(p.ins, Ins{Set, args[1], 1})
 				return nil
-			case "defined?":
-				if len(args) != 2 {
-					return errors.New("defined? takes 1 args")
+			case "define":
+				if len(args) != 3 {
+					return errors.New("define takes 2 args")
 				}
 				if _, ok := args[1].(Symbol); !ok {
-					return errors.New("Arg to defined? must be a symbol")
+					return errors.New("First arg to define must be a symbol")
 				}
-				p.ins = append(p.ins, Ins{Set, args[1], 1})
+				Gen(p, args[2])
+				p.ins = append(p.ins, Ins{Define, args[1], 1})
 				return nil
 			case "lambda":
 				lambda := Procedure{
