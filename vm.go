@@ -89,18 +89,16 @@ begin:
 			scope.m[sym] = stack.Pop()
 		case If:
 			cond, isbool := stack.Pop().(Boolean)
-			if !isbool {
-				cond = true
-			}
 			lt := stack.Pop().(Procedure)
+			if !isbool || bool(cond) {
+				lt.Eval()
+			}
+
 			if ins.nargs == 3 {
 				lf := stack.Pop().(Procedure)
-				if !cond {
+				if isbool && !bool(cond) {
 					lf.Eval()
 				}
-			}
-			if cond {
-				lt.Eval()
 			}
 		}
 	}
@@ -133,6 +131,8 @@ func (ins Ins) Print() {
 		fmt.Println("]")
 	case Lambda:
 		fmt.Println("LAMBDA")
+	case If:
+		fmt.Println("IF")
 	default:
 		fmt.Println("[unknown]")
 	}
