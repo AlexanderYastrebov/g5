@@ -14,6 +14,8 @@ var SymbolNames = []string{
 	"-",
 	"car",
 	"cdr",
+	"set-car!",
+	"set-cdr!",
 }
 
 var (
@@ -24,9 +26,10 @@ var (
 
 	SymAdd     = Symbol(4)
 	SymSub     = Symbol(5)
-	SymDefined = Symbol(6)
-	SymCar     = Symbol(7)
-	SymCdr     = Symbol(8)
+	SymCar     = Symbol(6)
+	SymCdr     = Symbol(7)
+	SymSetCar  = Symbol(8)
+	SymSetCdr  = Symbol(9)
 )
 
 func FnAdd(nargs int) {
@@ -113,13 +116,53 @@ func FnSub(nargs int) {
 	stack.Push(Value(Rational(sum)))
 }
 
+func FnCar(nargs int) {
+	if nargs != 1 {
+		log.Fatalln("Wrong arg count to car")
+	}
+	p := stack.Pop().(*Pair)
+	stack.Push(*p.Car)
+}
+
+func FnCdr(nargs int) {
+	if nargs != 1 {
+		log.Fatalln("Wrong arg count to cdr")
+	}
+	p := stack.Pop().(*Pair)
+	stack.Push(*p.Cdr)
+}
+
+func FnSetCar(nargs int) {
+	if nargs != 2 {
+		log.Fatalln("Wrong arg count to set-car!")
+	}
+	p := stack.Pop().(*Pair)
+	*p.Car = stack.Pop()
+}
+
+func FnSetCdr(nargs int) {
+	if nargs != 2 {
+		log.Fatalln("Wrong arg count to set-cdr!")
+	}
+	p := stack.Pop().(*Pair)
+	*p.Cdr = stack.Pop()
+}
+
 var ProcAdd = &Procedure{builtin: FnAdd}
 var ProcSub = &Procedure{builtin: FnSub}
+var ProcCar = &Procedure{builtin: FnCar}
+var ProcCdr = &Procedure{builtin: FnCdr}
+var ProcSetCar = &Procedure{builtin: FnSetCar}
+var ProcSetCdr = &Procedure{builtin: FnSetCdr}
 
 var TopScope = &Scope{
 	map[Symbol]Value{
 		SymAdd: ProcAdd,
 		SymSub: ProcSub,
+		SymCar: ProcCar,
+		SymCdr: ProcCdr,
+		SymSetCar: ProcSetCar,
+		SymSetCdr: ProcSetCdr,
 	},
 	nil,
 }
