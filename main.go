@@ -35,11 +35,6 @@ func run(code string) {
 		}
 
 		Top.Eval()
-
-		if len(stack) > 0 {
-			PrintValue(stack[len(stack) - 1])
-		}
-		fmt.Println()
 	}
 }
 

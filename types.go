@@ -53,16 +53,20 @@ func (Integer) isValue() {}
 type String string
 func (String) isValue() {}
 
-// TODO: Ports
+type Port struct {
+	io.ReadWriteCloser
+}
+func (Port) isValue() {}
 
-func WriteValue(v Value, quote bool, port io.Writer) {
+func WriteValue(v Value, quote bool, port *Port) {
+	var writer io.Writer = port
 	if port == nil {
-		port = os.Stdout
+		writer = os.Stdout
 	}
 	switch v.(type) {
 	case Boolean:
 		if v.(Boolean) {
-			fmt.Print("#t")
+			writer.Write([]byte("#t"))
 		} else {
 			fmt.Print("#f")
 		}
@@ -70,31 +74,31 @@ func WriteValue(v Value, quote bool, port io.Writer) {
 		fmt.Print(SymbolNames[v.(Symbol)])
 	case String:
 		if quote {
-			fmt.Printf("\"%s\"", v.(String))
+			fmt.Fprintf(writer, "\"%s\"", v.(String))
 		} else {
-			fmt.Print(v.(String))
+			fmt.Fprint(writer, v.(String))
 		}
 	case Character:
 		ch := rune(v.(Character))
 
 		if ch == '\n' {
-			fmt.Print("#\\newline")
+			fmt.Fprint(writer, "#\\newline")
 		} else if ch == ' ' {
-			fmt.Print("#\\space")
+			fmt.Fprint(writer, "#\\space")
 		} else {
-			fmt.Printf("#\\%c", ch)
+			fmt.Fprintf(writer, "#\\%c", ch)
 		}
 	case Vector:
-		fmt.Print("#(")
+		fmt.Fprint(writer, "#(")
 		for i, item := range v.(Vector) {
 			if i != 0 {
-				fmt.Print(" ")
+				fmt.Fprint(writer, " ")
 			}
 			WriteValue(item, quote, port)
 		}
-		fmt.Print(")")
+		fmt.Fprint(writer, ")")
 	case *Pair:
-		fmt.Print("(")
+		fmt.Fprint(writer, "(")
 
 		cur := v.(*Pair)
 		for {
@@ -108,30 +112,30 @@ func WriteValue(v Value, quote bool, port io.Writer) {
 				if p.Car == nil && p.Cdr == nil {
 					break
 				}
-				fmt.Print(" ")
+				fmt.Fprint(writer, " ")
 				cur = (*cur.Cdr).(*Pair)
 			} else {
-				fmt.Print(" . ")
+				fmt.Fprint(writer, " . ")
 				WriteValue(*cur.Cdr, quote, port)
 				break
 			}
 
 		}
-		fmt.Print(")")
+		fmt.Fprint(writer, ")")
 	
 	case Integer:
 		i := big.Int(v.(Integer))
-		fmt.Print(i.String())
+		fmt.Fprint(writer, i.String())
 
 	case Rational:
 		r := big.Rat(v.(Rational))
-		fmt.Print(r.String())
+		fmt.Fprint(writer, r.String())
 	
 	case Procedure:
-		fmt.Print("[procedure]")
+		fmt.Fprint(writer, "[procedure]")
 
 	default:
-		fmt.Print("[UNHANDLED TYPE]")
+		fmt.Fprint(writer, "[UNHANDLED TYPE]")
 	}
 }
 
