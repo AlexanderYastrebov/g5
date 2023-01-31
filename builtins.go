@@ -16,6 +16,7 @@ var SymbolNames = []string{
 	"cdr",
 	"set-car!",
 	"set-cdr!",
+	"display",
 }
 
 var (
@@ -30,6 +31,7 @@ var (
 	SymCdr     = Symbol(7)
 	SymSetCar  = Symbol(8)
 	SymSetCdr  = Symbol(9)
+	SymDisplay = Symbol(10)
 )
 
 func FnAdd(nargs int) {
@@ -148,21 +150,22 @@ func FnSetCdr(nargs int) {
 	*p.Cdr = stack.Pop()
 }
 
-var ProcAdd = &Procedure{builtin: FnAdd}
-var ProcSub = &Procedure{builtin: FnSub}
-var ProcCar = &Procedure{builtin: FnCar}
-var ProcCdr = &Procedure{builtin: FnCdr}
-var ProcSetCar = &Procedure{builtin: FnSetCar}
-var ProcSetCdr = &Procedure{builtin: FnSetCdr}
+func FnDisplay(nargs int) {
+	if nargs != 1 {
+		log.Fatalln("Wrong arg count to display (ports not yet implemented)")
+	}
+	WriteValue(stack.Top(), false, nil)
+}
 
 var TopScope = &Scope{
 	map[Symbol]Value{
-		SymAdd: ProcAdd,
-		SymSub: ProcSub,
-		SymCar: ProcCar,
-		SymCdr: ProcCdr,
-		SymSetCar: ProcSetCar,
-		SymSetCdr: ProcSetCdr,
+		SymAdd: &Procedure{builtin: FnAdd},
+		SymSub: &Procedure{builtin: FnSub},
+		SymCar: &Procedure{builtin: FnCar},
+		SymCdr: &Procedure{builtin: FnCdr},
+		SymSetCar: &Procedure{builtin: FnSetCar},
+		SymSetCdr: &Procedure{builtin: FnSetCdr},
+		SymDisplay: &Procedure{builtin: FnDisplay},
 	},
 	nil,
 }

@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"math/big"
+	"io"
+	"os"
 )
 
 type Value interface {
@@ -53,7 +55,10 @@ func (String) isValue() {}
 
 // TODO: Ports
 
-func PrintValue(v Value) {
+func WriteValue(v Value, quote bool, port io.Writer) {
+	if port == nil {
+		port = os.Stdout
+	}
 	switch v.(type) {
 	case Boolean:
 		if v.(Boolean) {
@@ -63,6 +68,12 @@ func PrintValue(v Value) {
 		}
 	case Symbol:
 		fmt.Print(SymbolNames[v.(Symbol)])
+	case String:
+		if quote {
+			fmt.Printf("\"%s\"", v.(String))
+		} else {
+			fmt.Print(v.(String))
+		}
 	case Character:
 		ch := rune(v.(Character))
 
@@ -79,7 +90,7 @@ func PrintValue(v Value) {
 			if i != 0 {
 				fmt.Print(" ")
 			}
-			PrintValue(item)
+			WriteValue(item, quote, port)
 		}
 		fmt.Print(")")
 	case *Pair:
@@ -91,7 +102,7 @@ func PrintValue(v Value) {
 				break
 			}
 
-			PrintValue(*cur.Car)
+			WriteValue(*cur.Car, quote, port)
 
 			if p, ok := (*cur.Cdr).(*Pair); ok {
 				if p.Car == nil && p.Cdr == nil {
@@ -101,7 +112,7 @@ func PrintValue(v Value) {
 				cur = (*cur.Cdr).(*Pair)
 			} else {
 				fmt.Print(" . ")
-				PrintValue(*cur.Cdr)
+				WriteValue(*cur.Cdr, quote, port)
 				break
 			}
 
@@ -122,4 +133,8 @@ func PrintValue(v Value) {
 	default:
 		fmt.Print("[UNHANDLED TYPE]")
 	}
+}
+
+func PrintValue(v Value) {
+	WriteValue(v, true, nil)
 }
