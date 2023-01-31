@@ -39,8 +39,8 @@ type Pair struct {
 	Car *Value
 	Cdr *Value
 }
-func (*Pair) isValue() {}
-var Empty Value = &Pair{nil, nil}
+func (Pair) isValue() {}
+var Empty Value = Pair{nil, nil}
 
 type Rational big.Rat
 func (Rational) isValue() {}
@@ -82,10 +82,10 @@ func PrintValue(v Value) {
 			PrintValue(item)
 		}
 		fmt.Print(")")
-	case *Pair:
+	case Pair:
 		fmt.Print("(")
 
-		cur := v.(*Pair)
+		cur := v.(Pair)
 		for {
 			if (cur.Car == nil) {
 				break
@@ -93,12 +93,12 @@ func PrintValue(v Value) {
 
 			PrintValue(*cur.Car)
 
-			if p, ok := (*cur.Cdr).(*Pair); ok {
+			if p, ok := (*cur.Cdr).(Pair); ok {
 				if p.Car == nil && p.Cdr == nil {
 					break
 				}
 				fmt.Print(" ")
-				cur = (*cur.Cdr).(*Pair)
+				cur = (*cur.Cdr).(Pair)
 			} else {
 				fmt.Print(" . ")
 				PrintValue(*cur.Cdr)
