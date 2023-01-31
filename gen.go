@@ -9,7 +9,7 @@ func list2vec(cur Pair) ([]Value, error) {
 	res := []Value{}
 	for cur.Car != nil {
 		var ok bool
-		res = append(res, cur.Car)
+		res = append(res, *cur.Car)
 		cur, ok = (*cur.Cdr).(Pair)
 		if !ok {
 			return nil, errors.New("Dotted list when regular list expected")
@@ -90,13 +90,21 @@ func Gen(p *Procedure, v Value) error {
 				lf := lt
 
 				Gen(&lt, args[2])
-				if len(args) == 4 {
+				if len(args) > 4 {
+					return errors.New("Too many args to if")
+				} else if len(args) == 4 {
 					Gen(&lf, args[3])
 					p.ins = append(p.ins, Ins{Imm, lf, 0})
 				}
 				p.ins = append(p.ins, Ins{Imm, lt, 0})
 				Gen(p, args[1])
 				p.ins = append(p.ins, Ins{If, nil, len(args) - 1})
+				return nil
+			case "quote":
+				if len(args) != 2 {
+					return errors.New("Wrong number of args to quote")
+				}
+				p.ins = append(p.ins, Ins{Imm, args[1], 0})
 				return nil
 			}
 		}

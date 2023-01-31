@@ -149,13 +149,13 @@ func (p *Parser) GetValue() (Value, error) {
 						"Line %d: Expected closing paren (pair)", p.line))
 				}
 
-				*cur = Pair{car, &cdr}
+				*cur = Pair{&car, &cdr}
 				p.data = p.data[1:]
 				return res, nil
 			}
 
 			var next Value = Pair{}
-			*cur = Pair{car, &next}
+			*cur = Pair{&car, &next}
 			cur = &next
 		}
 		*cur = Empty
@@ -241,16 +241,16 @@ func (p *Parser) GetValue() (Value, error) {
 			return nil, err
 		}
 
-		var tail Value = Pair{val, &Empty}
+		var tail Value = Pair{&val, &Empty}
 		switch str {
-		case "\\":
-			return Pair{Quote, &tail}, nil
+		case "'":
+			return Pair{&Quote, &tail}, nil
 		case ",":
-			return Pair{Unquote, &tail}, nil
+			return Pair{&Unquote, &tail}, nil
 		case "`":
-			return Pair{Quasiquote, &tail}, nil
+			return Pair{&Quasiquote, &tail}, nil
 		case ",@":
-			return Pair{UnquoteSplicing, &tail}, nil
+			return Pair{&UnquoteSplicing, &tail}, nil
 		default:
 			panic("Unreachable")
 		}

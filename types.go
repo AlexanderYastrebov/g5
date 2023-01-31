@@ -36,7 +36,7 @@ type Procedure struct {
 func (Procedure) isValue() {}
 
 type Pair struct {
-	Car Value
+	Car *Value
 	Cdr *Value
 }
 func (Pair) isValue() {}
@@ -91,7 +91,7 @@ func PrintValue(v Value) {
 				break
 			}
 
-			PrintValue(cur.Car)
+			PrintValue(*cur.Car)
 
 			if p, ok := (*cur.Cdr).(Pair); ok {
 				if p.Car == nil && p.Cdr == nil {
