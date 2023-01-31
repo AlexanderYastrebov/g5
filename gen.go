@@ -5,12 +5,12 @@ import (
 	"fmt"
 )
 
-func list2vec(cur Pair) ([]Value, error) {
+func list2vec(cur *Pair) ([]Value, error) {
 	res := []Value{}
 	for cur.Car != nil {
 		var ok bool
 		res = append(res, *cur.Car)
-		cur, ok = (*cur.Cdr).(Pair)
+		cur, ok = (*cur.Cdr).(*Pair)
 		if !ok {
 			return nil, errors.New("Dotted list when regular list expected")
 		}
@@ -24,9 +24,9 @@ func Gen(p *Procedure, v Value) error {
 		p.ins = append(p.ins, Ins{Imm, v, 0})
 	case Symbol:
 		p.ins = append(p.ins, Ins{GetVar, v, 0})
-	case Pair:
+	case *Pair:
 		var args []Value
-		args, err := list2vec(v.(Pair))
+		args, err := list2vec(v.(*Pair))
 		if err != nil {
 			return err
 		}
@@ -53,8 +53,8 @@ func Gen(p *Procedure, v Value) error {
 				}
 
 				switch args[1].(type) {
-				case Pair:
-					names, err := list2vec(args[1].(Pair))
+				case *Pair:
+					names, err := list2vec(args[1].(*Pair))
 					if err != nil {
 						return err
 					}
@@ -92,7 +92,7 @@ func Gen(p *Procedure, v Value) error {
 					nil,
 				}
 
-				pair, ok := args[1].(Pair)
+				pair, ok := args[1].(*Pair)
 				if !ok {
 					return errors.New(
 						fmt.Sprintf("Expected argument list (%T)", args[1]))
