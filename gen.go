@@ -113,7 +113,7 @@ func Gen(p *Procedure, v Value) error {
 				return nil
 			case "if":
 				lt := Procedure{
-					p.scope,
+					nil,
 					p.names,
 					[]Ins{},
 					nil,

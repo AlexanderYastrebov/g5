@@ -12,6 +12,10 @@ var SymbolNames = []string{
 	"unquote-splicing",
 	"+",
 	"-",
+	"*",
+	"/",
+	">",
+	"<",
 	"car",
 	"cdr",
 	"set-car!",
@@ -19,23 +23,32 @@ var SymbolNames = []string{
 	"display",
 }
 
-var (
-	Quote Value           = Symbol(0)
- 	Unquote Value         = Symbol(1)
- 	Quasiquote Value      = Symbol(2)
-	UnquoteSplicing Value = Symbol(3)
+const (
+	Quote = Symbol(iota)
+ 	Unquote
+ 	Quasiquote
+	UnquoteSplicing
 
-	SymAdd     = Symbol(4)
-	SymSub     = Symbol(5)
-	SymCar     = Symbol(6)
-	SymCdr     = Symbol(7)
-	SymSetCar  = Symbol(8)
-	SymSetCdr  = Symbol(9)
-	SymDisplay = Symbol(10)
+	SymAdd
+	SymSub
+	SymMul
+	SymDiv
+	SymGt
+	SymLt
+
+	SymCar
+	SymCdr
+	SymSetCar
+	SymSetCdr
+	SymDisplay
 )
 
 func FnAdd(nargs int) {
-	sum := big.Rat{}
+	if nargs == 0 {
+		log.Fatalln("Too few args: +")
+	}
+
+	total := big.Rat{}
 
 	for nargs > 0 {
 		n := stack.Pop()
@@ -47,46 +60,154 @@ func FnAdd(nargs int) {
 			log.Fatalln("Type mismatch: +")
 		}
 
+		x := big.Rat{}
 		if n_israt {
-			x := big.Rat(n_rat)
-			sum.Add(&sum, &x)
+			x = big.Rat(n_rat)
 		} else {
 			x_bi := big.Int(n_int)
-			x := big.Rat{}
 			x.SetInt(&x_bi)
-			sum.Add(&sum, &x)
 		}
+		total.Add(&total, &x)
 	}
 
-	if sum.IsInt() {
-		stack.Push(Value(Integer(*sum.Num())))
+	if total.IsInt() {
+		stack.Push(Integer(*total.Num()))
 		return
 	}
-	stack.Push(Value(Rational(sum)))
+	stack.Push(Rational(total))
 }
 
 func FnSub(nargs int) {
-	sum := big.Rat{}
-
+	total := big.Rat{}
 	n := stack.Pop()
 	nargs--
 	if n_rat, ok := n.(Rational); ok {
-		sum = big.Rat(n_rat)
+		total = big.Rat(n_rat)
 	} else {
 		n_i, ok := n.(Integer)
 		if !ok {
 			log.Fatalln("Type mismatch: -")
 		}
 		n_bi := big.Int(n_i)
-		sum.SetInt(&n_bi)
+		total.SetInt(&n_bi)
 	}
 	
 	if nargs == 0 {
-		if sum.IsInt() {
-			res := sum.Num()
-			stack.Push(Value(Integer(*res.Neg(res))))
+		if total.IsInt() {
+			res := total.Num()
+			stack.Push(Integer(*res.Neg(res)))
 		} else {
-			stack.Push(Value(Rational(*sum.Neg(&sum))))
+			stack.Push(Rational(*total.Neg(&total)))
+		}
+	}
+
+	for nargs > 0 {
+		n := stack.Pop()
+		nargs--
+		n_rat, n_israt := n.(Rational)
+		n_int, n_isint := n.(Integer)
+
+		if !n_israt && !n_isint {
+			log.Fatalln("Type mismatch: -")
+		}
+
+		x := big.Rat{}
+		if n_israt {
+			x = big.Rat(n_rat)
+		} else {
+			x_bi := big.Int(n_int)
+			x.SetInt(&x_bi)
+		}
+		total.Sub(&total, &x)
+	}
+
+	if total.IsInt() {
+		stack.Push(Integer(*total.Num()))
+		return
+	}
+	stack.Push(Rational(total))
+}
+
+func FnMul(nargs int) {
+	if nargs == 0 {
+		log.Fatalln("Too few args: *")
+	}
+
+	total := big.Rat{}
+	n := stack.Pop()
+	nargs--
+	if n_rat, ok := n.(Rational); ok {
+		total = big.Rat(n_rat)
+	} else {
+		n_i, ok := n.(Integer)
+		if !ok {
+			log.Fatalln("Type mismatch: *")
+		}
+		n_bi := big.Int(n_i)
+		total.SetInt(&n_bi)
+	}
+	
+	if nargs == 0 {
+		if total.IsInt() {
+			res := total.Num()
+			stack.Push(Integer(*res.Neg(res)))
+		} else {
+			stack.Push(Rational(*total.Neg(&total)))
+		}
+	}
+
+	for nargs > 0 {
+		n := stack.Pop()
+		nargs--
+		n_rat, n_israt := n.(Rational)
+		n_int, n_isint := n.(Integer)
+
+		if !n_israt && !n_isint {
+			log.Fatalln("Type mismatch: *")
+		}
+
+		x := big.Rat{}
+		if n_israt {
+			x = big.Rat(n_rat)
+		} else {
+			x_bi := big.Int(n_int)
+			x.SetInt(&x_bi)
+		}
+		total.Mul(&total, &x)
+	}
+
+	if total.IsInt() {
+		stack.Push(Integer(*total.Num()))
+		return
+	}
+	stack.Push(Rational(total))
+}
+
+func FnDiv(nargs int) {
+	if nargs == 0 {
+		log.Fatalln("Too few args: /")
+	}
+
+	total := big.Rat{}
+	n := stack.Pop()
+	nargs--
+	if n_rat, ok := n.(Rational); ok {
+		total = big.Rat(n_rat)
+	} else {
+		n_i, ok := n.(Integer)
+		if !ok {
+			log.Fatalln("Type mismatch: /")
+		}
+		n_bi := big.Int(n_i)
+		total.SetInt(&n_bi)
+	}
+	
+	if nargs == 0 {
+		if total.IsInt() {
+			res := total.Num()
+			stack.Push(Integer(*res.Neg(res)))
+		} else {
+			stack.Push(Rational(*total.Neg(&total)))
 		}
 	}
 
@@ -100,22 +221,117 @@ func FnSub(nargs int) {
 			log.Fatalln("Type mismatch: +")
 		}
 
+		x := big.Rat{}
 		if n_israt {
-			x := big.Rat(n_rat)
-			sum.Sub(&sum, &x)
+			x = big.Rat(n_rat)
 		} else {
 			x_bi := big.Int(n_int)
-			x := big.Rat{}
 			x.SetInt(&x_bi)
-			sum.Sub(&sum, &x)
 		}
+		total.Mul(&total, x.Inv(&x))
 	}
 
-	if sum.IsInt() {
-		stack.Push(Value(Integer(*sum.Num())))
+	if total.IsInt() {
+		stack.Push(Integer(*total.Num()))
 		return
 	}
-	stack.Push(Value(Rational(sum)))
+	stack.Push(Rational(total))
+}
+
+func FnGt(nargs int) {
+	if nargs == 0 {
+		log.Fatalln("Too few args: >")
+	}
+
+	last := big.Rat{}
+	n := stack.Pop()
+	nargs--
+	if n_rat, ok := n.(Rational); ok {
+		last = big.Rat(n_rat)
+	} else {
+		n_i, ok := n.(Integer)
+		if !ok {
+			log.Fatalln("Type mismatch: /")
+		}
+		n_bi := big.Int(n_i)
+		last.SetInt(&n_bi)
+	}
+	
+
+	for nargs > 0 {
+		n := stack.Pop()
+		nargs--
+		n_rat, n_israt := n.(Rational)
+		n_int, n_isint := n.(Integer)
+
+		if !n_israt && !n_isint {
+			log.Fatalln("Type mismatch: +")
+		}
+
+		x := big.Rat{}
+		if !n_israt {
+			x_bi := big.Int(n_int)
+			x.SetInt(&x_bi)
+		} else {
+			x = big.Rat(n_rat)
+		}
+
+		if last.Cmp(&x) != 1 {
+			stack.Push(Boolean(false))
+			return
+		}
+		last = x
+	}
+
+	stack.Push(Boolean(true))
+}
+
+func FnLt(nargs int) {
+	if nargs == 0 {
+		log.Fatalln("Too few args: >")
+	}
+
+	last := big.Rat{}
+	n := stack.Pop()
+	nargs--
+	if n_rat, ok := n.(Rational); ok {
+		last = big.Rat(n_rat)
+	} else {
+		n_i, ok := n.(Integer)
+		if !ok {
+			log.Fatalln("Type mismatch: /")
+		}
+		n_bi := big.Int(n_i)
+		last.SetInt(&n_bi)
+	}
+	
+
+	for nargs > 0 {
+		n := stack.Pop()
+		nargs--
+		n_rat, n_israt := n.(Rational)
+		n_int, n_isint := n.(Integer)
+
+		if !n_israt && !n_isint {
+			log.Fatalln("Type mismatch: +")
+		}
+
+		x := big.Rat{}
+		if !n_israt {
+			x_bi := big.Int(n_int)
+			x.SetInt(&x_bi)
+		} else {
+			x = big.Rat(n_rat)
+		}
+
+		if last.Cmp(&x) != -1 {
+			stack.Push(Boolean(false))
+			return
+		}
+		last = x
+	}
+
+	stack.Push(Boolean(true))
 }
 
 func FnCar(nargs int) {
@@ -161,6 +377,11 @@ var TopScope = &Scope{
 	map[Symbol]Value{
 		SymAdd: &Procedure{builtin: FnAdd},
 		SymSub: &Procedure{builtin: FnSub},
+		SymMul: &Procedure{builtin: FnMul},
+		SymDiv: &Procedure{builtin: FnDiv},
+		SymGt: &Procedure{builtin: FnGt},
+		SymLt: &Procedure{builtin: FnLt},
+
 		SymCar: &Procedure{builtin: FnCar},
 		SymCdr: &Procedure{builtin: FnCdr},
 		SymSetCar: &Procedure{builtin: FnSetCar},

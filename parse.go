@@ -242,18 +242,21 @@ func (p *Parser) GetValue() (Value, error) {
 		}
 
 		var tail Value = &Pair{&val, &Empty}
+
+		var res Value
 		switch str {
 		case "'":
-			return &Pair{&Quote, &tail}, nil
+			res = Quote
 		case ",":
-			return &Pair{&Unquote, &tail}, nil
+			res = Unquote
 		case "`":
-			return &Pair{&Quasiquote, &tail}, nil
+			res = Quasiquote
 		case ",@":
-			return &Pair{&UnquoteSplicing, &tail}, nil
+			res = UnquoteSplicing
 		default:
 			panic("Unreachable")
 		}
+		return &Pair{&res, &tail}, nil
 
 	default: // Symbol
 		str := ""

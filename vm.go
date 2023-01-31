@@ -60,6 +60,9 @@ begin:
 				if newp.builtin != nil {
 					newp.builtin(ins.nargs)
 				} else {
+					super := newp.scope.super
+					newp.scope = &Scope{super: super}
+					newp.scope.m = map[Symbol]Value{}
 					for _, name := range *newp.names {
 						newp.scope.m[name] = stack.Pop()
 					}
@@ -90,12 +93,19 @@ begin:
 		case If:
 			cond, isbool := stack.Pop().(Boolean)
 			lt := stack.Pop().(Procedure)
+			lf := Procedure{}
+
+			if ins.nargs == 3 {
+				lf = stack.Pop().(Procedure)
+			}
+
 			if !isbool || bool(cond) {
+				lt.scope = p.scope
 				lt.Eval()
 			}
 
 			if ins.nargs == 3 {
-				lf := stack.Pop().(Procedure)
+				lf.scope = p.scope
 				if isbool && !bool(cond) {
 					lf.Eval()
 				}
