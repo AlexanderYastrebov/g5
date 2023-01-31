@@ -51,11 +51,38 @@ func Gen(p *Procedure, v Value) error {
 				if len(args) != 3 {
 					return errors.New("define takes 2 args")
 				}
-				if _, ok := args[1].(Symbol); !ok {
+
+				switch args[1].(type) {
+				case Pair:
+					names, err := list2vec(args[1].(Pair))
+					if err != nil {
+						return err
+					}
+					dest, names := names[0], names[1:]
+					
+					lambda := Procedure{
+						nil,
+						new([]Symbol),
+						nil,
+						nil,
+					}
+
+					for _, v := range names {
+						if _, ok := v.(Symbol); !ok {
+							return errors.New("Args to fn must be symbols")
+						}
+						*lambda.names = append(*lambda.names, v.(Symbol))
+					}
+
+					Gen(&lambda, args[2])
+					p.ins = append(p.ins, Ins{Lambda, lambda, 0})
+					p.ins = append(p.ins, Ins{Define, dest, 1})
+				case Symbol:
+					Gen(p, args[2])
+					p.ins = append(p.ins, Ins{Define, args[1], 1})
+				default:
 					return errors.New("First arg to define must be a symbol")
 				}
-				Gen(p, args[2])
-				p.ins = append(p.ins, Ins{Define, args[1], 1})
 				return nil
 			case "lambda":
 				lambda := Procedure{
