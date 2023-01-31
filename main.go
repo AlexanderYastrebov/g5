@@ -41,12 +41,12 @@ func main() {
 			v, err := p.GetValue()
 			p.skipWs()
 			if err != nil {
-				log.Fatalln(err)
+				log.Fatalf("Erorr (parse): %s\n", err)
 			}
 
 			Top.ins = []Ins{}
 			if err := Gen(Top, v); err != nil {
-				log.Fatalln(err)
+				log.Fatalf("Error (gen): %s\n", err)
 			}
 
 			Top.Eval()

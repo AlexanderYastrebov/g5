@@ -31,6 +31,10 @@ func Gen(p *Procedure, v Value) error {
 			return err
 		}
 
+		if len(args) == 0 {
+			return errors.New("Empty expression")
+		}
+
 		if sym, ok := args[0].(Symbol); ok {
 			switch SymbolNames[sym] {
 			case "set!":
