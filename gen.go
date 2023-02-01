@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 )
 
 func list2vec(list *Pair) ([]Value, error) {
@@ -85,14 +84,8 @@ func Gen(p *Procedure, v Value) error {
 						"least one statement")
 				}
 
-				pair, ok := args[1].(*Pair)
-				if !ok {
-					return errors.New(
-						fmt.Sprintf("Expected argument list (%T)", args[1]))
-				}
-
 				lambda := Procedure{
-					args: pair,
+					args: args[1],
 					ins: []Ins{},
 				}
 				

@@ -65,10 +65,12 @@ begin:
 					newp.scope = &Scope{super: newp.scope.super}
 					newp.scope.m = map[Symbol]Value{}
 
-					var cur Value = newp.args.(*Pair)
+					_, ispair := newp.args.(*Pair)
+					var cur Value
+					cur = newp.args
 
 					n := ins.nargs
-					for n > 0 {
+					for n > 0 && ispair {
 						newp.scope.m[(*cur.(*Pair).Car).(Symbol)] = stack.Pop()
 						n--
 						cur = *cur.(*Pair).Cdr
