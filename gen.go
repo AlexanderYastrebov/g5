@@ -5,12 +5,12 @@ import (
 	"fmt"
 )
 
-func list2vec(cur *Pair) ([]Value, error) {
+func list2vec(list *Pair) ([]Value, error) {
 	res := []Value{}
-	for cur.Car != nil {
+	for list.Car != nil {
 		var ok bool
-		res = append(res, *cur.Car)
-		cur, ok = (*cur.Cdr).(*Pair)
+		res = append(res, *list.Car)
+		list, ok = (*list.Cdr).(*Pair)
 		if !ok {
 			return nil, errors.New("Dotted list when regular list expected")
 		}
@@ -48,36 +48,31 @@ func Gen(p *Procedure, v Value) error {
 				p.ins = append(p.ins, Ins{Set, args[1], 1})
 				return nil
 			case "define":
-				if len(args) != 3 {
-					return errors.New("define takes 2 args")
-				}
-
 				switch args[1].(type) {
 				case *Pair:
-					names, err := list2vec(args[1].(*Pair))
-					if err != nil {
-						return err
+					if len(args) < 2 {
+						return errors.New("Function definition requires at " +
+							"least one statement")
 					}
-					dest, names := names[0], names[1:]
-					
+
+					def := args[1].(*Pair)
+					dest := *def.Car
+
 					lambda := Procedure{
-						nil,
-						new([]Symbol),
-						nil,
-						nil,
+						args: *def.Cdr,
+						ins: []Ins{},
 					}
 
-					for _, v := range names {
-						if _, ok := v.(Symbol); !ok {
-							return errors.New("Args to fn must be symbols")
-						}
-						*lambda.names = append(*lambda.names, v.(Symbol))
+					for _, arg := range args[2:] {
+						Gen(&lambda, arg)
 					}
 
-					Gen(&lambda, args[2])
 					p.ins = append(p.ins, Ins{Lambda, lambda, 0})
 					p.ins = append(p.ins, Ins{Define, dest, 1})
 				case Symbol:
+					if len(args) != 3 {
+						return errors.New("define takes 2 args")
+					}
 					Gen(p, args[2])
 					p.ins = append(p.ins, Ins{Define, args[1], 1})
 				default:
@@ -85,11 +80,9 @@ func Gen(p *Procedure, v Value) error {
 				}
 				return nil
 			case "lambda":
-				lambda := Procedure{
-					nil,
-					new([]Symbol),
-					nil,
-					nil,
+				if len(args) < 2 {
+					return errors.New("lambda requires at " +
+						"least one statement")
 				}
 
 				pair, ok := args[1].(*Pair)
@@ -98,26 +91,18 @@ func Gen(p *Procedure, v Value) error {
 						fmt.Sprintf("Expected argument list (%T)", args[1]))
 				}
 
-				var names []Value
-				names, err = list2vec(pair)
-				if err != nil {
-					return err
+				lambda := Procedure{
+					args: pair,
+					ins: []Ins{},
 				}
 				
-				for _, v := range names {
-					*lambda.names = append(*lambda.names, v.(Symbol))
+				for _, arg := range args[2:] {
+					Gen(&lambda, arg)
 				}
-
-				Gen(&lambda, args[2])
 				p.ins = append(p.ins, Ins{Lambda, lambda, 0})
 				return nil
 			case "if":
-				lt := Procedure{
-					nil,
-					p.names,
-					[]Ins{},
-					nil,
-				}
+				lt := Procedure{ args: p.args, ins: []Ins{}}
 				lf := lt
 
 				Gen(&lt, args[2])

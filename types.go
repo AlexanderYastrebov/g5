@@ -31,7 +31,7 @@ type Scope struct {
 
 type Procedure struct {
 	scope *Scope
-	names *[]Symbol
+	args Value
 	ins []Ins
 	builtin func(int)
 }
@@ -131,7 +131,7 @@ func WriteValue(v Value, quote bool, port *Port) {
 		r := big.Rat(v.(Rational))
 		fmt.Fprint(writer, r.String())
 	
-	case Procedure:
+	case *Procedure:
 		fmt.Fprint(writer, "[procedure]")
 
 	default:

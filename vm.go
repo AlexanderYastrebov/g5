@@ -55,28 +55,62 @@ begin:
 			}
 		case Call:
 			callee := stack.Pop()
-			if newp, ok := callee.(*Procedure); ok {
+			if newp_template, ok := callee.(*Procedure); ok {
+				newp := new(Procedure)
+				*newp = *newp_template
+
 				if newp.builtin != nil {
 					newp.builtin(ins.nargs)
 				} else {
-					super := newp.scope.super
-					newp.scope = &Scope{super: super}
+					newp.scope = &Scope{super: newp.scope.super}
 					newp.scope.m = map[Symbol]Value{}
-					for _, name := range *newp.names {
-						newp.scope.m[name] = stack.Pop()
+
+					cur := newp.args.(*Pair)
+
+					n := ins.nargs
+					for n > 0 {
+						newp.scope.m[(*cur.Car).(Symbol)] = stack.Pop()
+						n--
+
+						if s, ok := (*cur.Cdr).(Symbol); ok {
+							rest := &Pair{}
+							cur := rest
+							for n > 0 {
+								v := stack.Pop()
+								n--
+								cur.Car = &v
+
+								if n == 0 {
+									cur.Cdr = &Empty
+									break
+								}
+								var next Value = &Pair{}
+								cur.Cdr = &next
+								cur = next.(*Pair)
+							}
+							newp.scope.m[s] = rest
+							break
+						}
+						cur = (*cur.Cdr).(*Pair)
 					}
-					if i == len(p.ins) - 1 {
+
+					if i == len(p.ins) - 1 { // Tail call
 						p = newp
 						goto begin
 					}
+					
+					stack_pos := len(stack)
 					newp.Eval()
+					// Clear temps from stack
+					top := stack.Top()
+					stack = append(stack[:stack_pos], top)
 				}
 			} else {
 				log.Fatalf("Call to non-procedure (%T)", callee)
 			}
 		case Lambda: // Procedure -> *Procedure
 			lambda := ins.imm.(Procedure)
-			lambda.scope = new(Scope)
+			lambda.scope = &Scope{}
 			lambda.scope.m = map[Symbol]Value{}
 			lambda.scope.super = p.scope
 			stack.Push(Value(&lambda))
