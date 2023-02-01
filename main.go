@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	_ "embed"
 )
+
+//go:embed runtime.scm
+var runtime string
 
 func validate(code string) bool {
 	count := 0
@@ -41,6 +45,7 @@ func run(code string) {
 func main() {
 	Top.scope = TopScope // Put builtins into top-level scope
 
+	run(runtime)
 	switch len(os.Args) {
 	case 1:
 		reader := bufio.NewReader(os.Stdin)

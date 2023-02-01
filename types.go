@@ -70,7 +70,7 @@ type Port struct {
 
 func (Port) isValue() {}
 
-func WriteValue(v Value, quote bool, port *Port) {
+func WriteValue(v Value, display bool, port *Port) {
 	var writer io.Writer = port
 	if port == nil {
 		writer = os.Stdout
@@ -85,20 +85,23 @@ func WriteValue(v Value, quote bool, port *Port) {
 	case Symbol:
 		fmt.Print(SymbolNames[v.(Symbol)])
 	case String:
-		if quote {
+		if !display {
 			fmt.Fprintf(writer, "\"%s\"", v.(String))
 		} else {
 			fmt.Fprint(writer, v.(String))
 		}
 	case Character:
 		ch := rune(v.(Character))
-
-		if ch == '\n' {
-			fmt.Fprint(writer, "#\\newline")
-		} else if ch == ' ' {
-			fmt.Fprint(writer, "#\\space")
+		if display {
+			fmt.Fprintf(writer, "%c", ch)
 		} else {
-			fmt.Fprintf(writer, "#\\%c", ch)
+			if ch == '\n' {
+				fmt.Fprint(writer, "#\\newline")
+			} else if ch == ' ' {
+				fmt.Fprint(writer, "#\\space")
+			} else {
+				fmt.Fprintf(writer, "#\\%c", ch)
+			}
 		}
 	case Vector:
 		fmt.Fprint(writer, "#(")
@@ -106,7 +109,7 @@ func WriteValue(v Value, quote bool, port *Port) {
 			if i != 0 {
 				fmt.Fprint(writer, " ")
 			}
-			WriteValue(item, quote, port)
+			WriteValue(item, display, port)
 		}
 		fmt.Fprint(writer, ")")
 	case *Pair:
@@ -118,7 +121,7 @@ func WriteValue(v Value, quote bool, port *Port) {
 				break
 			}
 
-			WriteValue(*cur.Car, quote, port)
+			WriteValue(*cur.Car, display, port)
 
 			if p, ok := (*cur.Cdr).(*Pair); ok {
 				if p.Car == nil && p.Cdr == nil {
@@ -128,7 +131,7 @@ func WriteValue(v Value, quote bool, port *Port) {
 				cur = (*cur.Cdr).(*Pair)
 			} else {
 				fmt.Fprint(writer, " . ")
-				WriteValue(*cur.Cdr, quote, port)
+				WriteValue(*cur.Cdr, display, port)
 				break
 			}
 

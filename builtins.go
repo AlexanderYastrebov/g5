@@ -67,7 +67,7 @@ func FnDisplay(nargs int) {
 	if nargs != 1 {
 		log.Fatalln("Wrong arg count to display (ports not yet implemented)")
 	}
-	WriteValue(stack.Top(), false, nil)
+	WriteValue(stack.Top(), true, nil)
 }
 
 var TopScope = &Scope{

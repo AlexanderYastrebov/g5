@@ -1,1 +1,1 @@
-(define (
+(define (newline) (display #\newline))
