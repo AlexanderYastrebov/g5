@@ -71,27 +71,30 @@ begin:
 					for n > 0 {
 						newp.scope.m[(*cur.Car).(Symbol)] = stack.Pop()
 						n--
-
-						if s, ok := (*cur.Cdr).(Symbol); ok {
-							rest := &Pair{}
-							cur := rest
-							for n > 0 {
-								v := stack.Pop()
-								n--
-								cur.Car = &v
-
-								if n == 0 {
-									cur.Cdr = &Empty
-									break
-								}
-								var next Value = &Pair{}
-								cur.Cdr = &next
-								cur = next.(*Pair)
-							}
-							newp.scope.m[s] = rest
+						next, ok := (*cur.Cdr).(*Pair)
+						if !ok {
 							break
 						}
-						cur = (*cur.Cdr).(*Pair)
+						cur = next
+					}
+
+					if s, ok := (*cur.Cdr).(Symbol); ok {
+						rest := &Pair{}
+						cur := rest
+						for n > 0 {
+							v := stack.Pop()
+							n--
+							cur.Car = &v
+
+							if n == 0 {
+								cur.Cdr = &Empty
+								break
+							}
+							var next Value = &Pair{}
+							cur.Cdr = &next
+							cur = next.(*Pair)
+						}
+						newp.scope.m[s] = rest
 					}
 
 					if i == len(p.ins) - 1 { // Tail call
