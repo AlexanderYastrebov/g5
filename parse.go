@@ -4,14 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"unicode"
 	"strings"
+	"unicode"
 )
 
 var delim = map[rune]bool{
-	';': true,
-	')': true,
-	' ': true,
+	';':  true,
+	')':  true,
+	' ':  true,
 	'\n': true,
 	'\r': true,
 	'\t': true,
@@ -46,7 +46,7 @@ func (p *Parser) GetValue() (Value, error) {
 	}
 
 	switch {
-	case unicode.IsDigit(p.data[0]) ||  p.data[0] == '-':
+	case unicode.IsDigit(p.data[0]) || p.data[0] == '-':
 		digits := ""
 		if p.data[0] == '-' {
 			digits = "-"
@@ -161,7 +161,7 @@ func (p *Parser) GetValue() (Value, error) {
 		*cur = Empty
 		p.data = p.data[1:] // Ending paren
 		return res, nil
-	
+
 	case p.data[0] == '#':
 		p.data = p.data[1:]
 		if len(p.data) == 0 {
@@ -190,7 +190,7 @@ func (p *Parser) GetValue() (Value, error) {
 
 			for _, v := range []string{"space", "newline"} {
 				slen := len(v)
-				if len(p.data) >= slen - 1 {
+				if len(p.data) >= slen-1 {
 					if len(p.data) == slen || delim[p.data[slen]] {
 						str := string(p.data[:slen])
 						p.data = p.data[slen:]
@@ -227,8 +227,8 @@ func (p *Parser) GetValue() (Value, error) {
 			return nil, errors.New(fmt.Sprintf(
 				"Line %d: Invalid # sequence", p.line))
 		}
-	
-	case p.data[0] == '\''|| p.data[0] == '`' || p.data[0] == ',':
+
+	case p.data[0] == '\'' || p.data[0] == '`' || p.data[0] == ',':
 		str := string(p.data[0])
 
 		p.data = p.data[1:]

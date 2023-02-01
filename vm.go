@@ -18,8 +18,8 @@ const (
 )
 
 type Ins struct {
-	op Op
-	imm Value
+	op    Op
+	imm   Value
 	nargs int
 }
 
@@ -82,27 +82,31 @@ begin:
 					if s, ok := cur.(Symbol); ok {
 						rest := &Pair{}
 						cur := rest
-						for n > 0 {
-							v := stack.Pop()
-							n--
-							cur.Car = &v
+						if n == 0 {
+							newp.scope.m[s] = Empty
+						} else {
+							for n > 0 {
+								v := stack.Pop()
+								n--
+								cur.Car = &v
 
-							if n == 0 {
-								cur.Cdr = &Empty
-								break
+								if n == 0 {
+									cur.Cdr = &Empty
+									break
+								}
+								var next Value = &Pair{}
+								cur.Cdr = &next
+								cur = next.(*Pair)
 							}
-							var next Value = &Pair{}
-							cur.Cdr = &next
-							cur = next.(*Pair)
+							newp.scope.m[s] = rest
 						}
-						newp.scope.m[s] = rest
 					}
 
-					if i == len(p.ins) - 1 { // Tail call
+					if i == len(p.ins)-1 { // Tail call
 						p = newp
 						goto begin
 					}
-					
+
 					stack_pos := len(stack)
 					newp.Eval()
 					// Clear temps from stack

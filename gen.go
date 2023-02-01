@@ -59,7 +59,7 @@ func Gen(p *Procedure, v Value) error {
 
 					lambda := Procedure{
 						args: *def.Cdr,
-						ins: []Ins{},
+						ins:  []Ins{},
 					}
 
 					for _, arg := range args[2:] {
@@ -86,16 +86,16 @@ func Gen(p *Procedure, v Value) error {
 
 				lambda := Procedure{
 					args: args[1],
-					ins: []Ins{},
+					ins:  []Ins{},
 				}
-				
+
 				for _, arg := range args[2:] {
 					Gen(&lambda, arg)
 				}
 				p.ins = append(p.ins, Ins{Lambda, lambda, 0})
 				return nil
 			case "if":
-				lt := Procedure{ args: p.args, ins: []Ins{}}
+				lt := Procedure{args: p.args, ins: []Ins{}}
 				lf := lt
 
 				Gen(&lt, args[2])

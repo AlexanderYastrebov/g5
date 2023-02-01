@@ -1,9 +1,8 @@
-
 package main
 
 import (
-	"math/big"
 	"log"
+	"math/big"
 )
 
 func FnAdd(nargs int) {
@@ -54,7 +53,7 @@ func FnSub(nargs int) {
 		n_bi := big.Int(n_i)
 		total.SetInt(&n_bi)
 	}
-	
+
 	if nargs == 0 {
 		if total.IsInt() {
 			res := total.Num()
@@ -109,7 +108,7 @@ func FnMul(nargs int) {
 		n_bi := big.Int(n_i)
 		total.SetInt(&n_bi)
 	}
-	
+
 	if nargs == 0 {
 		if total.IsInt() {
 			res := total.Num()
@@ -164,7 +163,7 @@ func FnDiv(nargs int) {
 		n_bi := big.Int(n_i)
 		total.SetInt(&n_bi)
 	}
-	
+
 	if nargs == 0 {
 		if total.IsInt() {
 			res := total.Num()
@@ -220,7 +219,6 @@ func FnGt(nargs int) {
 		n_bi := big.Int(n_i)
 		last.SetInt(&n_bi)
 	}
-	
 
 	for nargs > 0 {
 		n := stack.Pop()
@@ -269,7 +267,6 @@ func FnLt(nargs int) {
 		n_bi := big.Int(n_i)
 		last.SetInt(&n_bi)
 	}
-	
 
 	for nargs > 0 {
 		n := stack.Pop()
@@ -318,7 +315,6 @@ func FnNumEq(nargs int) {
 		log.Fatalf("Non-numeric argument to = (%T)\n", first_val)
 	}
 
-
 	for nargs > 0 {
 		n_val := stack.Pop()
 		nargs--
@@ -342,5 +338,3 @@ func FnNumEq(nargs int) {
 
 	stack.Push(Boolean(true))
 }
-
-

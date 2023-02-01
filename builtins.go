@@ -29,8 +29,8 @@ var SymbolNames = []string{
 
 const (
 	Quote = Symbol(iota)
- 	Unquote
- 	Quasiquote
+	Unquote
+	Quasiquote
 	UnquoteSplicing
 
 	SymAdd
@@ -76,16 +76,16 @@ var TopScope = &Scope{
 		SymSub: &Procedure{builtin: FnSub},
 		SymMul: &Procedure{builtin: FnMul},
 		SymDiv: &Procedure{builtin: FnDiv},
-		SymGt: &Procedure{builtin: FnGt},
-		SymLt: &Procedure{builtin: FnLt},
-		SymEq: &Procedure{builtin: FnNumEq},
+		SymGt:  &Procedure{builtin: FnGt},
+		SymLt:  &Procedure{builtin: FnLt},
+		SymEq:  &Procedure{builtin: FnNumEq},
 
 		SymNot: &Procedure{builtin: FnNot},
 
-		SymCar: &Procedure{builtin: FnCar},
-		SymCdr: &Procedure{builtin: FnCdr},
-		SymSetCar: &Procedure{builtin: FnSetCar},
-		SymSetCdr: &Procedure{builtin: FnSetCdr},
+		SymCar:     &Procedure{builtin: FnCar},
+		SymCdr:     &Procedure{builtin: FnCdr},
+		SymSetCar:  &Procedure{builtin: FnSetCar},
+		SymSetCdr:  &Procedure{builtin: FnSetCdr},
 		SymDisplay: &Procedure{builtin: FnDisplay},
 	},
 	nil,

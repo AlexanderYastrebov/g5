@@ -3,8 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"log"
+	"os"
 )
 
 func validate(code string) bool {
@@ -21,7 +21,7 @@ func validate(code string) bool {
 
 func run(code string) {
 	p := NewParser(code)
-	
+
 	for len(p.data) > 0 {
 		v, err := p.GetValue()
 		p.skipWs()

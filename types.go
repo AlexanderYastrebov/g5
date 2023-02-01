@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"math/big"
 	"io"
+	"math/big"
 	"os"
 )
 
@@ -12,50 +12,62 @@ type Value interface {
 }
 
 type Boolean bool
+
 func (Boolean) isValue() {}
 
 type Symbol uint
+
 func (Symbol) isValue() {}
+
 // Builtin symbols are listed in builtins.go
 
 type Character rune
+
 func (Character) isValue() {}
 
 type Vector []Value
+
 func (Vector) isValue() {}
 
 type Scope struct {
-	m map[Symbol]Value
+	m     map[Symbol]Value
 	super *Scope
 }
 
 type Procedure struct {
-	scope *Scope
-	args Value
-	ins []Ins
+	scope   *Scope
+	args    Value
+	ins     []Ins
 	builtin func(int)
 }
+
 func (Procedure) isValue() {}
 
 type Pair struct {
 	Car *Value
 	Cdr *Value
 }
+
 func (*Pair) isValue() {}
+
 var Empty Value = &Pair{nil, nil}
 
 type Rational big.Rat
+
 func (Rational) isValue() {}
 
 type Integer big.Int
+
 func (Integer) isValue() {}
 
 type String string
+
 func (String) isValue() {}
 
 type Port struct {
 	io.ReadWriteCloser
 }
+
 func (Port) isValue() {}
 
 func WriteValue(v Value, quote bool, port *Port) {
@@ -102,7 +114,7 @@ func WriteValue(v Value, quote bool, port *Port) {
 
 		cur := v.(*Pair)
 		for {
-			if (cur.Car == nil) {
+			if cur.Car == nil {
 				break
 			}
 
@@ -122,7 +134,7 @@ func WriteValue(v Value, quote bool, port *Port) {
 
 		}
 		fmt.Fprint(writer, ")")
-	
+
 	case Integer:
 		i := big.Int(v.(Integer))
 		fmt.Fprint(writer, i.String())
@@ -130,7 +142,7 @@ func WriteValue(v Value, quote bool, port *Port) {
 	case Rational:
 		r := big.Rat(v.(Rational))
 		fmt.Fprint(writer, r.String())
-	
+
 	case *Procedure:
 		fmt.Fprint(writer, "[procedure]")
 
