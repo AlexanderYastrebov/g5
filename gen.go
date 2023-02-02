@@ -116,9 +116,9 @@ func Gen(p *Procedure, v Value) error {
 				return nil
 
 			// These are for the implementation of (hygenic) macros
-			case "define-scope":
+			case "set-scope!":
 				if len(args) != 2 {
-					return errors.New("INTERNAL: define-scope takes 1 arg")
+					return errors.New("INTERNAL: set-scope! takes 1 arg")
 				}
 				lambda := Procedure{
 					args: Empty,
