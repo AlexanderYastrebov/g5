@@ -79,9 +79,8 @@ func Gen(p *Procedure, v Value) error {
 				}
 				return nil
 			case "lambda":
-				if len(args) < 2 {
-					return errors.New("lambda requires at " +
-						"least one statement")
+				if len(args) < 3 {
+					return errors.New("lambda requires at least one statement")
 				}
 
 				lambda := Procedure{
@@ -114,6 +113,31 @@ func Gen(p *Procedure, v Value) error {
 					return errors.New("Wrong number of args to quote")
 				}
 				p.ins = append(p.ins, Ins{Imm, args[1], 0})
+				return nil
+
+			// These are for the implementation of (hygenic) macros
+			case "define-scope":
+				if len(args) != 2 {
+					return errors.New("INTERNAL: define-scope takes 1 arg")
+				}
+				lambda := Procedure{
+					args: Empty,
+					ins:  []Ins{},
+				}
+				p.ins = append(p.ins, Ins{Lambda, lambda, 0})
+				p.ins = append(p.ins, Ins{Set, args[1], 1})
+				return nil
+			case "with-scope":
+				if len(args) != 3 {
+					return errors.New("Wrong number of args to with-scope")
+				}
+				Gen(p, args[1])
+				lambda := Procedure{
+					args: Empty,
+					ins:  []Ins{},
+				}
+				Gen(&lambda, args[2])
+				p.ins = append(p.ins, Ins{WithScope, lambda, 1})
 				return nil
 			}
 		}

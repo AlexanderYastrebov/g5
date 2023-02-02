@@ -265,15 +265,6 @@ func (p *Parser) GetValue() (Value, error) {
 			p.data = p.data[1:]
 		}
 
-		str = strings.ToLower(str) // Symbols are case-insensitive
-
-		for i, v := range SymbolNames {
-			if v == str {
-				return Symbol(i), nil
-			}
-		}
-
-		SymbolNames = append(SymbolNames, str)
-		return Symbol(len(SymbolNames) - 1), nil
+		return Str2Sym(str), nil
 	}
 }

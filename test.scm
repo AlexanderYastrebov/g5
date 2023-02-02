@@ -1,6 +1,9 @@
-(define (fib n)
-  (if (< n 2)
-    n
-    (+ (fib (- n 1)) (fib (- n 2)))))
+(set! a 1)
+(set! scope '())
+(define (myfn a)
+    (define-scope scope))
 
-(display (fib 10))
+(myfn 2)
+
+(with-scope scope
+            (display a))

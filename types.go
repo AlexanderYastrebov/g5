@@ -5,6 +5,7 @@ import (
 	"io"
 	"math/big"
 	"os"
+	"strings"
 )
 
 type Value interface {
@@ -12,21 +13,17 @@ type Value interface {
 }
 
 type Boolean bool
-
 func (Boolean) isValue() {}
 
 type Symbol uint
-
 func (Symbol) isValue() {}
 
 // Builtin symbols are listed in builtins.go
 
 type Character rune
-
 func (Character) isValue() {}
 
 type Vector []Value
-
 func (Vector) isValue() {}
 
 type Scope struct {
@@ -40,34 +37,27 @@ type Procedure struct {
 	ins     []Ins
 	builtin func(int)
 }
-
 func (Procedure) isValue() {}
 
 type Pair struct {
 	Car *Value
 	Cdr *Value
 }
-
 func (*Pair) isValue() {}
-
 var Empty Value = &Pair{nil, nil}
 
 type Rational big.Rat
-
 func (Rational) isValue() {}
 
 type Integer big.Int
-
 func (Integer) isValue() {}
 
 type String string
-
 func (String) isValue() {}
 
 type Port struct {
 	io.ReadWriteCloser
 }
-
 func (Port) isValue() {}
 
 func WriteValue(v Value, display bool, port *Port) {
@@ -156,4 +146,17 @@ func WriteValue(v Value, display bool, port *Port) {
 
 func PrintValue(v Value) {
 	WriteValue(v, true, nil)
+}
+
+func Str2Sym(str string) Symbol {
+	str = strings.ToLower(str) // Symbols are case-insensitive
+
+	for i, v := range SymbolNames {
+		if v == str {
+			return Symbol(i)
+		}
+	}
+
+	SymbolNames = append(SymbolNames, str)
+	return Symbol(len(SymbolNames) - 1)
 }

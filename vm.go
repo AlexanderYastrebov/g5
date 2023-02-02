@@ -15,6 +15,8 @@ const (
 	Set
 	Define
 	If
+
+	WithScope
 )
 
 type Ins struct {
@@ -151,6 +153,10 @@ begin:
 					lf.Eval()
 				}
 			}
+		case WithScope:
+			newp := stack.Pop().(*Procedure)
+			newp.ins = ins.imm.(Procedure).ins
+			newp.Eval()
 		}
 	}
 }
