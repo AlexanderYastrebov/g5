@@ -1,7 +1,7 @@
 (set! a 1)
 (set! scope '())
 (define (myfn a)
-    (define-scope scope))
+    (set-scope! scope))
 
 (myfn 2)
 
