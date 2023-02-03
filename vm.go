@@ -133,7 +133,7 @@ begin:
 			} else if ins.op == Define {
 				fmt.Println("WARNING: Redefining variable")
 			}
-			scope.m[sym] = stack.Pop()
+			scope.m[sym] = stack.Top()
 		case If:
 			cond, isbool := stack.Pop().(Boolean)
 			lt := stack.Pop().(Procedure)
