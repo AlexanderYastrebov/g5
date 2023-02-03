@@ -13,17 +13,21 @@ type Value interface {
 }
 
 type Boolean bool
+
 func (Boolean) isValue() {}
 
 type Symbol uint
+
 func (Symbol) isValue() {}
 
 // Builtin symbols are listed in builtins.go
 
 type Character rune
+
 func (Character) isValue() {}
 
 type Vector []Value
+
 func (Vector) isValue() {}
 
 type Scope struct {
@@ -31,33 +35,42 @@ type Scope struct {
 	super *Scope
 }
 
+func (*Scope) isValue() {}
+
 type Procedure struct {
 	scope   *Scope
 	args    Value
 	ins     []Ins
 	builtin func(int)
 }
+
 func (Procedure) isValue() {}
 
 type Pair struct {
 	Car *Value
 	Cdr *Value
 }
+
 func (*Pair) isValue() {}
+
 var Empty Value = &Pair{nil, nil}
 
 type Rational big.Rat
+
 func (Rational) isValue() {}
 
 type Integer big.Int
+
 func (Integer) isValue() {}
 
 type String string
+
 func (String) isValue() {}
 
 type Port struct {
 	io.ReadWriteCloser
 }
+
 func (Port) isValue() {}
 
 func WriteValue(v Value, display bool, port *Port) {
@@ -138,9 +151,12 @@ func WriteValue(v Value, display bool, port *Port) {
 
 	case *Procedure:
 		fmt.Fprint(writer, "[procedure]")
+	
+	case *Scope:
+		fmt.Fprint(writer, "[scope]")
 
 	default:
-		fmt.Fprint(writer, "[UNHANDLED TYPE]")
+		fmt.Fprint(writer, "[???]")
 	}
 }
 

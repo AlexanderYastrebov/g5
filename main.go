@@ -2,10 +2,10 @@ package main
 
 import (
 	"bufio"
+	_ "embed"
 	"fmt"
 	"log"
 	"os"
-	_ "embed"
 )
 
 //go:embed runtime.scm

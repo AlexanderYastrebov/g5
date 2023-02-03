@@ -16,6 +16,7 @@ const (
 	Define
 	If
 
+	SaveScope
 	WithScope
 )
 
@@ -153,9 +154,11 @@ begin:
 					lf.Eval()
 				}
 			}
+		case SaveScope:
+			stack.Push(p.scope)
 		case WithScope:
-			newp := stack.Pop().(*Procedure)
-			newp.ins = ins.imm.(Procedure).ins
+			newp := ins.imm.(Procedure)
+			newp.scope = stack.Pop().(*Scope)
 			newp.Eval()
 		}
 	}
