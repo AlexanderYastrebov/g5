@@ -1,9 +1,9 @@
 package main
 
 import (
-	"testing"
 	"math/big"
 	"os"
+	"testing"
 )
 
 func TestMain(m *testing.M) {
@@ -18,7 +18,7 @@ func TestLambdas(t *testing.T) {
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
-	
+
 	Run("(add 2 3)")
 	result, ok := stack.Top().(Integer)
 	if !ok {
@@ -30,19 +30,19 @@ func TestLambdas(t *testing.T) {
 	}
 }
 
-func TestClosuresAdder(t *testing.T) {
+func TestAdder(t *testing.T) {
 	Run("(define make-adder (lambda (x) (lambda (y) (+ x y))))")
 	result := stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
-	
+
 	Run("(define add-2 (make-adder 2))")
 	result = stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
-	
+
 	Run("(add-2 3)")
 	result, ok := stack.Top().(Integer)
 	if !ok {
@@ -60,13 +60,13 @@ func TestCounter(t *testing.T) {
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
-	
+
 	Run("(define ctr (make-ctr))")
 	result = stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
-	
+
 	Run("(ctr)")
 	result, ok := stack.Top().(Integer)
 	if !ok {

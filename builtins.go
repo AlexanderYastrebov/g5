@@ -9,6 +9,7 @@ var SymbolNames = []string{
 	"unquote",
 	"quasiquote",
 	"unquote-splicing",
+	"...",
 
 	"+",
 	"-",
@@ -19,12 +20,17 @@ var SymbolNames = []string{
 	"=",
 
 	"not",
+	"eqv?",
 
 	"car",
 	"cdr",
 	"set-car!",
 	"set-cdr!",
 	"display",
+
+	"string=?",
+	"symbol->string",
+	"char=?",
 }
 
 const (
@@ -32,6 +38,7 @@ const (
 	Unquote
 	Quasiquote
 	UnquoteSplicing
+	Elipses
 
 	SymAdd
 	SymSub
@@ -42,26 +49,18 @@ const (
 	SymEq
 
 	SymNot
+	SymEqv
 
 	SymCar
 	SymCdr
 	SymSetCar
 	SymSetCdr
 	SymDisplay
+
+	SymStringEq
+	SymSymbol2String
+	SymCharEq
 )
-
-func FnNot(nargs int) {
-	if nargs != 1 {
-		log.Fatalln("Wrong arg count to not")
-	}
-
-	switch val := stack.Pop(); val.(type) {
-	case Boolean:
-		stack.Push(!val.(Boolean))
-	default:
-		stack.Push(Boolean(false))
-	}
-}
 
 func FnDisplay(nargs int) {
 	if nargs != 1 {
@@ -81,12 +80,17 @@ var TopScope = &Scope{
 		SymEq:  &Procedure{builtin: FnNumEq},
 
 		SymNot: &Procedure{builtin: FnNot},
+		SymEqv: &Procedure{builtin: FnEqv},
 
 		SymCar:     &Procedure{builtin: FnCar},
 		SymCdr:     &Procedure{builtin: FnCdr},
 		SymSetCar:  &Procedure{builtin: FnSetCar},
 		SymSetCdr:  &Procedure{builtin: FnSetCdr},
 		SymDisplay: &Procedure{builtin: FnDisplay},
+
+		SymStringEq:      &Procedure{builtin: FnStringEq},
+		SymSymbol2String: &Procedure{builtin: FnSymbol2String},
+		SymCharEq:        &Procedure{builtin: FnCharEq},
 	},
 	nil,
 }

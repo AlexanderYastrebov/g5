@@ -151,7 +151,7 @@ func WriteValue(v Value, display bool, port *Port) {
 
 	case *Procedure:
 		fmt.Fprint(writer, "[procedure]")
-	
+
 	case *Scope:
 		fmt.Fprint(writer, "[scope]")
 
