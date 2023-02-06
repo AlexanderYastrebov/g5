@@ -69,9 +69,14 @@ func FnEqv(nargs int) {
 		stack.Push(Boolean(obj1 == obj2))
 		return
 	case *Procedure:
-		// obj1 and obj2 are procedures whose location tags are equal 
+		// obj1 and obj2 are procedures whose location tags are equal
 		stack.Push(Boolean(obj1 == obj2))
 		return
 	}
 	stack.Push(Boolean(false))
+}
+
+func FnEqual(nargs int) {
+	obj1, obj2 := stack.Pop(), stack.Pop()
+	stack.Push(Boolean(IsEqual(obj1, obj2)))
 }

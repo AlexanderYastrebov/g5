@@ -21,6 +21,8 @@ var SymbolNames = []string{
 
 	"not",
 	"eqv?",
+	"eq?",
+	"equal?",
 
 	"car",
 	"cdr",
@@ -46,10 +48,12 @@ const (
 	SymDiv
 	SymGt
 	SymLt
-	SymEq
+	SymEqu
 
 	SymNot
 	SymEqv
+	SymEq
+	SymEqual
 
 	SymCar
 	SymCdr
@@ -77,10 +81,12 @@ var TopScope = &Scope{
 		SymDiv: &Procedure{builtin: FnDiv},
 		SymGt:  &Procedure{builtin: FnGt},
 		SymLt:  &Procedure{builtin: FnLt},
-		SymEq:  &Procedure{builtin: FnNumEq},
+		SymEqu: &Procedure{builtin: FnNumEq},
 
-		SymNot: &Procedure{builtin: FnNot},
-		SymEqv: &Procedure{builtin: FnEqv},
+		SymNot:   &Procedure{builtin: FnNot},
+		SymEqv:   &Procedure{builtin: FnEqv},
+		SymEq:    &Procedure{builtin: FnEqv},
+		SymEqual: &Procedure{builtin: FnEqual},
 
 		SymCar:     &Procedure{builtin: FnCar},
 		SymCdr:     &Procedure{builtin: FnCdr},

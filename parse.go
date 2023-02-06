@@ -131,7 +131,7 @@ func (p *Parser) GetValue() (Value, error) {
 					"Line %d: Early EOF (list)", p.line))
 			}
 
-			if p.data[0] == '.' {
+			if p.data[0] == '.' && p.data[1] != '.' {
 				p.data = p.data[1:]
 				p.skipWs()
 				cdr, err := p.GetValue()
