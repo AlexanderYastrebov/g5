@@ -46,14 +46,18 @@ func TestBasicMap(t *testing.T) {
 		t.Errorf("Wrong length for map element: %d vs 3", len(m[a]))
 	}
 
-	x := big.Int(m[a][0].(Integer))
-	if x.Cmp(big.NewInt(1)) != 0 {
-		t.Errorf("Expected first element to be 1")
+	expected := []Integer{
+		Integer(*big.NewInt(1)),
+		Integer(*big.NewInt(2)),
+		Integer(*big.NewInt(3)),
 	}
 
-	x = big.Int(m[a][2].(Integer))
-	if x.Cmp(big.NewInt(3)) != 0 {
-		t.Errorf("Expected last element to be 3")
+	for i := range m[a] {
+		x := big.Int(m[a][i].(Integer))
+		y := big.Int(expected[i])
+		if x.Cmp(&y) != 0 {
+			t.Errorf("Expected first element to be 1")
+		}
 	}
 }
 
