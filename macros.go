@@ -165,25 +165,60 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 	return errors.New("Macro mismatch: No match found")
 }
 
-func transcribe(m *MacroMap, t Value) Value {
+func (m *MacroMap) transcribe(t Value) (Value, error) {
 	switch t.(type) {
 	case Symbol:
 		vl, ok := (*m)[t.(Symbol)]
 		if !ok {
-			return t
+			return t, nil
 		}
 		res := vl[0]
 		if len((*m)[t.(Symbol)]) > 1 {
 			(*m)[t.(Symbol)] = (*m)[t.(Symbol)][1:]
 		}
-		return res
+		return res, nil
 	case *Pair:
 		if t == Empty {
-			return Empty
+			return Empty, nil
 		}
-		car := transcribe(m, *t.(*Pair).Car)
-		cdr := transcribe(m, *t.(*Pair).Cdr)
-		return &Pair{&car, &cdr}
+
+		if cdr, ok := (*t.(*Pair).Cdr).(*Pair); ok && cdr != Empty {
+			if s, ok := (*cdr.Car).(Symbol); ok && s == Elipses {
+				key, ok := (*t.(*Pair).Car).(Symbol)
+				if !ok {
+					return nil, errors.New("Can only repeat pattern variables")
+				}
+
+				vl, ok := (*m)[key]
+				if !ok {
+					return t, nil
+				}
+				res := new(Pair)
+				cur := res
+				for i := range vl {
+					v := vl[i]
+					cur.Car = &v
+					var next Value = new(Pair)
+					cur.Cdr = &next
+					cur = (*cur.Cdr).(*Pair)
+				}
+				cdr, err := m.transcribe(*cdr.Cdr)
+				if err != nil {
+					return nil, err
+				}
+				cur.Cdr = &cdr
+				return res, nil
+			}
+		}
+		car, err := m.transcribe(*t.(*Pair).Car)
+		if err != nil {
+			return nil, err
+		}
+		cdr, err := m.transcribe(*t.(*Pair).Cdr)
+		if err != nil {
+			return nil, err
+		}
+		return &Pair{&car, &cdr}, nil
 	}
-	return t
+	return t, nil
 }
