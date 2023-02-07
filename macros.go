@@ -10,7 +10,7 @@ import (
 type SyntaxRules struct {
 	Literals []Symbol
 	Patterns []*Pair
-	Templates []*Pair
+	Templates []Value
 }
 
 func ParseSyntaxRules(v []Value) (*SyntaxRules, error) {
@@ -41,7 +41,7 @@ func ParseSyntaxRules(v []Value) (*SyntaxRules, error) {
 		literals = append(literals, s)
 	}
 
-	patterns, templates := []*Pair{}, []*Pair{}
+	patterns, templates := []*Pair{}, []Value{}
 	for _, v := range v[2:] {
 		full, ok := v.(*Pair)
 		if !ok {
@@ -58,12 +58,7 @@ func ParseSyntaxRules(v []Value) (*SyntaxRules, error) {
 			return nil, errors.New("Got non-list for <template>")
 		}
 
-
-		template, ok := (*cdr.Car).(*Pair)
-		if !ok {
-			return nil, errors.New("Got non-list for (cdr <template>)")
-		}
-		templates = append(templates, template)
+		templates = append(templates, *cdr.Car)
 		patterns = append(patterns, pattern)
 	}
 
@@ -120,6 +115,10 @@ func IsEqual(v1 Value, v2 Value) bool {
 func IsMatch(p Value, f Value, literals []Symbol) bool {
 	if IsEqual(p, f) {
 		return true
+	}
+
+	if p == Empty {
+		return false
 	}
 
 	switch p.(type) {
@@ -202,6 +201,14 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 				return errors.New("Macro mismatch: List vs non-list")
 			}
 
+			if len(vp) == 0 {
+				if len(vf) == 0 {
+					return nil
+				} else {
+					return errors.New("Macro mismatch: Empty list vs non-empty")
+				}
+			}
+
 			if vp[len(vp) - 1] == Elipses && len(vf) >= len(vp) - 1 {
 				for i := 0; i < len(vp) - 1; i++ {
 					m.parse(vp[i], vf[i], literals)
@@ -248,9 +255,11 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 			return Empty, nil
 		}
 
-		if cdr, ok := (*t.(*Pair).Cdr).(*Pair); ok && cdr != Empty {
+		tp := t.(*Pair)
+
+		if cdr, ok := (*tp.Cdr).(*Pair); ok && cdr != Empty {
 			if s, ok := (*cdr.Car).(Symbol); ok && s == Elipses {
-				key, ok := (*t.(*Pair).Car).(Symbol)
+				key, ok := (*tp.Car).(Symbol)
 				if !ok {
 					return nil, errors.New("Can only repeat pattern variables")
 				}
@@ -264,11 +273,11 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 				for i := range vl {
 					v := vl[i]
 					cur.Car = &v
+
 					var next Value = new(Pair)
 					cur.Cdr = &next
-					if i == len(vl) - 1 {
-						cur.Cdr = &Empty
-					} else {
+
+					if i != len(vl) - 1 {
 						cur = (*cur.Cdr).(*Pair)
 					}
 				}
@@ -280,11 +289,11 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 				return res, nil
 			}
 		}
-		car, err := m.transcribe(*t.(*Pair).Car)
+		car, err := m.transcribe(*tp.Car)
 		if err != nil {
 			return nil, err
 		}
-		cdr, err := m.transcribe(*t.(*Pair).Cdr)
+		cdr, err := m.transcribe(*tp.Cdr)
 		if err != nil {
 			return nil, err
 		}
