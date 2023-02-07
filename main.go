@@ -34,7 +34,7 @@ func Run(code string) {
 		}
 
 		Top.ins = []Ins{}
-		if err := Gen(Top, v); err != nil {
+		if err := Top.Gen(v); err != nil {
 			log.Fatalf("Error (gen): %s\n", err)
 		}
 

@@ -16,6 +16,12 @@ type SyntaxRules struct {
 func ParseSyntaxRules(v []Value) (*SyntaxRules, error) {
 	// (syntax-rules <literals> <syntax-rule> ...)
 
+	if s, ok := v[0].(Symbol); !ok {
+		return nil, errors.New("Expected syntax-rules, got non-symbol")
+	} else if s != Str2Sym("syntax-rules") {
+		return nil, errors.New("Expected syntax-rules, got other symbol")
+	}
+
 	litl, ok := v[1].(*Pair)
 	if !ok {
 		return nil, errors.New("Got non-list for <literals>")
@@ -49,15 +55,16 @@ func ParseSyntaxRules(v []Value) (*SyntaxRules, error) {
 
 		cdr, ok := (*full.Cdr).(*Pair)
 		if !ok {
-			return nil, errors.New("Got non-list for (cdr <syntax rule>)")
+			return nil, errors.New("Got non-list for <template>")
 		}
 
-		template, ok := (*cdr.Cdr).(*Pair)
+
+		template, ok := (*cdr.Car).(*Pair)
 		if !ok {
-			return nil, errors.New("Got non-list for (cddr <syntax rule>)")
+			return nil, errors.New("Got non-list for (cdr <template>)")
 		}
-		patterns = append(patterns, pattern)
 		templates = append(templates, template)
+		patterns = append(patterns, pattern)
 	}
 
 	return &SyntaxRules{literals, patterns, templates}, nil

@@ -2,9 +2,10 @@ package main
 
 import (
 	"errors"
+	"fmt"
 )
 
-var macros = map[Symbol]Value{}
+var Macros = map[Symbol]SyntaxRules{}
 
 func list2vec(list *Pair) ([]Value, error) {
 	res := []Value{}
@@ -19,7 +20,7 @@ func list2vec(list *Pair) ([]Value, error) {
 	return res, nil
 }
 
-func Gen(p *Procedure, v Value) error {
+func (p *Procedure) Gen(v Value) error {
 	switch v.(type) {
 	case Boolean, String, Character, Vector, Integer, Rational:
 		p.ins = append(p.ins, Ins{Imm, v, 0})
@@ -37,6 +38,42 @@ func Gen(p *Procedure, v Value) error {
 		}
 
 		if sym, ok := args[0].(Symbol); ok {
+			if sr, ok := Macros[sym]; ok {
+				i := 0
+				found := false
+				var pattern *Pair
+				f := *v.(*Pair).Cdr
+
+				for i, pattern = range sr.Patterns {
+					if IsMatch(*pattern.Cdr, f, sr.Literals) {
+						found = true
+						break
+					}
+				}
+
+				if !found {
+					return fmt.Errorf("No match found for macro %s",
+							SymbolNames[sym])
+				}
+
+				m := MacroMap{}
+				m.parse(*pattern.Cdr, f, sr.Literals)
+
+				trans, err := m.transcribe(sr.Templates[i])
+				if err != nil {
+					return err
+				}
+
+				p.Gen(args[0])
+				lambda := Procedure{
+					args: Empty,
+					ins:  []Ins{},
+				}
+				lambda.Gen(trans)
+				p.ins = append(p.ins, Ins{WithScope, lambda, 1})
+				return nil
+			}
+
 			switch SymbolNames[sym] {
 			case "set!":
 				if len(args) != 3 {
@@ -45,7 +82,7 @@ func Gen(p *Procedure, v Value) error {
 				if _, ok := args[1].(Symbol); !ok {
 					return errors.New("First arg to set! must be a symbol")
 				}
-				Gen(p, args[2])
+				p.Gen(args[2])
 				p.ins = append(p.ins, Ins{Set, args[1], 1})
 				return nil
 			case "define":
@@ -65,7 +102,7 @@ func Gen(p *Procedure, v Value) error {
 					}
 
 					for _, arg := range args[2:] {
-						Gen(&lambda, arg)
+						lambda.Gen(arg)
 					}
 
 					p.ins = append(p.ins, Ins{Lambda, lambda, 0})
@@ -74,10 +111,11 @@ func Gen(p *Procedure, v Value) error {
 					if len(args) != 3 {
 						return errors.New("define takes 2 args")
 					}
-					Gen(p, args[2])
+					p.Gen(args[2])
 					p.ins = append(p.ins, Ins{Define, args[1], 1})
 				default:
-					return errors.New("First arg to define must be a symbol")
+					return fmt.Errorf("First arg to define must be a symbol" +
+						": %T", args[1])
 				}
 				return nil
 			case "lambda":
@@ -91,7 +129,7 @@ func Gen(p *Procedure, v Value) error {
 				}
 
 				for _, arg := range args[2:] {
-					Gen(&lambda, arg)
+					lambda.Gen(arg)
 				}
 				p.ins = append(p.ins, Ins{Lambda, lambda, 0})
 				return nil
@@ -99,15 +137,15 @@ func Gen(p *Procedure, v Value) error {
 				lt := Procedure{args: p.args, ins: []Ins{}}
 				lf := lt
 
-				Gen(&lt, args[2])
+				lt.Gen(args[2])
 				if len(args) > 4 {
 					return errors.New("Too many args to if")
 				} else if len(args) == 4 {
-					Gen(&lf, args[3])
+					lf.Gen(args[3])
 					p.ins = append(p.ins, Ins{Imm, lf, 0})
 				}
 				p.ins = append(p.ins, Ins{Imm, lt, 0})
-				Gen(p, args[1])
+				p.Gen(args[1])
 				p.ins = append(p.ins, Ins{If, nil, len(args) - 1})
 				return nil
 			case "quote":
@@ -128,20 +166,54 @@ func Gen(p *Procedure, v Value) error {
 				if len(args) != 3 {
 					return errors.New("Wrong number of args to with-scope")
 				}
-				Gen(p, args[1])
+				p.Gen(args[1])
 				lambda := Procedure{
 					args: Empty,
 					ins:  []Ins{},
 				}
-				Gen(&lambda, args[2])
+				lambda.Gen(args[2])
 				p.ins = append(p.ins, Ins{WithScope, lambda, 1})
+				return nil
+			
+			case "define-syntax":
+				if len(args) != 3 {
+					return errors.New("Wrong number of args to define-syntax")
+				}
+
+				macroName, ok := args[1].(Symbol)
+				if !ok {
+					return fmt.Errorf("Expected macro name, got %T", args[1])
+				}
+
+				srl, ok := args[2].(*Pair)
+				if !ok {
+					return fmt.Errorf("Expected list, got %T", args[2])
+				}
+
+				srv, err := list2vec(srl)
+				if err != nil {
+					return err
+				}
+
+				sr, err := ParseSyntaxRules(srv)
+				if err != nil {
+					return err
+				}
+
+				if _, ok := Macros[macroName]; ok {
+					fmt.Println("WARNING: Redefining macro")
+				}
+
+				Macros[macroName] = *sr
+				p.ins = append(p.ins, Ins{SaveScope, nil, 0})
+				p.ins = append(p.ins, Ins{Set, macroName, 1})
 				return nil
 			}
 		}
 
 		// first arg is the callee
 		for i := len(args) - 1; i >= 0; i-- {
-			Gen(p, args[i])
+			p.Gen(args[i])
 		}
 		p.ins = append(p.ins, Ins{Call, nil, len(args) - 1})
 	}

@@ -1,7 +1,7 @@
 (set! a 1)
 (set! scope '())
 (define (myfn a)
-    (set-scope! scope))
+    (set! scope (save-scope)))
 
 (myfn 2)
 
@@ -9,8 +9,17 @@
             (display a))
 
 
+(define-syntax print
+  (syntax-rules ()
+    ((_ x)
+     ((lambda ()
+       (display x)
+       (newline))))))
 
-
+(newline)
+(display "test")
+(newline)
+(print "test of macros")
 
 
 ;(define-syntax let
