@@ -72,16 +72,10 @@ func TestTranscribe(t *testing.T) {
 	m.parse(pval, fval, []Symbol{})
 	res, _ := m.transcribe(tval)
 
-	lv1, _ := list2vec(res.(*Pair))
-	lv, _ := list2vec(lv1[0].(*Pair))
-	
-	x := big.Int(lv[0].(Integer))
-	if x.Cmp(big.NewInt(1)) != 0 {
-		t.Errorf("Expected first element to be 1")
-	}
+	rparse := NewParser("((1 2 3))")
+	rval, _ := rparse.GetValue()
 
-	x = big.Int(lv[2].(Integer))
-	if x.Cmp(big.NewInt(3)) != 0 {
-		t.Errorf("Expected last element to be 3")
+	if !IsEqual(rval, res) {
+		t.Errorf("Mismatch")
 	}
 }

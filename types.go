@@ -120,7 +120,7 @@ func WriteValue(v Value, display bool, port *Port) {
 
 		cur := v.(*Pair)
 		for {
-			if cur.Car == nil {
+			if cur == Empty {
 				break
 			}
 

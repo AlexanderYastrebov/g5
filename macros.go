@@ -33,6 +33,9 @@ func IsEqual(v1 Value, v2 Value) bool {
 		}
 		return true
 	case *Pair:
+		if v1 == Empty || v2 == Empty {
+			return v1 == Empty && v2 == Empty
+		}
 		return IsEqual(*v1.(*Pair).Car, *v2.(*Pair).Car) &&
 			IsEqual(*v1.(*Pair).Cdr, *v2.(*Pair).Cdr)
 	case Integer:
@@ -200,7 +203,11 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 					cur.Car = &v
 					var next Value = new(Pair)
 					cur.Cdr = &next
-					cur = (*cur.Cdr).(*Pair)
+					if i == len(vl) - 1 {
+						cur.Cdr = &Empty
+					} else {
+						cur = (*cur.Cdr).(*Pair)
+					}
 				}
 				cdr, err := m.transcribe(*cdr.Cdr)
 				if err != nil {
