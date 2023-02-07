@@ -54,7 +54,7 @@ func ParseSyntaxRules(v []Value) (*SyntaxRules, error) {
 
 		template, ok := (*cdr.Cdr).(*Pair)
 		if !ok {
-			return nil, errors.New("Got non-list for (cdr <syntax rule>)")
+			return nil, errors.New("Got non-list for (cddr <syntax rule>)")
 		}
 		patterns = append(patterns, pattern)
 		templates = append(templates, template)
