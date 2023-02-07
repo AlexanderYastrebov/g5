@@ -172,10 +172,10 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 		if !ok {
 			return t, nil
 		}
-		res := vl[0]
 		if len((*m)[t.(Symbol)]) > 1 {
-			(*m)[t.(Symbol)] = (*m)[t.(Symbol)][1:]
+			return nil, errors.New("Tried to insert list variable")
 		}
+		res := vl[0]
 		return res, nil
 	case *Pair:
 		if t == Empty {
