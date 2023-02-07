@@ -4,6 +4,8 @@ import (
 	"errors"
 )
 
+var macros = map[Symbol]Value{}
+
 func list2vec(list *Pair) ([]Value, error) {
 	res := []Value{}
 	for list.Car != nil {

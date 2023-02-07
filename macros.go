@@ -7,6 +7,62 @@ import (
 	"fmt"
 )
 
+type SyntaxRules struct {
+	Literals []Symbol
+	Patterns []*Pair
+	Templates []*Pair
+}
+
+func ParseSyntaxRules(v []Value) (*SyntaxRules, error) {
+	// (syntax-rules <literals> <syntax-rule> ...)
+
+	litl, ok := v[1].(*Pair)
+	if !ok {
+		return nil, errors.New("Got non-list for <literals>")
+	}
+
+	litv, err := list2vec(litl)
+	if err != nil {
+		return nil, errors.New("Got improper list for <literals>")
+	}
+
+	literals := []Symbol{}
+	for _, v := range litv {
+		s, ok := v.(Symbol)
+		if !ok {
+			return nil, errors.New("Got non-symbol in <literals>")
+		}
+		literals = append(literals, s)
+	}
+
+	patterns, templates := []*Pair{}, []*Pair{}
+	for _, v := range v[2:] {
+		full, ok := v.(*Pair)
+		if !ok {
+			return nil, errors.New("Got non-list for <syntax rule>")
+		}
+
+		pattern, ok := (*full.Car).(*Pair)
+		if !ok {
+			return nil, errors.New("Got non-list for <pattern>")
+		}
+
+		cdr, ok := (*full.Cdr).(*Pair)
+		if !ok {
+			return nil, errors.New("Got non-list for (cdr <syntax rule>)")
+		}
+
+		template, ok := (*cdr.Cdr).(*Pair)
+		if !ok {
+			return nil, errors.New("Got non-list for (cdr <syntax rule>)")
+		}
+		patterns = append(patterns, pattern)
+		templates = append(templates, template)
+	}
+
+	return &SyntaxRules{literals, patterns, templates}, nil
+}
+
 func IsEqual(v1 Value, v2 Value) bool {
 	if reflect.TypeOf(v1) != reflect.TypeOf(v2) {
 		return false
