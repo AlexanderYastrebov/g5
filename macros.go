@@ -4,6 +4,7 @@ import (
 	"math/big"
 	"reflect"
 	"errors"
+	"fmt"
 )
 
 func IsEqual(v1 Value, v2 Value) bool {
@@ -105,7 +106,7 @@ func IsMatch(p Value, f Value, literals []Symbol) bool {
 
 type MacroMap map[Symbol][]Value
 
-func getmap(m *MacroMap, p Value, f Value, literals []Symbol) error {
+func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 	switch p.(type) {
 	case Symbol:
 		isliteral := false
@@ -135,22 +136,24 @@ func getmap(m *MacroMap, p Value, f Value, literals []Symbol) error {
 				return errors.New("Macro mismatch: List vs non-list")
 			}
 
-			if vf[len(vf) - 1] == Elipses && len(vp) >= len(vf) {
+			if vp[len(vp) - 1] == Elipses && len(vf) >= len(vp) - 1 {
 				for i := 0; i < len(vp) - 1; i++ {
-					getmap(m, vp[i], vf[i], literals)
+					m.parse(vp[i], vf[i], literals)
 				}
 				for i := len(vp) - 1; i < len(vf); i++ {
-					getmap(m, vp[len(vp) - 1], vf[i], literals)
+					m.parse(vp[len(vp) - 2], vf[i], literals)
 				}
 				return nil
 			}
 
 			if len(vf) != len(vp) {
-				return errors.New("Macro mismatch: List length")
+				return errors.New(
+					fmt.Sprintf("Macro mismatch: List length: %d vs %d",
+						len(vp), len(vf)))
 			}
 			
 			for i := range vp {
-				getmap(m, vp[i], vf[i], literals)
+				m.parse(vp[i], vf[i], literals)
 			}
 			return nil
 		}
