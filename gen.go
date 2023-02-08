@@ -57,8 +57,6 @@ func (p *Procedure) Gen(v Value) error {
 				}
 				lambda.Gen(trans)
 
-				PrintValue(trans)
-				fmt.Println()
 				p.ins = append(p.ins, Ins{WithScope, lambda, 1})
 				return nil
 			}
