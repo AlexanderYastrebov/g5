@@ -44,8 +44,6 @@ func Run(code string) {
 
 func main() {
 	Top.scope = TopScope // Put builtins into top-level scope
-	Top.macros = map[Symbol]SyntaxRules{}
-
 	Run(Runtime)
 	switch len(os.Args) {
 	case 1:

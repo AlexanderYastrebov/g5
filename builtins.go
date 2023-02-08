@@ -101,4 +101,4 @@ var TopScope = &Scope{
 	nil,
 }
 
-var Top = &Procedure{}
+var Top = &Procedure{macros: map[Symbol]SyntaxRules{}}

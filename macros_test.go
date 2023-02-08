@@ -126,7 +126,7 @@ func TestParseSyntaxRules(t *testing.T) {
 		{Str2Sym("cons"), Str2Sym("a"), Str2Sym("b")},
 	}
 	for i, template := range result.Templates {
-		vec, _ := list2vec(template)
+		vec, _ := list2vec(template.(*Pair))
 		for j, val := range vec {
 			if !IsEqual(val, expectedTemplates[i][j]) {
 				t.Errorf("Expected template %+v, but got %+v",
