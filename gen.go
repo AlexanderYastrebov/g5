@@ -7,7 +7,7 @@ import (
 
 func list2vec(list *Pair) ([]Value, error) {
 	res := []Value{}
-	for list.Car != nil {
+	for list != Empty {
 		var ok bool
 		res = append(res, *list.Car)
 		list, ok = (*list.Cdr).(*Pair)
@@ -57,7 +57,7 @@ func (p *Procedure) Gen(v Value) error {
 				m := MacroMap{}
 				m.parse(*pattern.Cdr, f, sr.Literals)
 
-				trans, err := m.transcribe(sr.Templates[i])
+				trans, err := m.transcribe(sr.Templates[i], false)
 				if err != nil {
 					return err
 				}

@@ -15,7 +15,6 @@ type SyntaxRules struct {
 
 func ParseSyntaxRules(v []Value) (*SyntaxRules, error) {
 	// (syntax-rules <literals> <syntax-rule> ...)
-
 	if s, ok := v[0].(Symbol); !ok {
 		return nil, errors.New("Expected syntax-rules, got non-symbol")
 	} else if s != Str2Sym("syntax-rules") {
@@ -111,7 +110,7 @@ func IsEqual(v1 Value, v2 Value) bool {
 	}
 }
 
-// pattern   input form
+// pattern, import form
 func IsMatch(p Value, f Value, literals []Symbol) bool {
 	if IsEqual(p, f) {
 		return true
@@ -136,46 +135,59 @@ func IsMatch(p Value, f Value, literals []Symbol) bool {
 		if !ok {
 			return false
 		}
+
 		vp, err := list2vec(p.(*Pair))
-		if err == nil {
-			vf, err := list2vec(fp)
-			if err != nil {
+		if err != nil { // Dotted list
+			var last Value
+			cur := p.(*Pair)
+			ok := true
+			for ok {
+				vp = append(vp, *cur.Car)
+				last = (*cur.Cdr)
+				cur, ok = last.(*Pair)
+			}
+
+			vp = append(vp, last)
+			vp = append(vp, Ellipsis)
+		}
+
+		vf, err := list2vec(fp)
+		if err != nil {
+			return false
+		}
+
+		if vp[len(vp)-1] == Ellipsis {
+			// ( a b c ... )
+
+			last := len(vp) - 2
+			if len(vf) < last {
 				return false
 			}
 
-			if vp[len(vp)-1] == Ellipsis {
-				// ( a b c ... )
-
-				last := len(vp) - 2
-				if len(vf) < last {
+			for i := 0; i < last; i++ {
+				if !IsMatch(vp[i], vf[i], literals) {
 					return false
 				}
-
-				for i := 0; i < last; i++ {
-					if !IsMatch(vp[i], vf[i], literals) {
-						return false
-					}
-				}
-
-				for i := last; i < len(vf); i++ {
-					if !IsMatch(vp[last], vf[i], literals) {
-						return false
-					}
-				}
-				return true
 			}
 
-			if len(vf) != len(vp) {
-				return false
-			}
-
-			for i := range vf {
-				if !IsMatch(vp[i], vf[i], literals) {
+			for i := last; i < len(vf); i++ {
+				if !IsMatch(vp[last], vf[i], literals) {
 					return false
 				}
 			}
 			return true
 		}
+
+		if len(vf) != len(vp) {
+			return false
+		}
+
+		for i := range vf {
+			if !IsMatch(vp[i], vf[i], literals) {
+				return false
+			}
+		}
+		return true
 	}
 
 	return false
@@ -264,7 +276,27 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 	return errors.New("Macro mismatch: No match found")
 }
 
-func (m *MacroMap) transcribe(t Value) (Value, error) {
+func vec2list(vec []Value) *Pair {
+	res := new(Pair)
+	cur := res
+
+	for i := range vec {
+		v := vec[i]
+		cur.Car = &v
+
+		var next Value = new(Pair)
+
+		if i != len(vec) - 1 {
+			cur.Cdr = &next
+			cur = (*cur.Cdr).(*Pair)
+		}
+	}
+	cur.Cdr = &Empty
+
+	return res
+}
+
+func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
 	switch t.(type) {
 	case Symbol:
 		vl, ok := (*m)[t.(Symbol)]
@@ -272,10 +304,18 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 			return t, nil
 		}
 
-		if len(vl) > 1 {
-			return nil, errors.New("Tried to use list binding as single")
+		if len(vl) > 1 && !consume {
+			return vec2list(vl), nil
 		}
+
+		if len(vl) == 0 {
+			return nil, nil
+		}
+
 		res := vl[0]
+		if consume {
+			(*m)[t.(Symbol)] = vl[1:]
+		}
 		return res, nil
 	case *Pair:
 		if t == Empty {
@@ -286,18 +326,19 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 
 		if cdr, ok := (*tp.Cdr).(*Pair); ok && cdr != Empty {
 			if s, ok := (*cdr.Car).(Symbol); ok && s == Ellipsis {
-				key, ok := (*tp.Car).(Symbol)
-				if !ok {
-					return nil,
-						fmt.Errorf("Can only repeat pattern variables, got %T",
-							*tp.Car)
+				vl := []Value{}
+				v, err := m.transcribe(*tp.Car, true)	
+				if err != nil {
+					return nil, err
+				}
+				for v != nil {
+					vl = append(vl, v)
+					v, err = m.transcribe(*tp.Car, true)	
+					if err != nil {
+						return nil, err
+					}
 				}
 
-				vl, ok := (*m)[key]
-				if !ok {
-					return nil, fmt.Errorf("Could not find binding: %s",
-						SymbolNames[key])
-				}
 				res := new(Pair)
 				cur := res
 				for i := range vl {
@@ -311,24 +352,24 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 						cur = (*cur.Cdr).(*Pair)
 					}
 				}
-				cdr, err := m.transcribe(*cdr.Cdr)
+				cdr, err := m.transcribe(*cdr.Cdr, false)
 				if err != nil {
 					return nil, err
 				}
 				cur.Cdr = &cdr
 
-				if res.Car == nil {
+				if len(vl) == 0 || res.Car == nil {
 					res = Empty.(*Pair)
 				}
 
 				return res, nil
 			}
 		}
-		car, err := m.transcribe(*tp.Car)
+		car, err := m.transcribe(*tp.Car, false)
 		if err != nil {
 			return nil, err
 		}
-		cdr, err := m.transcribe(*tp.Cdr)
+		cdr, err := m.transcribe(*tp.Cdr, false)
 		if err != nil {
 			return nil, err
 		}

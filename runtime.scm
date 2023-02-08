@@ -70,7 +70,7 @@
      (let () 
        (define var init) 
        ... 
-       (let () . body))))) 
+       (let () body ...))))) 
 
 
 (define-syntax let

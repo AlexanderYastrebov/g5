@@ -3,6 +3,7 @@ package main
 import (
 	"math/big"
 	"testing"
+	"fmt"
 )
 
 func TestBasicMatch(t *testing.T) {
@@ -14,6 +15,18 @@ func TestBasicMatch(t *testing.T) {
 
 	if !IsMatch(pval, fval, []Symbol{}) {
 		t.Errorf("(a ...) did not match (1 2 3)")
+	}
+}
+
+func TestDotMatch(t *testing.T) {
+	pparse := NewParser("(a . b)")
+	pval, _ := pparse.GetValue()
+
+	fparse := NewParser("(1 2 3)")
+	fval, _ := fparse.GetValue()
+
+	if !IsMatch(pval, fval, []Symbol{}) {
+		t.Errorf("(a . b) did not match (1 2 3)")
 	}
 }
 
@@ -74,13 +87,23 @@ func TestTranscribe(t *testing.T) {
 	m := MacroMap{}
 
 	m.parse(pval, fval, []Symbol{})
-	res, _ := m.transcribe(tval)
+	res, err := m.transcribe(tval, false)
+	if err != nil {
+		t.Error(err)
+	}
 
 	rparse := NewParser("((1 2 3))")
-	rval, _ := rparse.GetValue()
+	rval, err := rparse.GetValue()
+	if err != nil {
+		t.Error(err)
+	}
 
 	if !IsEqual(rval, res) {
-		t.Errorf("Mismatch")
+		PrintValue(rval)
+		fmt.Println()
+		PrintValue(res)
+		fmt.Println()
+		t.Errorf("Mismatch %T", res)
 	}
 }
 
