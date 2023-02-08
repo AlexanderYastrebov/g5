@@ -44,20 +44,14 @@ func (p *Procedure) Gen(v Value) error {
 				m := MacroMap{}
 				m.parse(*pattern.Cdr, f, sr.Literals, true)
 
-				trans, err := m.transcribe(sr.Templates[i], false)
+				trans, err := m.transcribe(sr.Templates[i], false, sym)
 				if err != nil {
 					return err
 				}
 
 				p.Gen(args[0])
-				lambda := Procedure{
-					args:   Empty,
-					ins:    []Ins{},
-					macros: p.macros,
-				}
-				lambda.Gen(trans)
+				p.Gen(trans)
 
-				p.ins = append(p.ins, Ins{WithScope, lambda, 1})
 				return nil
 			}
 
@@ -155,6 +149,7 @@ func (p *Procedure) Gen(v Value) error {
 				if len(args) != 3 {
 					return errors.New("Wrong number of args to with-scope")
 				}
+
 				p.Gen(args[1])
 				lambda := Procedure{
 					args:   Empty,
@@ -198,6 +193,44 @@ func (p *Procedure) Gen(v Value) error {
 				p.ins = append(p.ins, Ins{SaveScope, nil, 0})
 				p.ins = append(p.ins, Ins{Set, macroName, 1})
 				return nil
+			}
+		}
+
+		special := []string{
+			"set!", "define", "lambda", "quote", "save-scope", "with-scope",
+			"define-syntax",
+		}
+
+		
+		// Handle things like ((with-syntax lambda) ...)
+		if pair, ok := args[0].(*Pair); ok {
+			if car, ok := (*pair.Car).(Symbol); ok &&
+				SymbolNames[car] == "with-scope" {
+				
+				vec, err := list2vec(pair)
+				if err != nil {
+					return err
+				}
+
+				if sym, ok := vec[2].(Symbol); ok {
+					found := false
+					if _, ok := p.macros[sym]; ok {
+						found = true
+					}
+					if !found {
+						for _, sp := range special {
+							if sp == SymbolNames[sym] {
+								found = true
+								break
+							}
+						}
+					}
+					if found {
+						v.(*Pair).Car = &vec[2]
+						p.Gen(v)
+						return nil
+					}
+				}
 			}
 		}
 

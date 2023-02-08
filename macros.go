@@ -202,8 +202,8 @@ type MacroMap map[Symbol]*MacroList
 func (m *MacroMap) parse(p Value,
 	f Value,
 	literals []Symbol,
-	isSingle bool) error {
-
+	isSingle bool,
+) error {
 	switch p.(type) {
 	case Symbol:
 		isliteral := false
@@ -284,12 +284,15 @@ func (m *MacroMap) parse(p Value,
 	return errors.New("Macro mismatch: No match found")
 }
 
-func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
+func (m *MacroMap) transcribe(t Value,
+	consume bool,
+	name Symbol,
+) (Value, error) {
 	switch t.(type) {
 	case Symbol:
 		vl, ok := (*m)[t.(Symbol)]
 		if !ok {
-			return t, nil
+			return vec2list([]Value{Str2Sym("with-scope"), name, t}), nil
 		}
 
 		if !vl.isSingle && !consume {
@@ -328,13 +331,13 @@ func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
 				//}
 
 				vl := []Value{}
-				res, err := m.transcribe(*tp.Car, true)
+				res, err := m.transcribe(*tp.Car, true, name)
 				if err != nil {
 					return nil, err
 				}
 				for res != nil {
 					vl = append(vl, res)
-					res, err = m.transcribe(*tp.Car, true)
+					res, err = m.transcribe(*tp.Car, true, name)
 					if err != nil {
 						return nil, err
 					}
@@ -346,7 +349,7 @@ func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
 					last = (*last.Cdr).(*Pair)
 				}
 
-				cdr, err := m.transcribe(*cdr.Cdr, consume)
+				cdr, err := m.transcribe(*cdr.Cdr, consume, name)
 				if cdr == nil {
 					return nil, err
 				}
@@ -359,11 +362,11 @@ func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
 				return res, nil
 			}
 		}
-		car, err := m.transcribe(*tp.Car, consume)
+		car, err := m.transcribe(*tp.Car, consume, name)
 		if car == nil {
 			return nil, err
 		}
-		cdr, err := m.transcribe(*tp.Cdr, consume)
+		cdr, err := m.transcribe(*tp.Cdr, consume, name)
 		if cdr == nil {
 			return nil, err
 		}
