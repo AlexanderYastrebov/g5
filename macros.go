@@ -317,8 +317,8 @@ func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
 			if s, ok := (*cdr.Car).(Symbol); ok && s == Ellipsis {
 				key, ok := (*tp.Car).(Symbol)
 				if !ok {
-					return nil, fmt.Errorf("Currently can only repeat pattern"+
-						"variables, got %T", *tp.Car)
+					return nil, fmt.Errorf("Currently can only repeat pattern" +
+						" variables, got %T", *tp.Car)
 				}
 
 				vl, ok := (*m)[key]
