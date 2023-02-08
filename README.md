@@ -14,4 +14,4 @@ defined macros.
 It is licensed under the BSD-0 license, effectively making it public domain.
 Use it however you wish.
 
-- *Joshua Pritsker*
+~ *Joshua Pritsker*
