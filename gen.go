@@ -201,12 +201,11 @@ func (p *Procedure) Gen(v Value) error {
 			"define-syntax",
 		}
 
-		
 		// Handle things like ((with-syntax lambda) ...)
 		if pair, ok := args[0].(*Pair); ok {
 			if car, ok := (*pair.Car).(Symbol); ok &&
 				SymbolNames[car] == "with-scope" {
-				
+
 				vec, err := list2vec(pair)
 				if err != nil {
 					return err
