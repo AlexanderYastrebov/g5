@@ -197,17 +197,16 @@ type MacroList struct {
 	v        []Value
 	isSingle bool
 }
-type MacroMap map[Symbol]MacroList
+type MacroMap map[Symbol]*MacroList
 
 func (m *MacroMap) parse(p Value,
 	f Value,
 	literals []Symbol,
 	isSingle bool) error {
-	switch p.(type) {
 
+	switch p.(type) {
 	case Symbol:
 		isliteral := false
-
 		for _, s := range literals {
 			if p.(Symbol) == s {
 				isliteral = true
@@ -222,14 +221,12 @@ func (m *MacroMap) parse(p Value,
 		}
 
 		if _, ok := (*m)[p.(Symbol)]; !ok {
-			(*m)[p.(Symbol)] = MacroList{[]Value{}, isSingle}
+			(*m)[p.(Symbol)] = &MacroList{[]Value{}, isSingle}
 		}
 		if f == nil {
 			return nil
 		}
-		res := (*m)[p.(Symbol)]
-		res.v = append(res.v, f)
-		(*m)[p.(Symbol)] = res
+		(*m)[p.(Symbol)].v = append((*m)[p.(Symbol)].v, f)
 		return nil
 	case *Pair:
 		vp, err := list2vec(p.(*Pair))
@@ -299,11 +296,13 @@ func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
 			return vec2list(vl.v), nil
 		}
 
+		if len(vl.v) == 0 {
+			return nil, nil
+		}
+
 		res := vl.v[0]
 		if !vl.isSingle && consume {
-			res := (*m)[t.(Symbol)]
-			res.v = vl.v[1:]
-			(*m)[t.(Symbol)] = res
+			(*m)[t.(Symbol)].v = vl.v[1:]
 		}
 		return res, nil
 	case *Pair:
@@ -315,27 +314,40 @@ func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
 
 		if cdr, ok := (*tp.Cdr).(*Pair); ok && cdr != Empty {
 			if s, ok := (*cdr.Car).(Symbol); ok && s == Ellipsis {
-				key, ok := (*tp.Car).(Symbol)
-				if !ok {
-					return nil, fmt.Errorf("Currently can only repeat pattern" +
-						" variables, got %T", *tp.Car)
+				//key, ok := (*tp.Car).(Symbol)
+				//if !ok {
+				//	return nil, fmt.Errorf(
+				//		"Currently can only repeat pattern variables, got %T",
+				//		*tp.Car)
+				//}
+
+				//vl, ok := (*m)[key]
+				//if !ok {
+				//	return nil, fmt.Errorf("Could not find binding %s",
+				//		SymbolNames[key])
+				//}
+
+				vl := []Value{}
+				res, err := m.transcribe(*tp.Car, true)
+				if err != nil {
+					return nil, err
+				}
+				for res != nil {
+					vl = append(vl, res)
+					res, err = m.transcribe(*tp.Car, true)
+					if err != nil {
+						return nil, err
+					}
 				}
 
-				vl, ok := (*m)[key]
-				if !ok {
-					return nil, fmt.Errorf("Could not find binidng %s",
-						SymbolNames[key])
-
-				}
-
-				res := vec2list(vl.v)
-				last := res
+				res = vec2list(vl)
+				last := res.(*Pair)
 				for last != Empty && *last.Cdr != Empty {
 					last = (*last.Cdr).(*Pair)
 				}
 
-				cdr, err := m.transcribe(*cdr.Cdr, false)
-				if err != nil {
+				cdr, err := m.transcribe(*cdr.Cdr, consume)
+				if cdr == nil {
 					return nil, err
 				}
 
@@ -347,12 +359,12 @@ func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
 				return res, nil
 			}
 		}
-		car, err := m.transcribe(*tp.Car, false)
-		if err != nil {
+		car, err := m.transcribe(*tp.Car, consume)
+		if car == nil {
 			return nil, err
 		}
-		cdr, err := m.transcribe(*tp.Cdr, false)
-		if err != nil {
+		cdr, err := m.transcribe(*tp.Cdr, consume)
+		if cdr == nil {
 			return nil, err
 		}
 		return &Pair{&car, &cdr}, nil

@@ -65,13 +65,16 @@
      (let ((x test1))
        (if x x (or test2 ...))))))
 
-(define-syntax letrec 
-  (syntax-rules () 
-    ((_ ((var init) ...) . body) 
-     (let () 
-       (define var init) 
-       ... 
-       (let () body ...))))) 
+  
+ (define-syntax letrec 
+   (syntax-rules () 
+     ((_ ((var init) ...) body ...)
+      (let () 
+        (define var init) 
+        ... 
+        (let () body ...))))) 
+          
+
 
 
 (define-syntax let
