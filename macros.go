@@ -140,16 +140,22 @@ func IsMatch(p Value, f Value, literals []Symbol) bool {
 			}
 
 			if vp[len(vp)-1] == Ellipsis {
-				if len(vf) < len(vp)-1 {
+				// ( a b c ... )
+				if len(vf) < len(vp)-2 {
 					return false
 				}
 
-				for i := 0; i < len(vp)-1; i++ {
+				for i := 0; i < len(vp)-2; i++ {
 					if !IsMatch(vp[i], vf[i], literals) {
 						return false
 					}
 				}
 
+				for i := len(vp)-2; i < len(vf); i++ {
+					if !IsMatch(vp[len(vp)-2], vf[i], literals) {
+						return false
+					}
+				}
 				return true
 			}
 
@@ -175,6 +181,7 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 	switch p.(type) {
 	case Symbol:
 		isliteral := false
+
 		for _, s := range literals {
 			if p.(Symbol) == s {
 				isliteral = true
@@ -182,7 +189,7 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 			}
 		}
 
-		if isliteral && p.(Symbol) == f.(Symbol) {
+		if isliteral && f != nil && p.(Symbol) == f.(Symbol) {
 			return nil
 		} else if isliteral {
 			return errors.New("Macro mismatch: Literal")
@@ -191,45 +198,58 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 		if _, ok := (*m)[p.(Symbol)]; !ok {
 			(*m)[p.(Symbol)] = []Value{}
 		}
+		if f == nil {
+			return nil
+		}
 		(*m)[p.(Symbol)] = append((*m)[p.(Symbol)], f)
 		return nil
 	case *Pair:
 		vp, err := list2vec(p.(*Pair))
-		if err == nil {
-			vf, err := list2vec(f.(*Pair))
-			if err != nil {
-				return errors.New("Macro mismatch: List vs non-list")
-			}
+		if err != nil {
+			return errors.New("Macro: Non-list")
+		}
 
-			if len(vp) == 0 {
-				if len(vf) == 0 {
-					return nil
-				} else {
-					return errors.New("Macro mismatch: Empty list vs non-empty")
-				}
-			}
-
-			if vp[len(vp)-1] == Ellipsis && len(vf) >= len(vp)-1 {
-				for i := 0; i < len(vp)-1; i++ {
-					m.parse(vp[i], vf[i], literals)
-				}
-				for i := len(vp) - 1; i < len(vf); i++ {
-					m.parse(vp[len(vp)-2], vf[i], literals)
-				}
-				return nil
-			}
-
-			if len(vf) != len(vp) {
-				return errors.New(
-					fmt.Sprintf("Macro mismatch: List length: %d vs %d",
-						len(vp), len(vf)))
-			}
-
+		var vf []Value
+		if f == nil {
 			for i := range vp {
-				m.parse(vp[i], vf[i], literals)
+				m.parse(vp[i], nil, literals)
 			}
 			return nil
 		}
+		vf, err = list2vec(f.(*Pair))
+		if err != nil {
+			return errors.New("Macro mismatch: List vs non-list")
+		}
+
+		if len(vp) == 0 && vf != nil {
+			if len(vf) == 0 {
+				return nil
+			} else {
+				return errors.New("Macro mismatch: Empty list vs non-empty")
+			}
+		}
+
+		if vp[len(vp)-1] == Ellipsis && len(vf) >= len(vp)-2 {
+			for i := 0; i < len(vp)-2; i++ {
+				m.parse(vp[i], vf[i], literals)
+			}
+			m.parse(vp[len(vp)-2], nil, literals)
+			for i := len(vp)-2; i < len(vf); i++ {
+				m.parse(vp[len(vp)-2], vf[i], literals)
+			}
+			return nil
+		}
+
+
+		if len(vf) != len(vp) {
+			return fmt.Errorf("Macro mismatch: List length: %d vs %d",
+					len(vp), len(vf))
+		}
+
+		for i := range vp {
+			m.parse(vp[i], vf[i], literals)
+		}
+		return nil
 	}
 	if IsEqual(p, f) {
 		return nil
@@ -266,7 +286,8 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 
 				vl, ok := (*m)[key]
 				if !ok {
-					return t, nil
+					return nil, fmt.Errorf("Could not find binding: %s",
+						SymbolNames[key])
 				}
 				res := new(Pair)
 				cur := res
@@ -286,6 +307,11 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 					return nil, err
 				}
 				cur.Cdr = &cdr
+
+				if res.Car == nil {
+					res = Empty.(*Pair)
+				}
+
 				return res, nil
 			}
 		}

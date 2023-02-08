@@ -124,7 +124,7 @@ func WriteValue(v Value, display bool, port *Port) {
 			if cur == Empty {
 				break
 			}
-
+			
 			WriteValue(*cur.Car, display, port)
 
 			if p, ok := (*cur.Cdr).(*Pair); ok {
