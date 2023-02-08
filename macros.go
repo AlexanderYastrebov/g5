@@ -193,10 +193,18 @@ func IsMatch(p Value, f Value, literals []Symbol) bool {
 	return false
 }
 
-type MacroMap map[Symbol][]Value
+type MacroList struct {
+	v        []Value
+	isSingle bool
+}
+type MacroMap map[Symbol]MacroList
 
-func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
+func (m *MacroMap) parse(p Value,
+	f Value,
+	literals []Symbol,
+	isSingle bool) error {
 	switch p.(type) {
+
 	case Symbol:
 		isliteral := false
 
@@ -214,12 +222,14 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 		}
 
 		if _, ok := (*m)[p.(Symbol)]; !ok {
-			(*m)[p.(Symbol)] = []Value{}
+			(*m)[p.(Symbol)] = MacroList{[]Value{}, isSingle}
 		}
 		if f == nil {
 			return nil
 		}
-		(*m)[p.(Symbol)] = append((*m)[p.(Symbol)], f)
+		res := (*m)[p.(Symbol)]
+		res.v = append(res.v, f)
+		(*m)[p.(Symbol)] = res
 		return nil
 	case *Pair:
 		vp, err := list2vec(p.(*Pair))
@@ -230,7 +240,7 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 		var vf []Value
 		if f == nil {
 			for i := range vp {
-				m.parse(vp[i], nil, literals)
+				m.parse(vp[i], nil, literals, isSingle)
 			}
 			return nil
 		}
@@ -250,11 +260,12 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 		if vp[len(vp)-1] == Ellipsis && len(vf) >= len(vp)-2 {
 			last := len(vp) - 2
 			for i := 0; i < last; i++ {
-				m.parse(vp[i], vf[i], literals)
+				m.parse(vp[i], vf[i], literals, isSingle)
 			}
-			m.parse(vp[last], nil, literals)
+
+			m.parse(vp[last], nil, literals, false)
 			for i := last; i < len(vf); i++ {
-				m.parse(vp[last], vf[i], literals)
+				m.parse(vp[last], vf[i], literals, false)
 			}
 			return nil
 		}
@@ -265,7 +276,7 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 		}
 
 		for i := range vp {
-			m.parse(vp[i], vf[i], literals)
+			m.parse(vp[i], vf[i], literals, isSingle)
 		}
 		return nil
 	}
@@ -284,17 +295,15 @@ func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
 			return t, nil
 		}
 
-		if len(vl) > 1 && !consume {
-			return vec2list(vl), nil
+		if !vl.isSingle && !consume {
+			return vec2list(vl.v), nil
 		}
 
-		if len(vl) == 0 {
-			return nil, nil
-		}
-
-		res := vl[0]
-		if consume {
-			(*m)[t.(Symbol)] = vl[1:]
+		res := vl.v[0]
+		if !vl.isSingle && consume {
+			res := (*m)[t.(Symbol)]
+			res.v = vl.v[1:]
+			(*m)[t.(Symbol)] = res
 		}
 		return res, nil
 	case *Pair:
@@ -308,7 +317,7 @@ func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
 			if s, ok := (*cdr.Car).(Symbol); ok && s == Ellipsis {
 				key, ok := (*tp.Car).(Symbol)
 				if !ok {
-					return nil, fmt.Errorf("Currently can only repeat pattern" +
+					return nil, fmt.Errorf("Currently can only repeat pattern"+
 						"variables, got %T", *tp.Car)
 				}
 
@@ -319,7 +328,7 @@ func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
 
 				}
 
-				res := vec2list(vl)
+				res := vec2list(vl.v)
 				last := res
 				for last != Empty && *last.Cdr != Empty {
 					last = (*last.Cdr).(*Pair)

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"math/big"
 	"testing"
-	"fmt"
 )
 
 func TestBasicMatch(t *testing.T) {
@@ -50,13 +50,13 @@ func TestBasicMap(t *testing.T) {
 	fval, _ := fparse.GetValue()
 
 	m := MacroMap{}
-	if err := m.parse(pval, fval, []Symbol{}); err != nil {
+	if err := m.parse(pval, fval, []Symbol{}, true); err != nil {
 		t.Errorf("Could not parse to map: %v", err)
 	}
 
 	a := Str2Sym("a")
-	if len(m[a]) != 3 {
-		t.Errorf("Wrong length for map element: %d vs 3", len(m[a]))
+	if len(m[a].v) != 3 {
+		t.Errorf("Wrong length for map element: %d vs 3", len(m[a].v))
 	}
 
 	expected := []Integer{
@@ -65,8 +65,8 @@ func TestBasicMap(t *testing.T) {
 		Integer(*big.NewInt(3)),
 	}
 
-	for i := range m[a] {
-		x := big.Int(m[a][i].(Integer))
+	for i := range m[a].v {
+		x := big.Int(m[a].v[i].(Integer))
 		y := big.Int(expected[i])
 		if x.Cmp(&y) != 0 {
 			t.Errorf("Expected first element to be 1")
@@ -86,7 +86,7 @@ func TestTranscribe(t *testing.T) {
 
 	m := MacroMap{}
 
-	m.parse(pval, fval, []Symbol{})
+	m.parse(pval, fval, []Symbol{}, true)
 	res, err := m.transcribe(tval, false)
 	if err != nil {
 		t.Error(err)

@@ -5,7 +5,6 @@ import (
 	"fmt"
 )
 
-
 func (p *Procedure) Gen(v Value) error {
 	switch v.(type) {
 	case Boolean, String, Character, Vector, Integer, Rational:
@@ -43,7 +42,7 @@ func (p *Procedure) Gen(v Value) error {
 				}
 
 				m := MacroMap{}
-				m.parse(*pattern.Cdr, f, sr.Literals)
+				m.parse(*pattern.Cdr, f, sr.Literals, true)
 
 				trans, err := m.transcribe(sr.Templates[i], false)
 				if err != nil {

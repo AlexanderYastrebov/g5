@@ -1,5 +1,6 @@
 (define (newline) (display #\newline))
 
+; Some of these do not work yet. The basic form of let works, though
 (define-syntax cond
   (syntax-rules (else =>)
     ((cond (else result1 result2 ...))

@@ -18,7 +18,7 @@ func vec2list(vec []Value) *Pair {
 
 		var next Value = new(Pair)
 
-		if i != len(vec) - 1 {
+		if i != len(vec)-1 {
 			cur.Cdr = &next
 			cur = (*cur.Cdr).(*Pair)
 		}

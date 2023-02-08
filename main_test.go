@@ -77,3 +77,15 @@ func TestCounter(t *testing.T) {
 		t.Errorf("Expected integer, got %v", result.String())
 	}
 }
+
+func TestLet(t *testing.T) {
+	Run("(let ((a 0) (b 1)) b)")
+	result, ok := stack.Top().(Integer)
+	if !ok {
+		t.Errorf("Expected integer, got %T", result)
+	}
+
+	if result := big.Int(result); result.Cmp(big.NewInt(1)) != 0 {
+		t.Errorf("Expected integer, got %v", result.String())
+	}
+}
