@@ -51,7 +51,7 @@ func (p *Procedure) Gen(v Value) error {
 
 				if !found {
 					return fmt.Errorf("No match found for macro %s",
-							SymbolNames[sym])
+						SymbolNames[sym])
 				}
 
 				m := MacroMap{}
@@ -64,8 +64,8 @@ func (p *Procedure) Gen(v Value) error {
 
 				p.Gen(args[0])
 				lambda := Procedure{
-					args: Empty,
-					ins:  []Ins{},
+					args:   Empty,
+					ins:    []Ins{},
 					macros: p.macros,
 				}
 				lambda.Gen(trans)
@@ -96,8 +96,8 @@ func (p *Procedure) Gen(v Value) error {
 					dest := *def.Car
 
 					lambda := Procedure{
-						args: *def.Cdr,
-						ins:  []Ins{},
+						args:   *def.Cdr,
+						ins:    []Ins{},
 						macros: p.macros,
 					}
 
@@ -114,7 +114,7 @@ func (p *Procedure) Gen(v Value) error {
 					p.Gen(args[2])
 					p.ins = append(p.ins, Ins{Define, args[1], 1})
 				default:
-					return fmt.Errorf("First arg to define must be a symbol" +
+					return fmt.Errorf("First arg to define must be a symbol"+
 						": %T", args[1])
 				}
 				return nil
@@ -124,8 +124,8 @@ func (p *Procedure) Gen(v Value) error {
 				}
 
 				lambda := Procedure{
-					args: args[1],
-					ins:  []Ins{},
+					args:   args[1],
+					ins:    []Ins{},
 					macros: p.macros,
 				}
 
@@ -169,14 +169,13 @@ func (p *Procedure) Gen(v Value) error {
 				}
 				p.Gen(args[1])
 				lambda := Procedure{
-					args: Empty,
-					ins:  []Ins{},
+					args:   Empty,
+					ins:    []Ins{},
 					macros: p.macros,
 				}
 				lambda.Gen(args[2])
 				p.ins = append(p.ins, Ins{WithScope, lambda, 1})
 				return nil
-			
 			case "define-syntax":
 				if len(args) != 3 {
 					return errors.New("Wrong number of args to define-syntax")
@@ -203,7 +202,8 @@ func (p *Procedure) Gen(v Value) error {
 				}
 
 				if _, ok := p.macros[macroName]; ok {
-					fmt.Println("WARNING: Redefining macro")
+					fmt.Printf("WARNING: Redefining macro %s",
+						SymbolNames[macroName])
 				}
 
 				p.macros[macroName] = *sr

@@ -42,7 +42,7 @@ type Procedure struct {
 	args    Value
 	ins     []Ins
 	builtin func(int)
-	macros map[Symbol]SyntaxRules
+	macros  map[Symbol]SyntaxRules
 }
 
 func (Procedure) isValue() {}

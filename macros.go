@@ -1,15 +1,15 @@
 package main
 
 import (
-	"math/big"
-	"reflect"
 	"errors"
 	"fmt"
+	"math/big"
+	"reflect"
 )
 
 type SyntaxRules struct {
-	Literals []Symbol
-	Patterns []*Pair
+	Literals  []Symbol
+	Patterns  []*Pair
 	Templates []Value
 }
 
@@ -139,12 +139,12 @@ func IsMatch(p Value, f Value, literals []Symbol) bool {
 				return false
 			}
 
-			if vp[len(vp) - 1] == Elipses {
-				if len(vf) < len(vp) - 1 {
+			if vp[len(vp)-1] == Elipses {
+				if len(vf) < len(vp)-1 {
 					return false
 				}
 
-				for i := 0; i < len(vp) - 1; i++ {
+				for i := 0; i < len(vp)-1; i++ {
 					if !IsMatch(vp[i], vf[i], literals) {
 						return false
 					}
@@ -209,12 +209,12 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 				}
 			}
 
-			if vp[len(vp) - 1] == Elipses && len(vf) >= len(vp) - 1 {
-				for i := 0; i < len(vp) - 1; i++ {
+			if vp[len(vp)-1] == Elipses && len(vf) >= len(vp)-1 {
+				for i := 0; i < len(vp)-1; i++ {
 					m.parse(vp[i], vf[i], literals)
 				}
 				for i := len(vp) - 1; i < len(vf); i++ {
-					m.parse(vp[len(vp) - 2], vf[i], literals)
+					m.parse(vp[len(vp)-2], vf[i], literals)
 				}
 				return nil
 			}
@@ -224,7 +224,7 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 					fmt.Sprintf("Macro mismatch: List length: %d vs %d",
 						len(vp), len(vf)))
 			}
-			
+
 			for i := range vp {
 				m.parse(vp[i], vf[i], literals)
 			}
@@ -277,7 +277,7 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 					var next Value = new(Pair)
 					cur.Cdr = &next
 
-					if i != len(vl) - 1 {
+					if i != len(vl)-1 {
 						cur = (*cur.Cdr).(*Pair)
 					}
 				}

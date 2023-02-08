@@ -1,8 +1,8 @@
 package main
 
 import (
-	"testing"
 	"math/big"
+	"testing"
 )
 
 func TestBasicMatch(t *testing.T) {
@@ -84,7 +84,6 @@ func TestTranscribe(t *testing.T) {
 	}
 }
 
-
 func TestParseSyntaxRules(t *testing.T) {
 	input := `(syntax-rules (a b) ((_ b) (cons b a)) ((_ a) (cons a b)))`
 	parse := NewParser(input)
@@ -104,7 +103,7 @@ func TestParseSyntaxRules(t *testing.T) {
 	for i, literal := range result.Literals {
 		if literal != expectedLiterals[i] {
 			t.Errorf("Expected literal %v, but got %v",
-					expectedLiterals[i], literal)
+				expectedLiterals[i], literal)
 		}
 	}
 
@@ -131,9 +130,8 @@ func TestParseSyntaxRules(t *testing.T) {
 		for j, val := range vec {
 			if !IsEqual(val, expectedTemplates[i][j]) {
 				t.Errorf("Expected template %+v, but got %+v",
-						expectedTemplates[i][j], val)
+					expectedTemplates[i][j], val)
 			}
 		}
 	}
 }
-

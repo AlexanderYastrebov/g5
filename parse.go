@@ -12,7 +12,7 @@ var delim = map[rune]bool{
 	';':  true,
 	')':  true,
 	' ':  true,
-	' ': true, // no-break space, for some reason the R5RS reference uses these
+	' ':  true, // no-break space, for some reason the R5RS reference uses these
 	'\n': true,
 	'\r': true,
 	'\t': true,
