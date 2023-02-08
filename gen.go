@@ -5,8 +5,6 @@ import (
 	"fmt"
 )
 
-var Macros = map[Symbol]SyntaxRules{}
-
 func list2vec(list *Pair) ([]Value, error) {
 	res := []Value{}
 	for list.Car != nil {
@@ -38,7 +36,7 @@ func (p *Procedure) Gen(v Value) error {
 		}
 
 		if sym, ok := args[0].(Symbol); ok {
-			if sr, ok := Macros[sym]; ok {
+			if sr, ok := p.macros[sym]; ok {
 				i := 0
 				found := false
 				var pattern *Pair
@@ -68,6 +66,7 @@ func (p *Procedure) Gen(v Value) error {
 				lambda := Procedure{
 					args: Empty,
 					ins:  []Ins{},
+					macros: p.macros,
 				}
 				lambda.Gen(trans)
 				p.ins = append(p.ins, Ins{WithScope, lambda, 1})
@@ -99,6 +98,7 @@ func (p *Procedure) Gen(v Value) error {
 					lambda := Procedure{
 						args: *def.Cdr,
 						ins:  []Ins{},
+						macros: p.macros,
 					}
 
 					for _, arg := range args[2:] {
@@ -126,6 +126,7 @@ func (p *Procedure) Gen(v Value) error {
 				lambda := Procedure{
 					args: args[1],
 					ins:  []Ins{},
+					macros: p.macros,
 				}
 
 				for _, arg := range args[2:] {
@@ -170,6 +171,7 @@ func (p *Procedure) Gen(v Value) error {
 				lambda := Procedure{
 					args: Empty,
 					ins:  []Ins{},
+					macros: p.macros,
 				}
 				lambda.Gen(args[2])
 				p.ins = append(p.ins, Ins{WithScope, lambda, 1})
@@ -200,11 +202,11 @@ func (p *Procedure) Gen(v Value) error {
 					return err
 				}
 
-				if _, ok := Macros[macroName]; ok {
+				if _, ok := p.macros[macroName]; ok {
 					fmt.Println("WARNING: Redefining macro")
 				}
 
-				Macros[macroName] = *sr
+				p.macros[macroName] = *sr
 				p.ins = append(p.ins, Ins{SaveScope, nil, 0})
 				p.ins = append(p.ins, Ins{Set, macroName, 1})
 				return nil
