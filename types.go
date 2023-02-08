@@ -168,8 +168,8 @@ func PrintValue(v Value) {
 func Str2Sym(str string) Symbol {
 	str = strings.ToLower(str) // Symbols are case-insensitive
 
-	for i, v := range SymbolNames {
-		if v == str {
+	for i, val := range SymbolNames {
+		if val == str {
 			return Symbol(i)
 		}
 	}

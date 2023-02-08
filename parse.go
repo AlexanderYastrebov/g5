@@ -189,8 +189,8 @@ func (p *Parser) GetValue() (Value, error) {
 				return Character(ch), nil
 			}
 
-			for _, v := range []string{"space", "newline"} {
-				slen := len(v)
+			for _, val := range []string{"space", "newline"} {
+				slen := len(val)
 				if len(p.data) >= slen-1 {
 					if len(p.data) == slen || delim[p.data[slen]] {
 						str := string(p.data[:slen])

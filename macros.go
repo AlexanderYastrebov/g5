@@ -32,8 +32,8 @@ func ParseSyntaxRules(v []Value) (*SyntaxRules, error) {
 	}
 
 	literals := []Symbol{}
-	for _, v := range litv {
-		s, ok := v.(Symbol)
+	for _, val := range litv {
+		s, ok := val.(Symbol)
 		if !ok {
 			return nil, errors.New("Got non-symbol in <literals>")
 		}
@@ -41,8 +41,8 @@ func ParseSyntaxRules(v []Value) (*SyntaxRules, error) {
 	}
 
 	patterns, templates := []*Pair{}, []Value{}
-	for _, v := range v[2:] {
-		full, ok := v.(*Pair)
+	for _, val := range v[2:] {
+		full, ok := val.(*Pair)
 		if !ok {
 			return nil, errors.New("Got non-list for <syntax rule>")
 		}
