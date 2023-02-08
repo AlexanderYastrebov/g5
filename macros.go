@@ -132,27 +132,33 @@ func IsMatch(p Value, f Value, literals []Symbol) bool {
 		}
 		return !isliteral || p.(Symbol) == f.(Symbol)
 	case *Pair:
+		fp, ok := f.(*Pair)
+		if !ok {
+			return false
+		}
 		vp, err := list2vec(p.(*Pair))
 		if err == nil {
-			vf, err := list2vec(f.(*Pair))
+			vf, err := list2vec(fp)
 			if err != nil {
 				return false
 			}
 
 			if vp[len(vp)-1] == Ellipsis {
 				// ( a b c ... )
-				if len(vf) < len(vp)-2 {
+
+				last := len(vp) - 2
+				if len(vf) < last {
 					return false
 				}
 
-				for i := 0; i < len(vp)-2; i++ {
+				for i := 0; i < last; i++ {
 					if !IsMatch(vp[i], vf[i], literals) {
 						return false
 					}
 				}
 
-				for i := len(vp)-2; i < len(vf); i++ {
-					if !IsMatch(vp[len(vp)-2], vf[i], literals) {
+				for i := last; i < len(vf); i++ {
+					if !IsMatch(vp[last], vf[i], literals) {
 						return false
 					}
 				}
@@ -230,20 +236,20 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 		}
 
 		if vp[len(vp)-1] == Ellipsis && len(vf) >= len(vp)-2 {
-			for i := 0; i < len(vp)-2; i++ {
+			last := len(vp) - 2
+			for i := 0; i < last; i++ {
 				m.parse(vp[i], vf[i], literals)
 			}
-			m.parse(vp[len(vp)-2], nil, literals)
-			for i := len(vp)-2; i < len(vf); i++ {
-				m.parse(vp[len(vp)-2], vf[i], literals)
+			m.parse(vp[last], nil, literals)
+			for i := last; i < len(vf); i++ {
+				m.parse(vp[last], vf[i], literals)
 			}
 			return nil
 		}
 
-
 		if len(vf) != len(vp) {
 			return fmt.Errorf("Macro mismatch: List length: %d vs %d",
-					len(vp), len(vf))
+				len(vp), len(vf))
 		}
 
 		for i := range vp {
@@ -265,8 +271,9 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 		if !ok {
 			return t, nil
 		}
-		if len((*m)[t.(Symbol)]) > 1 {
-			return nil, errors.New("Tried to insert list variable")
+
+		if len(vl) > 1 {
+			return nil, errors.New("Tried to use list binding as single")
 		}
 		res := vl[0]
 		return res, nil
@@ -281,7 +288,9 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 			if s, ok := (*cdr.Car).(Symbol); ok && s == Ellipsis {
 				key, ok := (*tp.Car).(Symbol)
 				if !ok {
-					return nil, errors.New("Can only repeat pattern variables")
+					return nil,
+						fmt.Errorf("Can only repeat pattern variables, got %T",
+							*tp.Car)
 				}
 
 				vl, ok := (*m)[key]

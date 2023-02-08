@@ -83,7 +83,7 @@ begin:
 					}
 
 					if s, ok := cur.(Symbol); ok {
-						rest := &Pair{}
+						rest := new(Pair)
 						cur := rest
 						if n == 0 {
 							newp.scope.m[s] = Empty
@@ -97,7 +97,7 @@ begin:
 									cur.Cdr = &Empty
 									break
 								}
-								var next Value = &Pair{}
+								var next Value = new(Pair)
 								cur.Cdr = &next
 								cur = next.(*Pair)
 							}
