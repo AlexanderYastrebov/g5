@@ -40,7 +40,7 @@ const (
 	Unquote
 	Quasiquote
 	UnquoteSplicing
-	Elipses
+	Ellipsis
 
 	SymAdd
 	SymSub

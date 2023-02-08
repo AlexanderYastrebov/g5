@@ -139,7 +139,7 @@ func IsMatch(p Value, f Value, literals []Symbol) bool {
 				return false
 			}
 
-			if vp[len(vp)-1] == Elipses {
+			if vp[len(vp)-1] == Ellipsis {
 				if len(vf) < len(vp)-1 {
 					return false
 				}
@@ -209,7 +209,7 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 				}
 			}
 
-			if vp[len(vp)-1] == Elipses && len(vf) >= len(vp)-1 {
+			if vp[len(vp)-1] == Ellipsis && len(vf) >= len(vp)-1 {
 				for i := 0; i < len(vp)-1; i++ {
 					m.parse(vp[i], vf[i], literals)
 				}
@@ -258,7 +258,7 @@ func (m *MacroMap) transcribe(t Value) (Value, error) {
 		tp := t.(*Pair)
 
 		if cdr, ok := (*tp.Cdr).(*Pair); ok && cdr != Empty {
-			if s, ok := (*cdr.Car).(Symbol); ok && s == Elipses {
+			if s, ok := (*cdr.Car).(Symbol); ok && s == Ellipsis {
 				key, ok := (*tp.Car).(Symbol)
 				if !ok {
 					return nil, errors.New("Can only repeat pattern variables")
