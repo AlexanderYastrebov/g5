@@ -193,6 +193,8 @@ func (ins Ins) Print() {
 		fmt.Println("LAMBDA")
 	case If:
 		fmt.Println("IF")
+	case WithScope:
+		fmt.Println("WITH-SCOPE")
 	default:
 		fmt.Println("[unknown]")
 	}

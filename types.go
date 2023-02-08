@@ -84,10 +84,10 @@ func WriteValue(v Value, display bool, port *Port) {
 		if v.(Boolean) {
 			writer.Write([]byte("#t"))
 		} else {
-			fmt.Print("#f")
+			writer.Write([]byte("#f"))
 		}
 	case Symbol:
-		fmt.Print(SymbolNames[v.(Symbol)])
+		fmt.Fprint(writer, SymbolNames[v.(Symbol)])
 	case String:
 		if !display {
 			fmt.Fprintf(writer, "\"%s\"", v.(String))
@@ -120,13 +120,8 @@ func WriteValue(v Value, display bool, port *Port) {
 		fmt.Fprint(writer, "(")
 
 		cur := v.(*Pair)
-		for {
-			if cur == Empty {
-				break
-			}
-
+		for cur != Empty {
 			WriteValue(*cur.Car, display, port)
-
 			if p, ok := (*cur.Cdr).(*Pair); ok {
 				if p.Car == nil && p.Cdr == nil {
 					break
@@ -138,7 +133,6 @@ func WriteValue(v Value, display bool, port *Port) {
 				WriteValue(*cur.Cdr, display, port)
 				break
 			}
-
 		}
 		fmt.Fprint(writer, ")")
 
@@ -152,12 +146,15 @@ func WriteValue(v Value, display bool, port *Port) {
 
 	case *Procedure:
 		fmt.Fprint(writer, "[procedure]")
+	
+	case Procedure:
+		fmt.Fprint(writer, "[imm_procedure]")
 
 	case *Scope:
 		fmt.Fprint(writer, "[scope]")
 
 	default:
-		fmt.Fprint(writer, "[???]")
+		fmt.Fprintf(writer, "[??? (%T)]", v)
 	}
 }
 

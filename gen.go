@@ -117,7 +117,11 @@ func (p *Procedure) Gen(v Value) error {
 				p.ins = append(p.ins, Ins{Lambda, lambda, 0})
 				return nil
 			case "if":
-				lt := Procedure{args: p.args, ins: []Ins{}}
+				lt := Procedure{
+					args: p.args,
+					ins: []Ins{},
+					macros: p.macros,
+				}
 				lf := lt
 
 				lt.Gen(args[2])
@@ -198,7 +202,7 @@ func (p *Procedure) Gen(v Value) error {
 
 		special := []string{
 			"set!", "define", "lambda", "quote", "save-scope", "with-scope",
-			"define-syntax",
+			"if", "define-syntax",
 		}
 
 		// Handle things like ((with-syntax lambda) ...)
@@ -225,6 +229,15 @@ func (p *Procedure) Gen(v Value) error {
 						}
 					}
 					if found {
+						v.(*Pair).Car = &vec[2]
+						p.Gen(v)
+						return nil
+					}
+				// Nested case: (with-scope x (with-scope y z))
+				} else if pair, ok := vec[2].(*Pair); ok {
+					if sym, ok := (*pair.Car).(Symbol); ok &&
+						SymbolNames[sym] == "with-scope"{
+
 						v.(*Pair).Car = &vec[2]
 						p.Gen(v)
 						return nil
