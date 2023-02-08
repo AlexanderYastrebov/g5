@@ -276,26 +276,6 @@ func (m *MacroMap) parse(p Value, f Value, literals []Symbol) error {
 	return errors.New("Macro mismatch: No match found")
 }
 
-func vec2list(vec []Value) *Pair {
-	res := new(Pair)
-	cur := res
-
-	for i := range vec {
-		v := vec[i]
-		cur.Car = &v
-
-		var next Value = new(Pair)
-
-		if i != len(vec) - 1 {
-			cur.Cdr = &next
-			cur = (*cur.Cdr).(*Pair)
-		}
-	}
-	cur.Cdr = &Empty
-
-	return res
-}
-
 func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
 	switch t.(type) {
 	case Symbol:
@@ -326,42 +306,35 @@ func (m *MacroMap) transcribe(t Value, consume bool) (Value, error) {
 
 		if cdr, ok := (*tp.Cdr).(*Pair); ok && cdr != Empty {
 			if s, ok := (*cdr.Car).(Symbol); ok && s == Ellipsis {
-				vl := []Value{}
-				v, err := m.transcribe(*tp.Car, true)	
-				if err != nil {
-					return nil, err
-				}
-				for v != nil {
-					vl = append(vl, v)
-					v, err = m.transcribe(*tp.Car, true)	
-					if err != nil {
-						return nil, err
-					}
+				key, ok := (*tp.Car).(Symbol)
+				if !ok {
+					return nil, fmt.Errorf("Currently can only repeat pattern" +
+						"variables, got %T", *tp.Car)
 				}
 
-				res := new(Pair)
-				cur := res
-				for i := range vl {
-					v := vl[i]
-					cur.Car = &v
+				vl, ok := (*m)[key]
+				if !ok {
+					return nil, fmt.Errorf("Could not find binidng %s",
+						SymbolNames[key])
 
-					var next Value = new(Pair)
-					cur.Cdr = &next
-
-					if i != len(vl)-1 {
-						cur = (*cur.Cdr).(*Pair)
-					}
 				}
+
+				res := vec2list(vl)
+				last := res
+				for last != Empty && *last.Cdr != Empty {
+					last = (*last.Cdr).(*Pair)
+				}
+
 				cdr, err := m.transcribe(*cdr.Cdr, false)
 				if err != nil {
 					return nil, err
 				}
-				cur.Cdr = &cdr
 
-				if len(vl) == 0 || res.Car == nil {
-					res = Empty.(*Pair)
+				if last == Empty {
+					return cdr, nil
 				}
 
+				last.Cdr = &cdr
 				return res, nil
 			}
 		}

@@ -5,18 +5,6 @@ import (
 	"fmt"
 )
 
-func list2vec(list *Pair) ([]Value, error) {
-	res := []Value{}
-	for list != Empty {
-		var ok bool
-		res = append(res, *list.Car)
-		list, ok = (*list.Cdr).(*Pair)
-		if !ok {
-			return nil, errors.New("Dotted list when regular list expected")
-		}
-	}
-	return res, nil
-}
 
 func (p *Procedure) Gen(v Value) error {
 	switch v.(type) {
