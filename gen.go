@@ -22,7 +22,18 @@ func (p *Procedure) Gen(v Value) error {
 			return errors.New("Empty expression")
 		}
 
-		if sym, ok := args[0].(Symbol); ok {
+		issym := false
+		sym, ok := args[0].(Symbol)
+		if ok {
+			issym = true
+		} else {
+			if scoped, ok := args[0].(Scoped); ok {
+				sym = scoped.Symbol
+				issym = true
+			}
+		}
+
+		if issym {
 			if sr, ok := p.macros[sym]; ok {
 				i := 0
 				found := false
@@ -49,7 +60,6 @@ func (p *Procedure) Gen(v Value) error {
 					return err
 				}
 
-				p.Gen(args[0])
 				p.Gen(trans)
 				return nil
 			}
@@ -148,20 +158,6 @@ func (p *Procedure) Gen(v Value) error {
 				}
 				p.ins = append(p.ins, Ins{SaveScope, nil, 0})
 				return nil
-			case "with-scope":
-				if len(args) != 3 {
-					return errors.New("Wrong number of args to with-scope")
-				}
-
-				p.Gen(args[1])
-				lambda := Procedure{
-					args:   Empty,
-					ins:    []Ins{},
-					macros: p.macros,
-				}
-				lambda.Gen(args[2])
-				p.ins = append(p.ins, Ins{WithScope, lambda, 1})
-				return nil
 			case "define-syntax":
 				if len(args) != 3 {
 					return errors.New("Wrong number of args to define-syntax")
@@ -196,52 +192,6 @@ func (p *Procedure) Gen(v Value) error {
 				p.ins = append(p.ins, Ins{SaveScope, nil, 0})
 				p.ins = append(p.ins, Ins{Set, macroName, 1})
 				return nil
-			}
-		}
-
-		special := []string{
-			"set!", "define", "lambda", "quote", "save-scope", "with-scope",
-			"if", "define-syntax",
-		}
-
-		// Handle things like ((with-syntax lambda) ...)
-		if pair, ok := args[0].(*Pair); ok {
-			if car, ok := (*pair.Car).(Symbol); ok &&
-				SymbolNames[car] == "with-scope" {
-
-				vec, err := list2vec(pair)
-				if err != nil {
-					return err
-				}
-
-				if sym, ok := vec[2].(Symbol); ok {
-					found := false
-					if _, ok := p.macros[sym]; ok {
-						found = true
-					}
-					if !found {
-						for _, sp := range special {
-							if sp == SymbolNames[sym] {
-								found = true
-								break
-							}
-						}
-					}
-					if found {
-						v.(*Pair).Car = &vec[2]
-						p.Gen(v)
-						return nil
-					}
-				// Nested case: (with-scope x (with-scope y z))
-				} else if pair, ok := vec[2].(*Pair); ok {
-					if sym, ok := (*pair.Car).(Symbol); ok &&
-						SymbolNames[sym] == "with-scope"{
-
-						v.(*Pair).Car = &vec[2]
-						p.Gen(v)
-						return nil
-					}
-				}
 			}
 		}
 

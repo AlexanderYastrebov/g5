@@ -15,9 +15,7 @@ const (
 	Set
 	Define
 	If
-
 	SaveScope
-	WithScope
 )
 
 type Ins struct {
@@ -26,11 +24,22 @@ type Ins struct {
 	nargs int
 }
 
-func (scope *Scope) Lookup(sym Symbol) *Scope {
-	if _, ok := scope.m[sym]; !ok {
-		if scope.super == nil {
-			return nil
+func (scope *Scope) Lookup(v Value) *Scope {
+	sym, ok := v.(Symbol)
+	if !ok {
+		_, ok = v.(Scoped)
+		if !ok {
+			panic("Tried to lookup non-symbol")
 		}
+		sym = v.(Scoped).Symbol
+		scope = scope.Lookup(v.(Scoped).Scope)
+	}
+
+	if scope == nil {
+		return nil
+	}
+
+	if _, ok := scope.m[sym]; !ok {
 		return scope.super.Lookup(sym)
 	}
 	return scope
@@ -105,7 +114,7 @@ begin:
 						}
 					}
 
-					if i == len(p.ins)-1 { // Tail call
+					if i == len(p.ins) - 1 { // Tail call
 						p = newp
 						goto begin
 					}
@@ -156,10 +165,6 @@ begin:
 			}
 		case SaveScope:
 			stack.Push(p.scope)
-		case WithScope:
-			newp := ins.imm.(Procedure)
-			newp.scope = stack.Pop().(*Scope)
-			newp.Eval()
 		}
 	}
 }
@@ -193,8 +198,8 @@ func (ins Ins) Print() {
 		fmt.Println("LAMBDA")
 	case If:
 		fmt.Println("IF")
-	case WithScope:
-		fmt.Println("WITH-SCOPE")
+	case SaveScope:
+		fmt.Println("SAVE-SCOPE")
 	default:
 		fmt.Println("[unknown]")
 	}

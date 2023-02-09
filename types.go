@@ -74,6 +74,13 @@ type Port struct {
 
 func (Port) isValue() {}
 
+type Scoped struct {
+	Symbol Symbol
+	Scope Symbol
+}
+
+func (Scoped) isValue() {}
+
 func WriteValue(v Value, display bool, port *Port) {
 	var writer io.Writer = port
 	if port == nil {

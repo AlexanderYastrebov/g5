@@ -10,6 +10,7 @@ var SymbolNames = []string{
 	"quasiquote",
 	"unquote-splicing",
 	"...",
+	"save-scope",
 
 	"+",
 	"-",
@@ -41,6 +42,7 @@ const (
 	Quasiquote
 	UnquoteSplicing
 	Ellipsis
+	SymSaveScope
 
 	SymAdd
 	SymSub

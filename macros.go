@@ -203,6 +203,7 @@ func IsMatch(p Value, f Value, literals []Symbol) bool {
 type MacroList struct {
 	v        []Value
 	isSingle bool
+	orig []Value
 }
 type MacroMap map[Symbol]*MacroList
 
@@ -228,12 +229,13 @@ func (m *MacroMap) parse(p Value,
 		}
 
 		if _, ok := (*m)[p.(Symbol)]; !ok {
-			(*m)[p.(Symbol)] = &MacroList{[]Value{}, isSingle}
+			(*m)[p.(Symbol)] = &MacroList{[]Value{}, isSingle, []Value{}}
 		}
 		if f == nil {
 			return nil
 		}
 		(*m)[p.(Symbol)].v = append((*m)[p.(Symbol)].v, f)
+		(*m)[p.(Symbol)].orig = (*m)[p.(Symbol)].v
 		return nil
 	case *Pair:
 		vp, err := list2vec(p.(*Pair))
@@ -299,7 +301,7 @@ func (m *MacroMap) transcribe(t Value,
 	case Symbol:
 		vl, ok := (*m)[t.(Symbol)]
 		if !ok {
-			return vec2list([]Value{Str2Sym("with-scope"), name, t}), nil
+			return Scoped{t.(Symbol), name}, nil
 		}
 
 		if !vl.isSingle && !consume {
@@ -307,6 +309,7 @@ func (m *MacroMap) transcribe(t Value,
 		}
 
 		if len(vl.v) == 0 {
+			(*m)[t.(Symbol)].v = (*m)[t.(Symbol)].orig
 			return nil, nil
 		}
 
@@ -324,19 +327,6 @@ func (m *MacroMap) transcribe(t Value,
 
 		if cdr, ok := (*tp.Cdr).(*Pair); ok && cdr != Empty {
 			if s, ok := (*cdr.Car).(Symbol); ok && s == Ellipsis {
-				//key, ok := (*tp.Car).(Symbol)
-				//if !ok {
-				//	return nil, fmt.Errorf(
-				//		"Currently can only repeat pattern variables, got %T",
-				//		*tp.Car)
-				//}
-
-				//vl, ok := (*m)[key]
-				//if !ok {
-				//	return nil, fmt.Errorf("Could not find binding %s",
-				//		SymbolNames[key])
-				//}
-
 				vl := []Value{}
 				res, err := m.transcribe(*tp.Car, true, name)
 				if err != nil {
