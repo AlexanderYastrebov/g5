@@ -30,15 +30,17 @@ func Run(code string) {
 		v, err := p.GetValue()
 		p.skipWs()
 		if err != nil {
-			log.Fatalf("Erorr (parse): %s\n", err)
+			log.Fatalf("Error (parse): %v\n", err)
 		}
 
 		Top.ins = []Ins{}
 		if err := Top.Gen(v); err != nil {
-			log.Fatalf("Error (gen): %s\n", err)
+			log.Fatalf("Error (gen): %v\n", err)
 		}
 
-		Top.Eval()
+		if err := Top.Eval(); err != nil {
+			log.Fatalf("Error (eval): %v\n", err)
+		}
 	}
 }
 

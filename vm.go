@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 )
 
 type Op uint8
@@ -45,7 +44,7 @@ func (scope *Scope) Lookup(v Value) *Scope {
 	return scope
 }
 
-func (p *Procedure) Eval() {
+func (p *Procedure) Eval() error {
 begin:
 	for i, ins := range p.ins {
 		switch ins.op {
@@ -62,7 +61,7 @@ begin:
 				cur = cur.super
 			}
 			if cur == nil {
-				log.Fatalf("Could not find variable: %s",
+				return fmt.Errorf("Could not find variable: %s",
 					SymbolNames[ins.imm.(Symbol)])
 			}
 		case Call:
@@ -72,7 +71,10 @@ begin:
 				*newp = *newp_template
 
 				if newp.builtin != nil {
-					newp.builtin(ins.nargs)
+					res := newp.builtin(ins.nargs)
+					if res != nil {
+						return res
+					}
 				} else {
 					newp.scope = &Scope{super: newp.scope.super}
 					newp.scope.m = map[Symbol]Value{}
@@ -120,13 +122,16 @@ begin:
 					}
 
 					stack_pos := len(stack)
-					newp.Eval()
+					res := newp.Eval()
 					// Clear temps from stack
 					top := stack.Top()
 					stack = append(stack[:stack_pos], top)
+					if res != nil {
+						return res
+					}
 				}
 			} else {
-				log.Fatalf("Call to non-procedure (%T)", callee)
+				return fmt.Errorf("Call to non-procedure (%T)", callee)
 			}
 		case Lambda: // Procedure -> *Procedure
 			lambda := ins.imm.(Procedure)
@@ -152,21 +157,26 @@ begin:
 				lf = stack.Pop().(Procedure)
 			}
 
+			var res error
 			if !isbool || bool(cond) {
 				lt.scope = p.scope
-				lt.Eval()
+				res = lt.Eval()
 			}
 
 			if ins.nargs == 3 {
 				lf.scope = p.scope
 				if isbool && !bool(cond) {
-					lf.Eval()
+					res = lf.Eval()
 				}
+			}
+			if res != nil {
+				return res
 			}
 		case SaveScope:
 			stack.Push(p.scope)
 		}
 	}
+	return nil
 }
 
 func (ins Ins) Print() {

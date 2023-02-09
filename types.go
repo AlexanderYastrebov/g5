@@ -41,7 +41,7 @@ type Procedure struct {
 	scope   *Scope
 	args    Value
 	ins     []Ins
-	builtin func(int)
+	builtin func(int) error
 	macros  map[Symbol]SyntaxRules
 }
 
@@ -81,7 +81,7 @@ type Scoped struct {
 
 func (Scoped) isValue() {}
 
-func WriteValue(v Value, display bool, port *Port) {
+func WriteValue(v Value, display bool, port *Port) error {
 	var writer io.Writer = port
 	if port == nil {
 		writer = os.Stdout
@@ -166,10 +166,11 @@ func WriteValue(v Value, display bool, port *Port) {
 	default:
 		fmt.Fprintf(writer, "[??? (%T)]", v)
 	}
+	return nil
 }
 
-func PrintValue(v Value) {
-	WriteValue(v, true, nil)
+func PrintValue(v Value) error {
+	return WriteValue(v, true, nil)
 }
 
 func Str2Sym(str string) Symbol {

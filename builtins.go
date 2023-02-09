@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"errors"
 )
 
 var SymbolNames = []string{
@@ -68,11 +68,12 @@ const (
 	SymCharEq
 )
 
-func FnDisplay(nargs int) {
+func FnDisplay(nargs int) error {
 	if nargs != 1 {
-		log.Fatalln("Wrong arg count to display (ports not yet implemented)")
+		return errors.New(
+			"Wrong arg count to display (ports not yet implemented)")
 	}
-	WriteValue(stack.Top(), true, nil)
+	return WriteValue(stack.Top(), true, nil)
 }
 
 var TopScope = &Scope{

@@ -1,37 +1,41 @@
 package main
 
 import (
-	"log"
+	"errors"
 )
 
-func FnCar(nargs int) {
+func FnCar(nargs int) error {
 	if nargs != 1 {
-		log.Fatalln("Wrong arg count to car")
+		return errors.New("Wrong arg count to car")
 	}
 	p := stack.Pop().(*Pair)
 	stack.Push(*p.Car)
+	return nil
 }
 
-func FnCdr(nargs int) {
+func FnCdr(nargs int) error {
 	if nargs != 1 {
-		log.Fatalln("Wrong arg count to cdr")
+		return errors.New("Wrong arg count to cdr")
 	}
 	p := stack.Pop().(*Pair)
 	stack.Push(*p.Cdr)
+	return nil
 }
 
-func FnSetCar(nargs int) {
+func FnSetCar(nargs int) error {
 	if nargs != 2 {
-		log.Fatalln("Wrong arg count to set-car!")
+		return errors.New("Wrong arg count to set-car!")
 	}
 	p := stack.Pop().(*Pair)
 	*p.Car = stack.Pop()
+	return nil
 }
 
-func FnSetCdr(nargs int) {
+func FnSetCdr(nargs int) error {
 	if nargs != 2 {
-		log.Fatalln("Wrong arg count to set-cdr!")
+		return errors.New("Wrong arg count to set-cdr!")
 	}
 	p := stack.Pop().(*Pair)
 	*p.Cdr = stack.Pop()
+	return nil
 }

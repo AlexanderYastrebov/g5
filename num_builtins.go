@@ -1,13 +1,14 @@
 package main
 
 import (
-	"log"
 	"math/big"
+	"errors"
+	"fmt"
 )
 
-func FnAdd(nargs int) {
+func FnAdd(nargs int) error {
 	if nargs == 0 {
-		log.Fatalln("Too few args: +")
+		return errors.New("Too few args: +")
 	}
 
 	total := big.Rat{}
@@ -19,7 +20,7 @@ func FnAdd(nargs int) {
 		n_int, n_isint := n.(Integer)
 
 		if !n_israt && !n_isint {
-			log.Fatalln("Type mismatch: +")
+			return fmt.Errorf("Non-numeric argument to + (%T)", n)
 		}
 
 		x := big.Rat{}
@@ -34,12 +35,13 @@ func FnAdd(nargs int) {
 
 	if total.IsInt() {
 		stack.Push(Integer(*total.Num()))
-		return
+		return nil
 	}
 	stack.Push(Rational(total))
+	return nil
 }
 
-func FnSub(nargs int) {
+func FnSub(nargs int) error {
 	total := big.Rat{}
 	n := stack.Pop()
 	nargs--
@@ -48,7 +50,7 @@ func FnSub(nargs int) {
 	} else {
 		n_i, ok := n.(Integer)
 		if !ok {
-			log.Fatalln("Type mismatch: -")
+			return fmt.Errorf("Non-numeric argument to - (%T)", n)
 		}
 		n_bi := big.Int(n_i)
 		total.SetInt(&n_bi)
@@ -70,7 +72,7 @@ func FnSub(nargs int) {
 		n_int, n_isint := n.(Integer)
 
 		if !n_israt && !n_isint {
-			log.Fatalln("Type mismatch: -")
+			return fmt.Errorf("Non-numeric argument to - (%T)", n)
 		}
 
 		x := big.Rat{}
@@ -85,14 +87,15 @@ func FnSub(nargs int) {
 
 	if total.IsInt() {
 		stack.Push(Integer(*total.Num()))
-		return
+		return nil
 	}
 	stack.Push(Rational(total))
+	return nil
 }
 
-func FnMul(nargs int) {
+func FnMul(nargs int) error {
 	if nargs == 0 {
-		log.Fatalln("Too few args: *")
+		return errors.New("Too few args: *")
 	}
 
 	total := big.Rat{}
@@ -103,7 +106,7 @@ func FnMul(nargs int) {
 	} else {
 		n_i, ok := n.(Integer)
 		if !ok {
-			log.Fatalln("Type mismatch: *")
+			return fmt.Errorf("Non-numeric argument to * (%T)", n)
 		}
 		n_bi := big.Int(n_i)
 		total.SetInt(&n_bi)
@@ -125,7 +128,7 @@ func FnMul(nargs int) {
 		n_int, n_isint := n.(Integer)
 
 		if !n_israt && !n_isint {
-			log.Fatalln("Type mismatch: *")
+			return fmt.Errorf("Non-numeric argument to * (%T)", n)
 		}
 
 		x := big.Rat{}
@@ -140,14 +143,15 @@ func FnMul(nargs int) {
 
 	if total.IsInt() {
 		stack.Push(Integer(*total.Num()))
-		return
+		return nil
 	}
 	stack.Push(Rational(total))
+	return nil
 }
 
-func FnDiv(nargs int) {
+func FnDiv(nargs int) error {
 	if nargs == 0 {
-		log.Fatalln("Too few args: /")
+		return errors.New("Too few args: /")
 	}
 
 	total := big.Rat{}
@@ -158,7 +162,7 @@ func FnDiv(nargs int) {
 	} else {
 		n_i, ok := n.(Integer)
 		if !ok {
-			log.Fatalln("Type mismatch: /")
+			return fmt.Errorf("Non-numeric argument to / (%T)", n)
 		}
 		n_bi := big.Int(n_i)
 		total.SetInt(&n_bi)
@@ -180,7 +184,7 @@ func FnDiv(nargs int) {
 		n_int, n_isint := n.(Integer)
 
 		if !n_israt && !n_isint {
-			log.Fatalln("Type mismatch: +")
+			return fmt.Errorf("Non-numeric argument to / (%T)", n)
 		}
 
 		x := big.Rat{}
@@ -195,15 +199,16 @@ func FnDiv(nargs int) {
 
 	if total.IsInt() {
 		stack.Push(Integer(*total.Num()))
-		return
+		return nil
 	}
 	stack.Push(Rational(total))
+	return nil
 }
 
-func FnGt(nargs int) {
+func FnGt(nargs int) error {
 	if nargs == 0 {
 		stack.Push(Boolean(true))
-		return
+		return nil
 	}
 
 	last := big.Rat{}
@@ -214,7 +219,7 @@ func FnGt(nargs int) {
 	} else {
 		n_i, ok := n.(Integer)
 		if !ok {
-			log.Fatalln("Type mismatch: /")
+			return fmt.Errorf("Non-numeric argument to > (%T)", n)
 		}
 		n_bi := big.Int(n_i)
 		last.SetInt(&n_bi)
@@ -227,7 +232,7 @@ func FnGt(nargs int) {
 		n_int, n_isint := n.(Integer)
 
 		if !n_israt && !n_isint {
-			log.Fatalln("Type mismatch: +")
+			return fmt.Errorf("Non-numeric argument to > (%T)", n)
 		}
 
 		x := big.Rat{}
@@ -240,18 +245,19 @@ func FnGt(nargs int) {
 
 		if last.Cmp(&x) != 1 {
 			stack.Push(Boolean(false))
-			return
+			return nil
 		}
 		last = x
 	}
 
 	stack.Push(Boolean(true))
+	return nil
 }
 
-func FnLt(nargs int) {
+func FnLt(nargs int) error {
 	if nargs == 0 {
 		stack.Push(Boolean(true))
-		return
+		return nil
 	}
 
 	last := big.Rat{}
@@ -262,7 +268,7 @@ func FnLt(nargs int) {
 	} else {
 		n_i, ok := n.(Integer)
 		if !ok {
-			log.Fatalln("Type mismatch: /")
+			return fmt.Errorf("Non-numeric argument to < (%T)", n)
 		}
 		n_bi := big.Int(n_i)
 		last.SetInt(&n_bi)
@@ -275,7 +281,7 @@ func FnLt(nargs int) {
 		n_int, n_isint := n.(Integer)
 
 		if !n_israt && !n_isint {
-			log.Fatalln("Type mismatch: +")
+			return fmt.Errorf("Non-numeric argument to < (%T)", n)
 		}
 
 		x := big.Rat{}
@@ -288,17 +294,18 @@ func FnLt(nargs int) {
 
 		if last.Cmp(&x) != -1 {
 			stack.Push(Boolean(false))
-			return
+			return nil
 		}
 		last = x
 	}
 
 	stack.Push(Boolean(true))
+	return nil
 }
 
-func FnNumEq(nargs int) {
+func FnNumEq(nargs int) error {
 	if nargs == 0 {
-		log.Fatalln("Too few args: =")
+		return errors.New("Too few args: =")
 	}
 
 	first_val := stack.Pop()
@@ -312,7 +319,7 @@ func FnNumEq(nargs int) {
 		first_int := big.Int(first_val.(Integer))
 		first.SetInt(&first_int)
 	default:
-		log.Fatalf("Non-numeric argument to = (%T)\n", first_val)
+		return fmt.Errorf("Non-numeric argument to = (%T)\n", first_val)
 	}
 
 	for nargs > 0 {
@@ -327,14 +334,15 @@ func FnNumEq(nargs int) {
 			n_int := big.Int(n_val.(Integer))
 			n.SetInt(&n_int)
 		default:
-			log.Fatalf("Non-numeric argument to = (%T)\n", n_val)
+			return fmt.Errorf("Non-numeric argument to = (%T)\n", n_val)
 		}
 
 		if first.Cmp(&n) != 0 {
 			stack.Push(Boolean(false))
-			return
+			return nil
 		}
 	}
 
 	stack.Push(Boolean(true))
+	return nil
 }

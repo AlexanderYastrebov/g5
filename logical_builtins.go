@@ -1,13 +1,13 @@
 package main
 
 import (
-	"log"
+	"errors"
 	"reflect"
 )
 
-func FnNot(nargs int) {
+func FnNot(nargs int) error {
 	if nargs != 1 {
-		log.Fatalln("Wrong arg count to not")
+		errors.New("Wrong arg count to not")
 	}
 
 	switch val := stack.Pop(); val.(type) {
@@ -16,16 +16,17 @@ func FnNot(nargs int) {
 	default:
 		stack.Push(Boolean(false))
 	}
+	return nil
 }
 
-func FnEqv(nargs int) {
+func FnEqv(nargs int) error {
 	obj1, obj2 := stack.Pop(), stack.Pop()
 
 	// The eqv? procedure returns #f if:
 	// - obj1 and obj2 are of different types
 	if reflect.TypeOf(obj1) != reflect.TypeOf(obj2) {
 		stack.Push(Boolean(false))
-		return
+		return nil
 	}
 
 	// The eqv? procedure returns #t if:
@@ -33,7 +34,7 @@ func FnEqv(nargs int) {
 	case Boolean:
 		// obj1 and obj2 are both #t or both #f.
 		stack.Push(Boolean(obj1.(Boolean) == obj2.(Boolean)))
-		return
+		return nil
 	case Symbol:
 		// obj1 and obj2 are both symbols and
 		//
@@ -42,7 +43,7 @@ func FnEqv(nargs int) {
 		//             ===>  #t
 		stack.Push(
 			Boolean(SymbolNames[obj1.(Symbol)] == SymbolNames[obj2.(Symbol)]))
-		return
+		return nil
 	case Integer, Rational:
 		// obj1 and obj2 are both numbers, are numerically equal,
 		// and are either both exact or both inexact.
@@ -50,33 +51,35 @@ func FnEqv(nargs int) {
 		stack.Push(obj1)
 		stack.Push(obj2)
 		FnNumEq(2)
-		return
+		return nil
 	case Character:
 		// obj1 and obj2 are both characters and are the same character
 		// according to the char=? procedure
 		stack.Push(obj1)
 		stack.Push(obj2)
 		FnCharEq(2)
-		return
+		return nil
 	case *Pair:
 		// both obj1 and obj2 are the empty list.
 		if obj1 == Empty && obj2 == Empty {
 			stack.Push(Boolean(true))
-			return
+			return nil
 		}
 		// obj1 and obj2 are pairs, vectors, or strings that denote the same
 		// locations in the store
 		stack.Push(Boolean(obj1 == obj2))
-		return
+		return nil
 	case *Procedure:
 		// obj1 and obj2 are procedures whose location tags are equal
 		stack.Push(Boolean(obj1 == obj2))
-		return
+		return nil
 	}
 	stack.Push(Boolean(false))
+	return nil
 }
 
-func FnEqual(nargs int) {
+func FnEqual(nargs int) error {
 	obj1, obj2 := stack.Pop(), stack.Pop()
 	stack.Push(Boolean(IsEqual(obj1, obj2)))
+	return nil
 }
