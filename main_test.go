@@ -8,18 +8,18 @@ import (
 
 func TestMain(m *testing.M) {
 	Top.scope = TopScope // Put builtins into top-level scope
-	Run(Runtime)
+	Run(Runtime, true)
 	os.Exit(m.Run())
 }
 
 func TestLambdas(t *testing.T) {
-	Run("(define add (lambda (x y) (+ x y)))")
+	Run("(define add (lambda (x y) (+ x y)))", true)
 	result := stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
 
-	Run("(add 2 3)")
+	Run("(add 2 3)", true)
 	result, ok := stack.Top().(Integer)
 	if !ok {
 		t.Errorf("Expected integer, got %T", result)
@@ -31,19 +31,19 @@ func TestLambdas(t *testing.T) {
 }
 
 func TestAdder(t *testing.T) {
-	Run("(define make-adder (lambda (x) (lambda (y) (+ x y))))")
+	Run("(define make-adder (lambda (x) (lambda (y) (+ x y))))", true)
 	result := stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
 
-	Run("(define add-2 (make-adder 2))")
+	Run("(define add-2 (make-adder 2))", true)
 	result = stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
 
-	Run("(add-2 3)")
+	Run("(add-2 3)", true)
 	result, ok := stack.Top().(Integer)
 	if !ok {
 		t.Errorf("Expected integer, got %T", result)
@@ -55,19 +55,19 @@ func TestAdder(t *testing.T) {
 }
 
 func TestCounter(t *testing.T) {
-	Run("(define (make-ctr) (set! count 0) (lambda (ctr) (+ count 1)))")
+	Run("(define (make-ctr) (set! count 0) (lambda (ctr) (+ count 1)))", true)
 	result := stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
 
-	Run("(define ctr (make-ctr))")
+	Run("(define ctr (make-ctr))", true)
 	result = stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
 
-	Run("(ctr)")
+	Run("(ctr)", true)
 	result, ok := stack.Top().(Integer)
 	if !ok {
 		t.Errorf("Expected integer, got %T", result)
@@ -79,7 +79,7 @@ func TestCounter(t *testing.T) {
 }
 
 func TestLet(t *testing.T) {
-	Run("(let ((a 0) (b 1)) b)")
+	Run("(let ((a 0) (b 1)) b)", true)
 	result, ok := stack.Top().(Integer)
 	if !ok {
 		t.Errorf("Expected integer, got %T", result)
