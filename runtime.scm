@@ -163,3 +163,11 @@
 
 
 (define (list . x) x)
+
+(define (length list . count)
+  (if (null? list)
+    (car count)
+    (length (cdr list)
+            (if (null? count)
+              1
+              (+ (car count) 1)))))

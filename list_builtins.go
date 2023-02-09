@@ -5,12 +5,34 @@ import (
 	"fmt"
 )
 
+func FnIsNull(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to null?")
+	}
+	stack.Push(Boolean(stack.Pop() == Empty))
+	return nil
+}
+
+func FnCons(nargs int) error {
+	if nargs != 2 {
+		return errors.New("Wrong arg count to cons")
+	}
+	obj1 := stack.Pop()
+	obj2 := stack.Pop()
+	stack.Push(&Pair{&obj1, &obj2})
+	return nil
+}
+
 func FnCar(nargs int) error {
 	if nargs != 1 {
 		return errors.New("Wrong arg count to car")
 	}
 	p := stack.Pop().(*Pair)
-	stack.Push(*p.Car)
+	if p == Empty {
+		stack.Push(Empty)
+	} else {
+		stack.Push(*p.Car)
+	}
 	return nil
 }
 
@@ -19,16 +41,29 @@ func FnCdr(nargs int) error {
 		return errors.New("Wrong arg count to cdr")
 	}
 	p := stack.Pop().(*Pair)
-	stack.Push(*p.Cdr)
+	if p == Empty {
+		stack.Push(Empty)
+	} else {
+		stack.Push(*p.Cdr)
+	}
 	return nil
 }
+
 
 func FnSetCar(nargs int) error {
 	if nargs != 2 {
 		return errors.New("Wrong arg count to set-car!")
 	}
-	p := stack.Pop().(*Pair)
-	*p.Car = stack.Pop()
+
+	pair := stack.Pop()
+	obj := stack.Pop()
+
+	if _, ok := pair.(*Pair); !ok {
+		return errors.New("set-car! requires a pair argument")
+	}
+
+	pair.(*Pair).Car = &obj
+	stack.Push(pair)
 	return nil
 }
 
@@ -36,8 +71,16 @@ func FnSetCdr(nargs int) error {
 	if nargs != 2 {
 		return errors.New("Wrong arg count to set-cdr!")
 	}
-	p := stack.Pop().(*Pair)
-	*p.Cdr = stack.Pop()
+
+	pair := stack.Pop()
+	obj := stack.Pop()
+
+	if _, ok := pair.(*Pair); !ok {
+		return errors.New("set-car! requires a pair argument")
+	}
+
+	pair.(*Pair).Cdr = &obj
+	stack.Push(pair)
 	return nil
 }
 

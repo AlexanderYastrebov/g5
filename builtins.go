@@ -31,6 +31,8 @@ var SymbolNames = []string{
 	"eq?",
 	"equal?",
 
+	"null?",
+	"cons",
 	"car",
 	"cdr",
 	"set-car!",
@@ -73,6 +75,8 @@ const (
 	SymEq
 	SymEqual
 
+	SymIsNull
+	SymCons
 	SymCar
 	SymCdr
 	SymSetCar
@@ -111,6 +115,8 @@ var TopScope = &Scope{
 		SymEq:    &Procedure{builtin: FnEqv},
 		SymEqual: &Procedure{builtin: FnEqual},
 
+		SymIsNull:  &Procedure{builtin: FnIsNull},
+		SymCons:    &Procedure{builtin: FnCons},
 		SymCar:     &Procedure{builtin: FnCar},
 		SymCdr:     &Procedure{builtin: FnCdr},
 		SymSetCar:  &Procedure{builtin: FnSetCar},
