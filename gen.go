@@ -51,8 +51,6 @@ func (p *Procedure) Gen(v Value) error {
 
 				p.Gen(args[0])
 				p.Gen(trans)
-				PrintValue(trans)
-				fmt.Println()
 				return nil
 			}
 

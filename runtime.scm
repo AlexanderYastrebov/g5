@@ -122,3 +122,31 @@
      (let ((name1 val1))
        (let* ((name2 val2) ...)
          body1 body2 ...)))))
+
+(define-syntax begin
+  (syntax-rules ()
+    ((begin exp ...)
+     ((lambda () exp ...)))))
+
+(define-syntax do
+  (syntax-rules ()
+    ((do ((var init step ...) ...)
+         (test expr ...)
+         command ...)
+     (letrec
+       ((loop
+         (lambda (var ...)
+           (if test
+               (begin
+                 (if #f #f)
+                 expr ...)
+               (begin
+                 command
+                 ...
+                 (loop (do "step" var step ...)
+                       ...))))))
+       (loop init ...)))
+    ((do "step" x)
+     x)
+    ((do "step" x y)
+     y)))
