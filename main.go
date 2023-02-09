@@ -49,7 +49,7 @@ func main() {
 	case 1:
 		reader := bufio.NewReader(os.Stdin)
 		for {
-			fmt.Print("> ")
+			fmt.Print("\n> ")
 
 			code, _ := reader.ReadString('\n')
 

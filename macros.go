@@ -110,6 +110,22 @@ func IsEqual(v1 Value, v2 Value) bool {
 	}
 }
 
+func dot2ellipsis(list *Pair) []Value {
+	vp := []Value{}
+	var cdr Value
+	cur := list
+	ok := true
+	for ok {
+		vp = append(vp, *cur.Car)
+		cdr = *cur.Cdr
+		cur, ok = cdr.(*Pair)
+	}
+
+	vp = append(vp, cdr)
+	vp = append(vp, Ellipsis)
+	return vp
+}
+
 // pattern, import form
 func IsMatch(p Value, f Value, literals []Symbol) bool {
 	if IsEqual(p, f) {
@@ -131,27 +147,18 @@ func IsMatch(p Value, f Value, literals []Symbol) bool {
 		}
 		return !isliteral || p.(Symbol) == f.(Symbol)
 	case *Pair:
-		fp, ok := f.(*Pair)
+
+		vp, err := list2vec(p.(*Pair))
+		if err != nil { // Dotted list
+			vp = dot2ellipsis(p.(*Pair))
+		}
+
+		pf, ok := f.(*Pair)
 		if !ok {
 			return false
 		}
 
-		vp, err := list2vec(p.(*Pair))
-		if err != nil { // Dotted list
-			var last Value
-			cur := p.(*Pair)
-			ok := true
-			for ok {
-				vp = append(vp, *cur.Car)
-				last = (*cur.Cdr)
-				cur, ok = last.(*Pair)
-			}
-
-			vp = append(vp, last)
-			vp = append(vp, Ellipsis)
-		}
-
-		vf, err := list2vec(fp)
+		vf, err := list2vec(pf)
 		if err != nil {
 			return false
 		}
@@ -231,7 +238,7 @@ func (m *MacroMap) parse(p Value,
 	case *Pair:
 		vp, err := list2vec(p.(*Pair))
 		if err != nil {
-			return errors.New("Macro: Non-list")
+			vp = dot2ellipsis(p.(*Pair))
 		}
 
 		var vf []Value
