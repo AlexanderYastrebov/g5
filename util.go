@@ -40,5 +40,3 @@ func list2vec(list *Pair) ([]Value, error) {
 	}
 	return res, nil
 }
-
-

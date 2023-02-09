@@ -203,7 +203,7 @@ func IsMatch(p Value, f Value, literals []Symbol) bool {
 type MacroList struct {
 	v        []Value
 	isSingle bool
-	orig []Value
+	orig     []Value
 }
 type MacroMap map[Symbol]*MacroList
 

@@ -116,7 +116,7 @@ begin:
 						}
 					}
 
-					if i == len(p.ins) - 1 { // Tail call
+					if i == len(p.ins)-1 { // Tail call
 						p = newp
 						goto begin
 					}

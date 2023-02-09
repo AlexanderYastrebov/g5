@@ -76,7 +76,7 @@ func (Port) isValue() {}
 
 type Scoped struct {
 	Symbol Symbol
-	Scope Symbol
+	Scope  Symbol
 }
 
 func (Scoped) isValue() {}
@@ -153,13 +153,13 @@ func WriteValue(v Value, display bool, port *Port) error {
 
 	case *Procedure:
 		fmt.Fprint(writer, "[procedure]")
-	
+
 	case Procedure:
 		fmt.Fprint(writer, "[imm_procedure]")
 
 	case *Scope:
 		fmt.Fprint(writer, "[scope]")
-	
+
 	case Scoped:
 		WriteValue(v.(Scoped).Symbol, display, port)
 

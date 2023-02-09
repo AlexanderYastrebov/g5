@@ -127,8 +127,8 @@ func (p *Procedure) Gen(v Value) error {
 				return nil
 			case "if":
 				lt := Procedure{
-					args: p.args,
-					ins: []Ins{},
+					args:   p.args,
+					ins:    []Ins{},
 					macros: p.macros,
 				}
 				lf := lt
