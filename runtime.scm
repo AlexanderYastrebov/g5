@@ -160,3 +160,6 @@
   (syntax-rules ()
     ((delay expression)
      (make-promise (lambda () expression)))))
+
+
+(define (list . x) x)

@@ -35,7 +35,6 @@ var SymbolNames = []string{
 	"cdr",
 	"set-car!",
 	"set-cdr!",
-	"list",
 	"append",
 
 	"display",
@@ -78,7 +77,6 @@ const (
 	SymCdr
 	SymSetCar
 	SymSetCdr
-	SymList
 	SymAppend
 
 	SymDisplay
@@ -117,7 +115,6 @@ var TopScope = &Scope{
 		SymCdr:     &Procedure{builtin: FnCdr},
 		SymSetCar:  &Procedure{builtin: FnSetCar},
 		SymSetCdr:  &Procedure{builtin: FnSetCdr},
-		SymList:    &Procedure{builtin: FnList},
 		SymAppend:  &Procedure{builtin: FnAppend},
 
 		SymDisplay: &Procedure{builtin: FnDisplay},

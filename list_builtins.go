@@ -41,19 +41,6 @@ func FnSetCdr(nargs int) error {
 	return nil
 }
 
-func FnList(nargs int) error {
-	if nargs == 0 {
-		stack.Push(Empty)
-	}
-
-	vals := []Value{}
-	for i := 0; i < nargs; i++ {
-		vals = append(vals, stack.Pop())
-	}
-	stack.Push(vec2list(vals))
-	return nil
-}
-
 func FnAppend(nargs int) error {
 	if nargs == 0 {
 		return errors.New("Wrong arg count to append")
