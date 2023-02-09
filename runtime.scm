@@ -124,12 +124,12 @@
     ((do "step" x y)
      y)))
 
-(define (map x f)
+(define (map f x)
     (if (not (eqv? x '()))
       (begin
         (f (car x))
-        (map (cdr x) f))))
+        (map f (cdr x)))))
 
 (define (print . x)
-  (map x (lambda (x) (display x) (display #\space)))
+  (map (lambda (x) (display x) (display #\space)) x)
   (newline))

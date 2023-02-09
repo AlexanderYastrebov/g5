@@ -87,7 +87,7 @@ func TestTranscribe(t *testing.T) {
 	m := MacroMap{}
 
 	m.parse(pval, fval, []Symbol{}, true)
-	res, err := m.transcribe(tval, false)
+	res, err := m.transcribe(tval, false, Str2Sym("macro"))
 	if err != nil {
 		t.Error(err)
 	}

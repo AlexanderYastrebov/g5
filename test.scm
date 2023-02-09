@@ -1,29 +1,14 @@
-(set! a 1)
-(set! scope '())
-(define (myfn a)
-    (set! scope (save-scope)))
+(define (print x)
+  (display x)
+  (newline))
 
-(myfn 2)
+(define (fib x)
+  (cond
+    ((= x 0) 0)
+    ((= x 1) 1)
+    (else (+ (fib (- x 1)) (fib (- x 2))))))
 
-(with-scope scope
-            (display a))
-
-
-(define-syntax print
-  (syntax-rules ()
-    ((_ x)
-     ((lambda ()
-       (display x)
-       (newline))))))
-
-(newline)
-(display "test")
-(newline)
-(print "test of macros")
-
-
-;(define-syntax let
-;  (syntax-rules ()
-;    ((let ((name val) ...) body1 body2 ...)
-;     ((lambda (name ...) body1 body2 ...)
-;      val ...))))
+(print (fib 20))
+(print (fib 20))
+(print (fib 20))
+(print (fib 20))
