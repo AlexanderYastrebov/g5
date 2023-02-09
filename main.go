@@ -29,6 +29,7 @@ func validate(code string) bool {
 }
 
 func Run(code string, quiet bool) {
+	//stack = []Value{}
 	p := NewParser(code)
 	p.skipWs()
 
@@ -49,19 +50,27 @@ func Run(code string, quiet bool) {
 		}
 
 		if !quiet {
-			PrintValue(stack.Top())
+			if len(stack) > 0 {
+				PrintValue(stack.Top())
+			}
+			fmt.Println()
 		}
 	}
 }
 
 func main() {
 	Top.scope = TopScope // Put builtins into top-level scope
+
+	if int(Last) != len(SymbolNames) {
+		log.Fatalln("Symbol table length mismatch")
+	}
+
 	Run(Runtime, true)
 	switch len(os.Args) {
 	case 1:
 		reader := bufio.NewReader(os.Stdin)
 		for {
-			fmt.Print("\n> ")
+			fmt.Print("> ")
 
 			code, _ := reader.ReadString('\n')
 

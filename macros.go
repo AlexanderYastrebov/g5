@@ -136,6 +136,10 @@ func IsMatch(p Value, f Value, literals []Symbol) bool {
 		return false
 	}
 
+	if _, ok := p.(Scoped); ok {
+		p = p.(Scoped).Symbol
+	}
+
 	switch p.(type) {
 	case Symbol:
 		isliteral := false

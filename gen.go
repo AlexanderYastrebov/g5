@@ -9,7 +9,7 @@ func (p *Procedure) Gen(v Value) error {
 	switch v.(type) {
 	case Boolean, String, Character, Vector, Integer, Rational:
 		p.ins = append(p.ins, Ins{Imm, v, 0})
-	case Symbol:
+	case Symbol, Scoped:
 		p.ins = append(p.ins, Ins{GetVar, v, 0})
 	case *Pair:
 		var args []Value
@@ -64,8 +64,8 @@ func (p *Procedure) Gen(v Value) error {
 				return nil
 			}
 
-			switch SymbolNames[sym] {
-			case "set!":
+			switch sym {
+			case SymSet:
 				if len(args) != 3 {
 					return errors.New("set! takes 2 args")
 				}
@@ -75,7 +75,7 @@ func (p *Procedure) Gen(v Value) error {
 				p.Gen(args[2])
 				p.ins = append(p.ins, Ins{Set, args[1], 1})
 				return nil
-			case "define":
+			case SymDefine:
 				switch args[1].(type) {
 				case *Pair:
 					if len(args) < 2 {
@@ -109,7 +109,7 @@ func (p *Procedure) Gen(v Value) error {
 						": %T", args[1])
 				}
 				return nil
-			case "lambda":
+			case SymLambda:
 				if len(args) < 3 {
 					return errors.New("lambda requires at least one statement")
 				}
@@ -125,7 +125,7 @@ func (p *Procedure) Gen(v Value) error {
 				}
 				p.ins = append(p.ins, Ins{Lambda, lambda, 0})
 				return nil
-			case "if":
+			case SymIf:
 				lt := Procedure{
 					args:   p.args,
 					ins:    []Ins{},
@@ -144,7 +144,7 @@ func (p *Procedure) Gen(v Value) error {
 				p.Gen(args[1])
 				p.ins = append(p.ins, Ins{If, nil, len(args) - 1})
 				return nil
-			case "quote":
+			case Quote:
 				if len(args) != 2 {
 					return errors.New("Wrong number of args to quote")
 				}
@@ -152,13 +152,13 @@ func (p *Procedure) Gen(v Value) error {
 				return nil
 
 			// These are for the implementation of (hygenic) macros
-			case "save-scope":
+			case SymSaveScope:
 				if len(args) != 1 {
 					return errors.New("INTERNAL: save-scope takes no args")
 				}
 				p.ins = append(p.ins, Ins{SaveScope, nil, 0})
 				return nil
-			case "define-syntax":
+			case SymDefineSyntax:
 				if len(args) != 3 {
 					return errors.New("Wrong number of args to define-syntax")
 				}

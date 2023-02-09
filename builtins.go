@@ -10,6 +10,12 @@ var SymbolNames = []string{
 	"quasiquote",
 	"unquote-splicing",
 	"...",
+
+	"set!",
+	"define",
+	"lambda",
+	"if",
+	"define-syntax",
 	"save-scope",
 
 	"+",
@@ -29,6 +35,9 @@ var SymbolNames = []string{
 	"cdr",
 	"set-car!",
 	"set-cdr!",
+	"list",
+	"append",
+
 	"display",
 
 	"string=?",
@@ -37,13 +46,21 @@ var SymbolNames = []string{
 }
 
 const (
+	// Primitives
 	Quote = Symbol(iota)
 	Unquote
 	Quasiquote
 	UnquoteSplicing
 	Ellipsis
+
+	SymSet
+	SymDefine
+	SymLambda
+	SymIf
+	SymDefineSyntax
 	SymSaveScope
 
+	// Builtin procedures
 	SymAdd
 	SymSub
 	SymMul
@@ -61,11 +78,16 @@ const (
 	SymCdr
 	SymSetCar
 	SymSetCdr
+	SymList
+	SymAppend
+
 	SymDisplay
 
 	SymStringEq
 	SymSymbol2String
 	SymCharEq
+
+	Last
 )
 
 func FnDisplay(nargs int) error {
@@ -95,6 +117,9 @@ var TopScope = &Scope{
 		SymCdr:     &Procedure{builtin: FnCdr},
 		SymSetCar:  &Procedure{builtin: FnSetCar},
 		SymSetCdr:  &Procedure{builtin: FnSetCdr},
+		SymList:    &Procedure{builtin: FnList},
+		SymAppend:  &Procedure{builtin: FnAppend},
+
 		SymDisplay: &Procedure{builtin: FnDisplay},
 
 		SymStringEq:      &Procedure{builtin: FnStringEq},

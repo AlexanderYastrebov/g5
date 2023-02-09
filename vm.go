@@ -51,19 +51,23 @@ begin:
 		case Imm:
 			stack.Push(ins.imm)
 		case GetVar:
-			cur := p.scope
-			for cur != nil {
-				v, ok := cur.m[ins.imm.(Symbol)]
-				if ok {
-					stack.Push(v)
-					break
-				}
-				cur = cur.super
+			var scope *Scope
+			switch ins.imm.(type) {
+			case Symbol, Scoped:
+				scope = p.scope.Lookup(ins.imm)
+			default:
+				return fmt.Errorf("Tried to look up non-variable")
 			}
-			if cur == nil {
+			if scope == nil {
 				return fmt.Errorf("Could not find variable: %s",
 					SymbolNames[ins.imm.(Symbol)])
 			}
+
+			sym, ok := ins.imm.(Symbol)
+			if !ok {
+				sym = ins.imm.(Scoped).Symbol
+			}
+			stack.Push(scope.m[sym])
 		case Call:
 			callee := stack.Pop()
 			if newp_template, ok := callee.(*Procedure); ok {
@@ -79,11 +83,11 @@ begin:
 					newp.scope = &Scope{super: newp.scope.super}
 					newp.scope.m = map[Symbol]Value{}
 
-					_, ispair := newp.args.(*Pair)
 					var cur Value
 					cur = newp.args
 
 					n := ins.nargs
+					_, ispair := newp.args.(*Pair)
 					for n > 0 && ispair {
 						newp.scope.m[(*cur.(*Pair).Car).(Symbol)] = stack.Pop()
 						n--
@@ -138,6 +142,7 @@ begin:
 			lambda.scope = &Scope{}
 			lambda.scope.m = map[Symbol]Value{}
 			lambda.scope.super = p.scope
+
 			stack.Push(Value(&lambda))
 		case Set, Define:
 			sym := ins.imm.(Symbol)
@@ -145,7 +150,7 @@ begin:
 			if scope == nil {
 				scope = p.scope
 			} else if ins.op == Define {
-				fmt.Println("WARNING: Redefining variable")
+				fmt.Printf("WARNING: Redefining variable %s", SymbolNames[sym])
 			}
 			scope.m[sym] = stack.Top()
 		case If:
@@ -205,7 +210,9 @@ func (ins Ins) Print() {
 		PrintValue(ins.imm)
 		fmt.Println("]")
 	case Lambda:
-		fmt.Println("LAMBDA")
+		fmt.Print("LAMBDA ")
+		PrintValue(ins.imm.(Procedure).args)
+		fmt.Println()
 	case If:
 		fmt.Println("IF")
 	case SaveScope:

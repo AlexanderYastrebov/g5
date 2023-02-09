@@ -101,28 +101,29 @@
     ((begin exp ...)
      ((lambda () exp ...)))))
 
-(define-syntax do
-  (syntax-rules ()
-    ((do ((var init step ...) ...)
-         (test expr ...)
-         command ...)
-     (letrec
-       ((loop
-         (lambda (var ...)
-           (if test
-               (begin
-                 (if #f #f)
-                 expr ...)
-               (begin
-                 command
-                 ...
-                 (loop (do "step" var step ...)
-                       ...))))))
-       (loop init ...)))
-    ((do "step" x)
-     x)
-    ((do "step" x y)
-     y)))
+(define-syntax do
+  (syntax-rules ()
+    ((do ((var init step ...) ...)
+         (test expr ...)
+         command ...)
+     (letrec
+       ((loop
+         (lambda (var ...)
+           (if test
+               (begin
+                 (if #f #f)
+                 expr ...)
+               (begin
+                 command
+                 ...
+                 (loop (do "step" var step ...)
+                       ...))))))
+       (loop init ...)))
+    ((do "step" x)
+     x)
+    ((do "step" x y)
+     y)))
+
 
 (define (map f x)
     (if (not (eqv? x '()))
@@ -130,6 +131,32 @@
         (f (car x))
         (map f (cdr x)))))
 
+
 (define (print . x)
   (map (lambda (x) (display x) (display #\space)) x)
   (newline))
+
+
+(define (force object)
+  (object))
+
+
+(define make-promise
+  (lambda (proc)
+    (let ((result-ready? #f)
+          (result #f))
+      (lambda ()
+        (if result-ready?
+            result
+            (let ((x (proc)))
+              (if result-ready?
+                  result
+                  (begin (set! result-ready? #t)
+                         (set! result x)
+                         result))))))))
+
+
+(define-syntax delay
+  (syntax-rules ()
+    ((delay expression)
+     (make-promise (lambda () expression)))))

@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 )
 
 func FnCar(nargs int) error {
@@ -37,5 +38,42 @@ func FnSetCdr(nargs int) error {
 	}
 	p := stack.Pop().(*Pair)
 	*p.Cdr = stack.Pop()
+	return nil
+}
+
+func FnList(nargs int) error {
+	if nargs == 0 {
+		stack.Push(Empty)
+	}
+
+	vals := []Value{}
+	for i := 0; i < nargs; i++ {
+		vals = append(vals, stack.Pop())
+	}
+	stack.Push(vec2list(vals))
+	return nil
+}
+
+func FnAppend(nargs int) error {
+	if nargs == 0 {
+		return errors.New("Wrong arg count to append")
+	}
+
+	list := stack.Pop()
+
+	p, ok := list.(*Pair)
+	if !ok {
+		return fmt.Errorf("Expected pair argument to append (got %T)", list)
+	}
+
+	vec, err := list2vec(p)
+	if err != nil {
+		return errors.New("Expected list argument to append")
+	}
+
+	for i := 1; i < nargs; i++ {
+		vec = append(vec, stack.Pop())
+	}
+	stack.Push(vec2list(vec))
 	return nil
 }
