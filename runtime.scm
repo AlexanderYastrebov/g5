@@ -66,41 +66,14 @@
        (if x x (or test2 ...))))))
   
   
- (define-syntax letrec 
-   (syntax-rules () 
-     ((_ ((var init) ...) . body)
-      (let () 
-        (define var init) ... 
-        (let () . body))))) 
-; (define-syntax letrec
-;  (syntax-rules ()
-;    ((letrec ((var1 init1) ...) body ...)
-;     (letrec "generate_temp_names"
-;       (var1 ...)
-;       ()
-;       ((var1 init1) ...)
-;       body ...))
-;    ((letrec "generate_temp_names"
-;       ()
-;       (temp1 ...)
-;       ((var1 init1) ...)
-;       body ...)
-;     (let ((var1 <undefined>) ...)
-;       (let ((temp1 init1) ...)
-;         (set! var1 temp1)
-;         ...
-;         body ...)))
-;    ((letrec "generate_temp_names"
-;       (x y ...)
-;       (temp ...)
-;       ((var1 init1) ...)
-;       body ...)
-;     (letrec "generate_temp_names"
-;       (y ...)
-;       (newtemp temp ...)
-;       ((var1 init1) ...)
-;       body ...))))
+(define-syntax letrec 
+  (syntax-rules () 
+    ((_ ((var init) ...) body ...)
+     (let () 
+       (define var init) ... 
+       (let () body ...))))) 
  
+
  (define-syntax let
    (syntax-rules ()
      ((let ((name val) ...) body1 body2 ...)
