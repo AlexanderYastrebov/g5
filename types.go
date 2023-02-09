@@ -96,7 +96,7 @@ func WriteValue(v Value, display bool, port *Port) {
 	case Symbol:
 		fmt.Fprint(writer, SymbolNames[v.(Symbol)])
 	case String:
-		if !display {
+		if display {
 			fmt.Fprintf(writer, "\"%s\"", v.(String))
 		} else {
 			fmt.Fprint(writer, v.(String))
@@ -159,6 +159,9 @@ func WriteValue(v Value, display bool, port *Port) {
 
 	case *Scope:
 		fmt.Fprint(writer, "[scope]")
+	
+	case Scoped:
+		WriteValue(v.(Scoped).Symbol, display, port)
 
 	default:
 		fmt.Fprintf(writer, "[??? (%T)]", v)
@@ -166,7 +169,7 @@ func WriteValue(v Value, display bool, port *Port) {
 }
 
 func PrintValue(v Value) {
-	WriteValue(v, false, nil)
+	WriteValue(v, true, nil)
 }
 
 func Str2Sym(str string) Symbol {
