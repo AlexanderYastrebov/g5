@@ -7,7 +7,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	Top.scope = TopScope // Put builtins into top-level scope
+	Top.Scope = TopScope // Put builtins into top-level scope
 	Run(Runtime, true)
 	os.Exit(m.Run())
 }
@@ -87,5 +87,29 @@ func TestLet(t *testing.T) {
 
 	if result := big.Int(result); result.Cmp(big.NewInt(1)) != 0 {
 		t.Errorf("Expected integer, got %v", result.String())
+	}
+}
+
+func TestAnd(t *testing.T) {
+	Run("(and #t #t)", true)
+	result, ok := stack.Top().(Boolean)
+	if !ok {
+		t.Errorf("Expected boolean, got %T", result)
+	}
+
+	if result != true {
+		t.Errorf("Expected #t, got #f")
+	}
+}
+
+func TestOr(t *testing.T) {
+	Run("(or #t #f)", true)
+	result, ok := stack.Top().(Boolean)
+	if !ok {
+		t.Errorf("Expected boolean, got %T", result)
+	}
+
+	if result != true {
+		t.Errorf("Expected true, got false")
 	}
 }
