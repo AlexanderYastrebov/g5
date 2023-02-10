@@ -85,8 +85,8 @@ func FnSetCdr(nargs int) error {
 }
 
 func FnAppend(nargs int) error {
-	if nargs == 0 {
-		return errors.New("Wrong arg count to append")
+	if nargs != 2 {
+		return errors.New("Wrong arg count to append") // TODO: make varadic
 	}
 
 	v := stack.Pop()
