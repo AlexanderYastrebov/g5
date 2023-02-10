@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"errors"
 )
 
 type Op uint8
@@ -99,6 +98,7 @@ begin:
 						}
 					}
 
+					// Dot arg
 					if s, ok := cur.(Symbol); ok {
 						rest := new(Pair)
 						cur := rest
@@ -137,6 +137,9 @@ begin:
 					}
 				}
 			} else {
+				fmt.Println("CALL:")
+				PrintValue(callee)
+				fmt.Println()
 				return fmt.Errorf("Call to non-procedure (%T)", callee)
 			}
 		case Lambda: // Procedure -> *Procedure
@@ -145,30 +148,22 @@ begin:
 			lambda.Scope.m = map[Symbol]Value{}
 
 			scope := p.Scope
-			if lambda.Base != nil {
-				bscope := p.Scope.Lookup(*lambda.Base)
-				if bscope == nil {
-					return fmt.Errorf("? Could not find base (%s) in scope",
-						SymbolNames[*lambda.Base])
-				}
-				v, ok := bscope.m[*lambda.Base].(*Scope)
-				if !ok {
-					return errors.New("? Tried to use non-scope as base")
-				}
-				scope = v
-			}
 			lambda.Scope.super = scope
 
 			stack.Push(Value(&lambda))
-		case Set, Define:
+		case Set:
 			sym := ins.imm.(Symbol)
 			scope := p.Scope.Lookup(sym)
 			if scope == nil {
 				scope = p.Scope
-			} else if ins.op == Define {
-				fmt.Printf("WARNING: Redefining variable %s", SymbolNames[sym])
 			}
 			scope.m[sym] = stack.Top()
+		case Define:
+			sym := ins.imm.(Symbol)
+			if _, ok := p.Scope.m[sym]; ok {
+				fmt.Printf("WARNING: Redefining binding %s", SymbolNames[sym])
+			}
+			p.Scope.m[sym] = stack.Top()
 		case If:
 			cond, isbool := stack.Pop().(Boolean)
 			lt := stack.Pop().(Procedure)

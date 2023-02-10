@@ -87,13 +87,13 @@ func (p *Procedure) Gen(v Value) error {
 					dest := *def.Car
 
 					lambda := Procedure{
-						Args:   *def.Cdr,
+						Args:   Unscope(*def.Cdr),
 						Ins:    []Ins{},
 						Macros: p.Macros,
 					}
 
 					for _, arg := range args[2:] {
-						lambda.Gen(arg)
+						lambda.Gen(Unscope(arg))
 					}
 
 					p.Ins = append(p.Ins, Ins{Lambda, lambda, 0})
@@ -115,13 +115,9 @@ func (p *Procedure) Gen(v Value) error {
 				}
 
 				lambda := Procedure{
-					Args:   args[1],
+					Args:   Unscope(args[1]),
 					Ins:    []Ins{},
 					Macros: p.Macros,
-				}
-
-				if scoped, ok := args[0].(Scoped); ok {
-					lambda.Base = &scoped.Scope
 				}
 
 				for _, arg := range args[2:] {
@@ -194,7 +190,7 @@ func (p *Procedure) Gen(v Value) error {
 
 				p.Macros[macroName] = *sr
 				p.Ins = append(p.Ins, Ins{SaveScope, nil, 0})
-				p.Ins = append(p.Ins, Ins{Set, macroName, 1})
+				p.Ins = append(p.Ins, Ins{Define, macroName, 1})
 				return nil
 			}
 		}

@@ -1,14 +1,14 @@
-(define (print x)
-  (display x)
-  (newline))
+(define *tests-run* 0)
+(define *tests-passed* 0)
 
-(define (fib x)
-  (cond
-    ((= x 0) 0)
-    ((= x 1) 1)
-    (else (+ (fib (- x 1)) (fib (- x 2))))))
+(define-syntax test
+  (syntax-rules ()
+    ((test expect expr)
+     (begin
+       (set! *tests-run* (+ *tests-run* 1))
+       (print (if (equal? expect expr) "PASS" "FAIL")
+              *tests-run* "/"
+              (set! *tests-pased* (+ *tests-passed* 1)))))))
 
-(print (fib 20))
-(print (fib 20))
-(print (fib 20))
-(print (fib 20))
+(test 1 2)
+(test 2 2)
