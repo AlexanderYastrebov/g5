@@ -40,3 +40,19 @@ func list2vec(list *Pair) ([]Value, error) {
 	}
 	return res, nil
 }
+
+func Unscope(v Value) Value {
+	if v == Empty {
+		return v
+	}
+	switch v.(type) {
+	case Scoped:
+		return v.(Scoped).Symbol
+	case *Pair:
+		car := Unscope(*v.(*Pair).Car)
+		cdr := Unscope(*v.(*Pair).Cdr)
+		return &Pair{&car, &cdr}
+	default:
+		return v
+	}
+}

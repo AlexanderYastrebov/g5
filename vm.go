@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"errors"
 )
 
 type Op uint8
@@ -28,6 +29,7 @@ func (scope *Scope) Lookup(v Value) *Scope {
 	if !ok {
 		_, ok = v.(Scoped)
 		if !ok {
+			fmt.Printf("Found type: %T\n", v)
 			panic("Tried to lookup non-symbol")
 		}
 		sym = v.(Scoped).Symbol
@@ -46,7 +48,7 @@ func (scope *Scope) Lookup(v Value) *Scope {
 
 func (p *Procedure) Eval() error {
 begin:
-	for i, ins := range p.ins {
+	for i, ins := range p.Ins {
 		switch ins.op {
 		case Imm:
 			stack.Push(ins.imm)
@@ -54,7 +56,7 @@ begin:
 			var scope *Scope
 			switch ins.imm.(type) {
 			case Symbol, Scoped:
-				scope = p.scope.Lookup(ins.imm)
+				scope = p.Scope.Lookup(ins.imm)
 			default:
 				return fmt.Errorf("Tried to look up non-variable")
 			}
@@ -74,22 +76,22 @@ begin:
 				newp := new(Procedure)
 				*newp = *newp_template
 
-				if newp.builtin != nil {
-					res := newp.builtin(ins.nargs)
+				if newp.Builtin != nil {
+					res := newp.Builtin(ins.nargs)
 					if res != nil {
 						return res
 					}
 				} else {
-					newp.scope = &Scope{super: newp.scope.super}
-					newp.scope.m = map[Symbol]Value{}
+					newp.Scope = &Scope{super: newp.Scope.super}
+					newp.Scope.m = map[Symbol]Value{}
 
 					var cur Value
-					cur = newp.args
+					cur = newp.Args
 
 					n := ins.nargs
-					_, ispair := newp.args.(*Pair)
+					_, ispair := newp.Args.(*Pair)
 					for n > 0 && ispair {
-						newp.scope.m[(*cur.(*Pair).Car).(Symbol)] = stack.Pop()
+						newp.Scope.m[(*cur.(*Pair).Car).(Symbol)] = stack.Pop()
 						n--
 						cur = *cur.(*Pair).Cdr
 						if _, ok := cur.(*Pair); !ok {
@@ -101,7 +103,7 @@ begin:
 						rest := new(Pair)
 						cur := rest
 						if n == 0 {
-							newp.scope.m[s] = Empty
+							newp.Scope.m[s] = Empty
 						} else {
 							for n > 0 {
 								v := stack.Pop()
@@ -116,11 +118,11 @@ begin:
 								cur.Cdr = &next
 								cur = next.(*Pair)
 							}
-							newp.scope.m[s] = rest
+							newp.Scope.m[s] = rest
 						}
 					}
 
-					if i == len(p.ins)-1 { // Tail call
+					if i == len(p.Ins)-1 { // Tail call
 						p = newp
 						goto begin
 					}
@@ -139,16 +141,30 @@ begin:
 			}
 		case Lambda: // Procedure -> *Procedure
 			lambda := ins.imm.(Procedure)
-			lambda.scope = &Scope{}
-			lambda.scope.m = map[Symbol]Value{}
-			lambda.scope.super = p.scope
+			lambda.Scope = &Scope{}
+			lambda.Scope.m = map[Symbol]Value{}
+
+			scope := p.Scope
+			if lambda.Base != nil {
+				bscope := p.Scope.Lookup(*lambda.Base)
+				if bscope == nil {
+					return fmt.Errorf("? Could not find base (%s) in scope",
+						SymbolNames[*lambda.Base])
+				}
+				v, ok := bscope.m[*lambda.Base].(*Scope)
+				if !ok {
+					return errors.New("? Tried to use non-scope as base")
+				}
+				scope = v
+			}
+			lambda.Scope.super = scope
 
 			stack.Push(Value(&lambda))
 		case Set, Define:
 			sym := ins.imm.(Symbol)
-			scope := p.scope.Lookup(sym)
+			scope := p.Scope.Lookup(sym)
 			if scope == nil {
-				scope = p.scope
+				scope = p.Scope
 			} else if ins.op == Define {
 				fmt.Printf("WARNING: Redefining variable %s", SymbolNames[sym])
 			}
@@ -164,12 +180,12 @@ begin:
 
 			var res error
 			if !isbool || bool(cond) {
-				lt.scope = p.scope
+				lt.Scope = p.Scope
 				res = lt.Eval()
 			}
 
 			if ins.nargs == 3 {
-				lf.scope = p.scope
+				lf.Scope = p.Scope
 				if isbool && !bool(cond) {
 					res = lf.Eval()
 				}
@@ -178,7 +194,7 @@ begin:
 				return res
 			}
 		case SaveScope:
-			stack.Push(p.scope)
+			stack.Push(p.Scope)
 		}
 	}
 	return nil
@@ -211,7 +227,7 @@ func (ins Ins) Print() {
 		fmt.Println("]")
 	case Lambda:
 		fmt.Print("LAMBDA ")
-		PrintValue(ins.imm.(Procedure).args)
+		PrintValue(ins.imm.(Procedure).Args)
 		fmt.Println()
 	case If:
 		fmt.Println("IF")

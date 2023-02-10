@@ -216,6 +216,13 @@ func (m *MacroMap) parse(p Value,
 	literals []Symbol,
 	isSingle bool,
 ) error {
+	if scoped, ok := p.(Scoped); ok {
+		p = scoped.Symbol
+	}
+
+	if scoped, ok := f.(Scoped); ok {
+		f = scoped.Symbol
+	}
 	switch p.(type) {
 	case Symbol:
 		isliteral := false
@@ -301,6 +308,9 @@ func (m *MacroMap) transcribe(t Value,
 	consume bool,
 	name Symbol,
 ) (Value, error) {
+	if scoped, ok := t.(Scoped); ok {
+		t = scoped.Symbol
+	}
 	switch t.(type) {
 	case Symbol:
 		vl, ok := (*m)[t.(Symbol)]

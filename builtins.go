@@ -102,34 +102,34 @@ func FnDisplay(nargs int) error {
 
 var TopScope = &Scope{
 	map[Symbol]Value{
-		SymAdd: &Procedure{builtin: FnAdd},
-		SymSub: &Procedure{builtin: FnSub},
-		SymMul: &Procedure{builtin: FnMul},
-		SymDiv: &Procedure{builtin: FnDiv},
-		SymGt:  &Procedure{builtin: FnGt},
-		SymLt:  &Procedure{builtin: FnLt},
-		SymEqu: &Procedure{builtin: FnNumEq},
+		SymAdd: &Procedure{Builtin: FnAdd},
+		SymSub: &Procedure{Builtin: FnSub},
+		SymMul: &Procedure{Builtin: FnMul},
+		SymDiv: &Procedure{Builtin: FnDiv},
+		SymGt:  &Procedure{Builtin: FnGt},
+		SymLt:  &Procedure{Builtin: FnLt},
+		SymEqu: &Procedure{Builtin: FnNumEq},
 
-		SymNot:   &Procedure{builtin: FnNot},
-		SymEqv:   &Procedure{builtin: FnEqv},
-		SymEq:    &Procedure{builtin: FnEqv},
-		SymEqual: &Procedure{builtin: FnEqual},
+		SymNot:   &Procedure{Builtin: FnNot},
+		SymEqv:   &Procedure{Builtin: FnEqv},
+		SymEq:    &Procedure{Builtin: FnEqv},
+		SymEqual: &Procedure{Builtin: FnEqual},
 
-		SymIsNull:  &Procedure{builtin: FnIsNull},
-		SymCons:    &Procedure{builtin: FnCons},
-		SymCar:     &Procedure{builtin: FnCar},
-		SymCdr:     &Procedure{builtin: FnCdr},
-		SymSetCar:  &Procedure{builtin: FnSetCar},
-		SymSetCdr:  &Procedure{builtin: FnSetCdr},
-		SymAppend:  &Procedure{builtin: FnAppend},
+		SymIsNull:  &Procedure{Builtin: FnIsNull},
+		SymCons:    &Procedure{Builtin: FnCons},
+		SymCar:     &Procedure{Builtin: FnCar},
+		SymCdr:     &Procedure{Builtin: FnCdr},
+		SymSetCar:  &Procedure{Builtin: FnSetCar},
+		SymSetCdr:  &Procedure{Builtin: FnSetCdr},
+		SymAppend:  &Procedure{Builtin: FnAppend},
 
-		SymDisplay: &Procedure{builtin: FnDisplay},
+		SymDisplay: &Procedure{Builtin: FnDisplay},
 
-		SymStringEq:      &Procedure{builtin: FnStringEq},
-		SymSymbol2String: &Procedure{builtin: FnSymbol2String},
-		SymCharEq:        &Procedure{builtin: FnCharEq},
+		SymStringEq:      &Procedure{Builtin: FnStringEq},
+		SymSymbol2String: &Procedure{Builtin: FnSymbol2String},
+		SymCharEq:        &Procedure{Builtin: FnCharEq},
 	},
 	nil,
 }
 
-var Top = &Procedure{macros: map[Symbol]SyntaxRules{}}
+var Top = &Procedure{Macros: map[Symbol]SyntaxRules{}}

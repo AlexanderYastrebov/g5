@@ -40,7 +40,7 @@ func Run(code string, quiet bool) {
 			log.Fatalf("Error (parse): %v\n", err)
 		}
 
-		Top.ins = []Ins{}
+		Top.Ins = []Ins{}
 		if err := Top.Gen(v); err != nil {
 			log.Fatalf("Error (gen): %v\n", err)
 		}
@@ -59,7 +59,7 @@ func Run(code string, quiet bool) {
 }
 
 func main() {
-	Top.scope = TopScope // Put builtins into top-level scope
+	Top.Scope = TopScope // Put builtins into top-level scope
 
 	if int(Last) != len(SymbolNames) {
 		log.Fatalln("Symbol table length mismatch")

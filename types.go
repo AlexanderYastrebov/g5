@@ -38,11 +38,12 @@ type Scope struct {
 func (*Scope) isValue() {}
 
 type Procedure struct {
-	scope   *Scope
-	args    Value
-	ins     []Ins
-	builtin func(int) error
-	macros  map[Symbol]SyntaxRules
+	Scope   *Scope
+	Args    Value
+	Ins     []Ins
+	Builtin func(int) error
+	Macros  map[Symbol]SyntaxRules
+	Base *Symbol // Scope to derive from
 }
 
 func (Procedure) isValue() {}

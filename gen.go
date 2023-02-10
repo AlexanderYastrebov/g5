@@ -8,9 +8,9 @@ import (
 func (p *Procedure) Gen(v Value) error {
 	switch v.(type) {
 	case Boolean, String, Character, Vector, Integer, Rational:
-		p.ins = append(p.ins, Ins{Imm, v, 0})
+		p.Ins = append(p.Ins, Ins{Imm, v, 0})
 	case Symbol, Scoped:
-		p.ins = append(p.ins, Ins{GetVar, v, 0})
+		p.Ins = append(p.Ins, Ins{GetVar, v, 0})
 	case *Pair:
 		var args []Value
 		args, err := list2vec(v.(*Pair))
@@ -34,7 +34,7 @@ func (p *Procedure) Gen(v Value) error {
 		}
 
 		if issym {
-			if sr, ok := p.macros[sym]; ok {
+			if sr, ok := p.Macros[sym]; ok {
 				i := 0
 				found := false
 				var pattern *Pair
@@ -73,7 +73,7 @@ func (p *Procedure) Gen(v Value) error {
 					return errors.New("First arg to set! must be a symbol")
 				}
 				p.Gen(args[2])
-				p.ins = append(p.ins, Ins{Set, args[1], 1})
+				p.Ins = append(p.Ins, Ins{Set, args[1], 1})
 				return nil
 			case SymDefine:
 				switch args[1].(type) {
@@ -87,23 +87,23 @@ func (p *Procedure) Gen(v Value) error {
 					dest := *def.Car
 
 					lambda := Procedure{
-						args:   *def.Cdr,
-						ins:    []Ins{},
-						macros: p.macros,
+						Args:   *def.Cdr,
+						Ins:    []Ins{},
+						Macros: p.Macros,
 					}
 
 					for _, arg := range args[2:] {
 						lambda.Gen(arg)
 					}
 
-					p.ins = append(p.ins, Ins{Lambda, lambda, 0})
-					p.ins = append(p.ins, Ins{Define, dest, 1})
+					p.Ins = append(p.Ins, Ins{Lambda, lambda, 0})
+					p.Ins = append(p.Ins, Ins{Define, dest, 1})
 				case Symbol:
 					if len(args) != 3 {
 						return errors.New("define takes 2 args")
 					}
 					p.Gen(args[2])
-					p.ins = append(p.ins, Ins{Define, args[1], 1})
+					p.Ins = append(p.Ins, Ins{Define, args[1], 1})
 				default:
 					return fmt.Errorf("First arg to define must be a symbol"+
 						": %T", args[1])
@@ -115,21 +115,25 @@ func (p *Procedure) Gen(v Value) error {
 				}
 
 				lambda := Procedure{
-					args:   args[1],
-					ins:    []Ins{},
-					macros: p.macros,
+					Args:   args[1],
+					Ins:    []Ins{},
+					Macros: p.Macros,
+				}
+
+				if scoped, ok := args[0].(Scoped); ok {
+					lambda.Base = &scoped.Scope
 				}
 
 				for _, arg := range args[2:] {
-					lambda.Gen(arg)
+					lambda.Gen(Unscope(arg))
 				}
-				p.ins = append(p.ins, Ins{Lambda, lambda, 0})
+				p.Ins = append(p.Ins, Ins{Lambda, lambda, 0})
 				return nil
 			case SymIf:
 				lt := Procedure{
-					args:   p.args,
-					ins:    []Ins{},
-					macros: p.macros,
+					Args:   p.Args,
+					Ins:    []Ins{},
+					Macros: p.Macros,
 				}
 				lf := lt
 
@@ -138,17 +142,17 @@ func (p *Procedure) Gen(v Value) error {
 					return errors.New("Too many args to if")
 				} else if len(args) == 4 {
 					lf.Gen(args[3])
-					p.ins = append(p.ins, Ins{Imm, lf, 0})
+					p.Ins = append(p.Ins, Ins{Imm, lf, 0})
 				}
-				p.ins = append(p.ins, Ins{Imm, lt, 0})
+				p.Ins = append(p.Ins, Ins{Imm, lt, 0})
 				p.Gen(args[1])
-				p.ins = append(p.ins, Ins{If, nil, len(args) - 1})
+				p.Ins = append(p.Ins, Ins{If, nil, len(args) - 1})
 				return nil
 			case Quote:
 				if len(args) != 2 {
 					return errors.New("Wrong number of args to quote")
 				}
-				p.ins = append(p.ins, Ins{Imm, args[1], 0})
+				p.Ins = append(p.Ins, Ins{Imm, args[1], 0})
 				return nil
 
 			// These are for the implementation of (hygenic) macros
@@ -156,7 +160,7 @@ func (p *Procedure) Gen(v Value) error {
 				if len(args) != 1 {
 					return errors.New("INTERNAL: save-scope takes no args")
 				}
-				p.ins = append(p.ins, Ins{SaveScope, nil, 0})
+				p.Ins = append(p.Ins, Ins{SaveScope, nil, 0})
 				return nil
 			case SymDefineSyntax:
 				if len(args) != 3 {
@@ -183,14 +187,14 @@ func (p *Procedure) Gen(v Value) error {
 					return err
 				}
 
-				if _, ok := p.macros[macroName]; ok {
+				if _, ok := p.Macros[macroName]; ok {
 					fmt.Printf("WARNING: Redefining macro %s",
 						SymbolNames[macroName])
 				}
 
-				p.macros[macroName] = *sr
-				p.ins = append(p.ins, Ins{SaveScope, nil, 0})
-				p.ins = append(p.ins, Ins{Set, macroName, 1})
+				p.Macros[macroName] = *sr
+				p.Ins = append(p.Ins, Ins{SaveScope, nil, 0})
+				p.Ins = append(p.Ins, Ins{Set, macroName, 1})
 				return nil
 			}
 		}
@@ -199,7 +203,7 @@ func (p *Procedure) Gen(v Value) error {
 		for i := len(args) - 1; i >= 0; i-- {
 			p.Gen(args[i])
 		}
-		p.ins = append(p.ins, Ins{Call, nil, len(args) - 1})
+		p.Ins = append(p.Ins, Ins{Call, nil, len(args) - 1})
 	}
 	return nil
 }
