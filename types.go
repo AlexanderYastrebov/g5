@@ -43,7 +43,6 @@ type Procedure struct {
 	Ins     []Ins
 	Builtin func(int) error
 	Macros  map[Symbol]SyntaxRules
-	Base *Symbol // Scope to derive from
 }
 
 func (Procedure) isValue() {}
