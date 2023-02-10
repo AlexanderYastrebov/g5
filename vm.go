@@ -152,7 +152,7 @@ begin:
 
 			stack.Push(Value(&lambda))
 		case Set:
-			sym := ins.imm.(Symbol)
+			sym := Unscope(ins.imm).(Symbol)
 			scope := p.Scope.Lookup(sym)
 			if scope == nil {
 				scope = p.Scope

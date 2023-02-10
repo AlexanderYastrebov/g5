@@ -97,7 +97,7 @@ func WriteValue(v Value, display bool, port *Port) error {
 	case Symbol:
 		fmt.Fprint(writer, SymbolNames[v.(Symbol)])
 	case String:
-		if display {
+		if !display {
 			fmt.Fprintf(writer, "\"%s\"", v.(String))
 		} else {
 			fmt.Fprint(writer, v.(String))

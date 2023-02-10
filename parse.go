@@ -206,24 +206,13 @@ func (p *Parser) GetValue() (Value, error) {
 			return nil, errors.New(fmt.Sprintf(
 				"Line %d: Invalid # sequence", p.line))
 		} else if ch == '(' {
-			p.data = p.data[1:]
-
-			vec := Vector{}
-			for p.data[0] != ')' {
-				p.skipWs()
-				new, err := p.GetValue()
-				if err != nil {
-					return nil, err
-				}
-				vec = append(vec, new)
-				p.skipWs()
-
-				if len(p.data) == 0 {
-					return nil, errors.New(fmt.Sprintf(
-						"Line %d: Early EOF (vector)", p.line))
-				}
+			v, err := p.GetValue()
+			if err != nil {
+				return nil, err
 			}
-			return vec, nil
+
+			vec, err := list2vec(v.(*Pair))
+			return Vector(vec), err
 		} else {
 			return nil, errors.New(fmt.Sprintf(
 				"Line %d: Invalid # sequence", p.line))

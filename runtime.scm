@@ -127,8 +127,8 @@
 (define (map f x)
   (if (not (eq? x '()))
     (begin
-      (map f (cdr x))
-      (f (car x)))))
+      (f (car x))
+      (map f (cdr x)))))
 
 (define (print . x)
   (map (lambda (x) (display x) (display #\space)) x)
