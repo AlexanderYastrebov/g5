@@ -113,3 +113,15 @@ func TestOr(t *testing.T) {
 		t.Errorf("Expected true, got false")
 	}
 }
+
+func TestLetrec(t *testing.T) {
+	Run("(letrec ((a #t)) #t)", true)
+	result, ok := stack.Top().(Boolean)
+	if !ok {
+		t.Errorf("Expected boolean, got %T", result)
+	}
+
+	if result != true {
+		t.Errorf("Expected true, got false")
+	}
+}
