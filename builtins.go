@@ -43,6 +43,7 @@ var SymbolNames = []string{
 
 	"string=?",
 	"symbol->string",
+	"number->string",
 	"char=?",
 }
 
@@ -87,6 +88,7 @@ const (
 
 	SymStringEq
 	SymSymbol2String
+	SymNumber2String
 	SymCharEq
 
 	Last
@@ -127,6 +129,7 @@ var TopScope = &Scope{
 
 		SymStringEq:      &Procedure{Builtin: FnStringEq},
 		SymSymbol2String: &Procedure{Builtin: FnSymbol2String},
+		SymNumber2String: &Procedure{Builtin: FnNumber2String},
 		SymCharEq:        &Procedure{Builtin: FnCharEq},
 	},
 	nil,

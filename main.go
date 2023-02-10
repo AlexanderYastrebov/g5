@@ -51,7 +51,7 @@ func Run(code string, quiet bool) {
 
 		if !quiet {
 			if len(stack) > 0 {
-				PrintValue(stack.Top())
+				WriteValue(stack.Top(), false, nil)
 			}
 			fmt.Println()
 		}
