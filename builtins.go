@@ -45,9 +45,15 @@ var SymbolNames = []string{
 	"append",
 	"apply",
 
-	"write-prim",
-
+	"vector?",
 	"make-vector",
+	"vector",
+	"vector-length",
+	"vector-ref",
+	"vector-set!",
+	"list->vector",
+
+	"write-prim",
 
 	"string=?",
 	"symbol->string",
@@ -98,9 +104,15 @@ const (
 	SymAppend
 	SymApply
 
-	SymWritePrim
-
+	SymIsVector
 	SymMakeVector
+	SymVector
+	SymVectorLength
+	SymVectorRef
+	SymVectorSet
+	SymList2Vector
+
+	SymWritePrim
 
 	SymStringEq
 	SymSymbol2String
@@ -152,6 +164,14 @@ var TopScope = &Scope{
 		SymSetCdr: &Procedure{Builtin: FnSetCdr},
 		SymAppend: &Procedure{Builtin: FnAppend},
 		SymApply:  &Procedure{Builtin: FnApply},
+
+		SymIsVector:     &Procedure{Builtin: FnIsVector},
+		SymMakeVector:   &Procedure{Builtin: FnMakeVector},
+		SymVector:       &Procedure{Builtin: FnVector},
+		SymVectorLength: &Procedure{Builtin: FnVectorLength},
+		SymVectorRef:    &Procedure{Builtin: FnVectorRef},
+		SymVectorSet:    &Procedure{Builtin: FnVectorSet},
+		SymList2Vector:  &Procedure{Builtin: FnList2Vector},
 
 		SymWritePrim: &Procedure{Builtin: FnWritePrim},
 

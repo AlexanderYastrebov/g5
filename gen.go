@@ -8,7 +8,7 @@ import (
 func (p *Procedure) Gen(v Value) error {
 	switch v.(type) {
 	case Vector:
-		panic("Vectors not yet implemented")
+		panic("Vector macros not yet implemented")
 	case Boolean, String, Character, Integer, Rational:
 		p.Ins = append(p.Ins, Ins{Imm, v, 0})
 	case Symbol, Scoped:
