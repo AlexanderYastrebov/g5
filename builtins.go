@@ -29,6 +29,15 @@ var SymbolNames = []string{
 	">",
 	"<",
 	"=",
+	"quotient",
+	"remainder",
+	"modulo",
+	"numerator",
+	"denominator",
+	"floor",
+	"ceiling",
+	"trunacte",
+	"round",
 
 	"number?",
 	"complex?",
@@ -90,6 +99,15 @@ const (
 	SymGt
 	SymLt
 	SymEqu
+	SymQuotient
+	SymRemainder
+	SymModulo
+	SymNumerator
+	SymDenominator
+	SymFloor
+	SymCeiling
+	SymTruncate
+	SymRound
 
 	SymIsNumber
 	SymIsComplex
@@ -165,13 +183,22 @@ var TopScope = &Scope{
 	map[Symbol]Value{
 		SymExit: &Procedure{Builtin: FnExit},
 
-		SymAdd: &Procedure{Builtin: FnAdd},
-		SymSub: &Procedure{Builtin: FnSub},
-		SymMul: &Procedure{Builtin: FnMul},
-		SymDiv: &Procedure{Builtin: FnDiv},
-		SymGt:  &Procedure{Builtin: FnGt},
-		SymLt:  &Procedure{Builtin: FnLt},
-		SymEqu: &Procedure{Builtin: FnNumEq},
+		SymAdd:         &Procedure{Builtin: FnAdd},
+		SymSub:         &Procedure{Builtin: FnSub},
+		SymMul:         &Procedure{Builtin: FnMul},
+		SymDiv:         &Procedure{Builtin: FnDiv},
+		SymGt:          &Procedure{Builtin: FnGt},
+		SymLt:          &Procedure{Builtin: FnLt},
+		SymEqu:         &Procedure{Builtin: FnNumEq},
+		SymQuotient:    &Procedure{Builtin: FnQuotient},
+		SymRemainder:   &Procedure{Builtin: FnRemainder},
+		SymModulo:      &Procedure{Builtin: FnModulo},
+		SymNumerator:   &Procedure{Builtin: FnNumerator},
+		SymDenominator: &Procedure{Builtin: FnDenominator},
+		SymFloor:       &Procedure{Builtin: FnFloor},
+		SymCeiling:     &Procedure{Builtin: FnCeiling},
+		SymTruncate:    &Procedure{Builtin: FnTruncate},
+		SymRound:       &Procedure{Builtin: FnRound},
 
 		SymNot:   &Procedure{Builtin: FnNot},
 		SymEqv:   &Procedure{Builtin: FnEqv},

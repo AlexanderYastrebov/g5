@@ -4,6 +4,8 @@
 (define (negative? x) (< x 0))
 (define (>= x y) (not (< x y)))
 (define (<= x y) (not (< x y)))
+(define exact? number?)
+(define (inexact? z) #f)
 
 (define (list . x) x)
 
@@ -229,3 +231,34 @@
          (apply (lambda ?al ?e1 ...) ?args)
          (case-lambda "CLAUSE" ?args ?l 
            ?clause1 ...)))))
+
+(define (reverse l)
+  (if (null? l)
+    '()
+    (append (reverse (cdr l)) (list (car l)))))
+
+(define (list-tail x k)
+                  (if (zero? k)
+                    x
+                    (list-tail (cdr x) (- k 1))))
+(define (memf f? x l)
+   (if (null? l)
+       #f
+       (if (f? (car l) x)
+           l
+           (member x (cdr l)))))
+
+(define (member x l) (memf equal? x l))
+(define (memv x l) (memf eqv? x l))
+(define (memq x l) (memf eq? x l))
+
+(define (assf f? thing alist)
+   (if (null? alist)
+       #f
+       (if (f? (car (car alist)) thing)
+           (car alist)
+           (assoc thing (cdr alist)))))
+
+(define (assoc x l) (assf equal? x l))
+(define (assv x l) (assf eqv? x l))
+(define (assq x l) (assf eq? x l))

@@ -416,3 +416,163 @@ func FnIsInteger(nargs int) error {
 	}
 	return nil
 }
+
+func FnQuotient(nargs int) error {
+	if nargs != 2 {
+		return errors.New("Wrong arg count to quotient")
+	}
+
+	n1, ok1 := stack.Pop().(Integer)
+	n2, ok2 := stack.Pop().(Integer)
+	if !ok1 || !ok2 {
+		return errors.New("quotient takes only integers")
+	}
+
+	nb1 := big.Int(n1)
+	nb2 := big.Int(n2)
+	stack.Push(Integer(*nb1.Quo(&nb1, &nb2)))
+	return nil
+}
+
+func FnRemainder(nargs int) error {
+	if nargs != 2 {
+		return errors.New("Wrong arg count to remainder")
+	}
+
+	n1, ok1 := stack.Pop().(Integer)
+	n2, ok2 := stack.Pop().(Integer)
+	if !ok1 || !ok2 {
+		return errors.New("remainder takes only integers")
+	}
+
+	nb1 := big.Int(n1)
+	nb2 := big.Int(n2)
+	stack.Push(Integer(*nb1.Rem(&nb1, &nb2)))
+	return nil
+}
+
+func FnModulo(nargs int) error {
+	if nargs != 2 {
+		return errors.New("Wrong arg count to modulus")
+	}
+
+	n1, ok1 := stack.Pop().(Integer)
+	n2, ok2 := stack.Pop().(Integer)
+	if !ok1 || !ok2 {
+		return errors.New("modulus takes only integers")
+	}
+
+	nb1 := big.Int(n1)
+	nb2 := big.Int(n2)
+	stack.Push(Integer(*nb1.Mod(&nb1, &nb2)))
+	return nil
+}
+
+func FnNumerator(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to numerator")
+	}
+	n, ok := stack.Pop().(Rational)
+	if !ok {
+		return errors.New("numerator only takes rationals")
+	}
+	nb := big.Rat(n)
+	stack.Push(Integer(*nb.Num()))
+	return nil
+}
+
+func FnDenominator(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to denominator")
+	}
+	n, ok := stack.Pop().(Rational)
+	if !ok {
+		return errors.New("denominator only takes rationals")
+	}
+	nb := big.Rat(n)
+	stack.Push(Integer(*nb.Denom()))
+	return nil
+}
+
+func FnFloor(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to floor")
+	}
+	n, ok := stack.Pop().(Rational)
+	if !ok {
+		return errors.New("floor only takes rationals")
+	}
+	nb := big.Rat(n)
+
+	s := nb.FloatString(1)
+	s = s[:len(s)-2]
+	res := new(big.Int)
+	res.SetString(s, 10)
+
+	if !nb.IsInt() && res.Cmp(big.NewInt(0)) < 0 {
+		res.Sub(res, big.NewInt(1))
+	}
+
+	stack.Push(Integer(*res))
+	return nil
+}
+
+func FnCeiling(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to ceiling")
+	}
+	n, ok := stack.Pop().(Rational)
+	if !ok {
+		return errors.New("ceiling only takes rationals")
+	}
+	nb := big.Rat(n)
+
+	s := nb.FloatString(1)
+	s = s[:len(s)-2]
+	res := new(big.Int)
+	res.SetString(s, 10)
+
+	if !nb.IsInt() && res.Cmp(big.NewInt(0)) > 0 {
+		res.Add(res, big.NewInt(1))
+	}
+
+	stack.Push(Integer(*res))
+	return nil
+}
+
+func FnTruncate(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to truncate")
+	}
+	n, ok := stack.Pop().(Rational)
+	if !ok {
+		return errors.New("truncate only takes rationals")
+	}
+	nb := big.Rat(n)
+
+	s := nb.FloatString(1)
+	s = s[:len(s)-2]
+	res := new(big.Int)
+	res.SetString(s, 10)
+
+	stack.Push(Integer(*res))
+	return nil
+}
+
+func FnRound(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to floor")
+	}
+	n, ok := stack.Pop().(Rational)
+	if !ok {
+		return errors.New("floor only takes rationals")
+	}
+	nb := big.Rat(n)
+
+	s := nb.FloatString(0)
+	res := new(big.Int)
+	res.SetString(s, 10)
+
+	stack.Push(Integer(*res))
+	return nil
+}
