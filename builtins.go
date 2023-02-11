@@ -2,6 +2,8 @@ package main
 
 import (
 	"errors"
+	"math/big"
+	"os"
 )
 
 var SymbolNames = []string{
@@ -17,6 +19,8 @@ var SymbolNames = []string{
 	"if",
 	"define-syntax",
 	"save-scope",
+
+	"exit",
 
 	"+",
 	"-",
@@ -77,6 +81,8 @@ const (
 	SymSaveScope
 
 	// Builtin procedures
+	SymExit
+
 	SymAdd
 	SymSub
 	SymMul
@@ -136,8 +142,29 @@ func FnWritePrim(nargs int) error {
 	return WriteValue(stack.Top(), bool(isdisplay), nil)
 }
 
+func FnExit(nargs int) error {
+	if nargs > 1 {
+		return errors.New("Wrong arg count to exit")
+	}
+	
+	code := 0
+	if nargs == 1 {
+		v, ok := stack.Pop().(Integer)
+		if !ok {
+			return errors.New("exit takes an integer as the arg")
+		}
+		bi := big.Int(v)
+		code = int(bi.Int64())
+	}
+
+	os.Exit(code)
+	return nil
+}
+
 var TopScope = &Scope{
 	map[Symbol]Value{
+		SymExit: &Procedure{Builtin: FnExit},
+
 		SymAdd: &Procedure{Builtin: FnAdd},
 		SymSub: &Procedure{Builtin: FnSub},
 		SymMul: &Procedure{Builtin: FnMul},

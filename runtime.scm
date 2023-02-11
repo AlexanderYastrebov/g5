@@ -1,6 +1,38 @@
+(define (null? x) (eqv? x '()))
+(define (zero? z) (= z 0))
+(define (positive? x) (>= x 0))
+(define (negative? x) (< x 0))
+(define (>= x y) (not (< x y)))
+(define (<= x y) (not (< x y)))
+
+(define (list . x) x)
+
+(define-syntax begin
+  (syntax-rules ()
+    ((begin exp ...)
+     ((lambda () exp ...)))))
+
 (define (display x) (write-prim #t x))
 (define (write x) (write-prim #f x))
 (define (newline) (display #\newline))
+
+(define (for-each f . x)
+  (define (for-each1 f x)
+    (if (not (null? x))
+      (begin
+        (f (car x))
+        (for-each1 f (cdr x)))))
+  (for-each1 (lambda (x) (for-each1 f x) x) x))
+
+(define (print . x)
+  (for-each (lambda (x) (display x) (display #\space)) x)
+  (newline))
+
+(define (error reason . args)
+    (display "Error: ")
+    (display reason)
+    (apply print args)
+    (exit 1))
 
 (define-syntax cond
   (syntax-rules (else =>)
@@ -91,10 +123,6 @@
        (let* ((name2 val2) ...)
          body1 body2 ...)))))
 
-(define-syntax begin
-  (syntax-rules ()
-    ((begin exp ...)
-     ((lambda () exp ...)))))
 
 (define-syntax do
   (syntax-rules ()
@@ -118,20 +146,6 @@
      x)
     ((do "step" x y)
      y)))
-
-(define (list . x) x)
-
-(define (for-each f . x)
-  (define (for-each1 f x)
-    (if (not (null? x))
-      (begin
-        (f (car x))
-        (for-each1 f (cdr x)))))
-  (for-each1 (lambda (x) (for-each1 f x) x) x))
-
-(define (print . x)
-  (for-each (lambda (x) (display x) (display #\space)) x)
-  (newline))
 
 (define (force object) (object))
 
@@ -164,13 +178,6 @@
                 (+ (car count) 1)))))
   (lengthl list 0))
 
-(define (null? x) (eqv? x '()))
-(define (zero? z) (= z 0))
-(define (positive? x) (>= x 0))
-(define (negative? x) (< x 0))
-(define (>= x y) (not (< x y)))
-(define (<= x y) (not (< x y)))
-
 (define (max . x)
   (define (maxl x)
     (if (= (length x) 1)
@@ -184,7 +191,7 @@
   (syntax-rules ()
     ((case-lambda)
      (lambda args
-       (print "CASE-LAMBDA without any clauses.")))
+       (error "CASE-LAMBDA without any clauses.")))
     ((case-lambda 
       (?a1 ?e1 ...) 
       ?clause1 ...)
@@ -211,7 +218,7 @@
      (let ((?a1 ?args))
        ?e1 ...))
     ((case-lambda "CLAUSE" ?args ?l)
-     (print "Wrong number of arguments to CASE-LAMBDA."))
+     (error "Wrong number of arguments to CASE-LAMBDA."))
     ((case-lambda "IMPROPER" ?args ?l ?k ?al ((?a1 . ?ar) ?e1 ...)
       ?clause1 ...)
      (case-lambda "IMPROPER" ?args ?l (+ ?k 1) ?al (?ar ?e1 ...) 
