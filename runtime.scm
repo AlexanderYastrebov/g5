@@ -129,8 +129,10 @@
         (map1 f (cdr x)))))
   (map1 (lambda (x) (map1 f x) x) x))
 
+(define for-each map)
+
 (define (print . x)
-  (map (lambda (x) (display x) (display #\space)) x)
+  (for-each (lambda (x) (display x) (display #\space)) x)
   (newline))
 
 (define (force object) (object))
