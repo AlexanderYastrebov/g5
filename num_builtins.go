@@ -346,3 +346,73 @@ func FnNumEq(nargs int) error {
 	stack.Push(Boolean(true))
 	return nil
 }
+
+func FnIsNumber(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to number?")
+	}
+
+	switch v := stack.Pop(); v.(type) {
+	case Integer, Rational:
+		stack.Push(Boolean(true))
+	default:
+		stack.Push(Boolean(false))
+	}
+	return nil
+}
+
+func FnIsComplex(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to number?")
+	}
+
+	switch v := stack.Pop(); v.(type) {
+	case Integer, Rational:
+		stack.Push(Boolean(true))
+	default:
+		stack.Push(Boolean(false))
+	}
+	return nil
+}
+
+func FnIsReal(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to number?")
+	}
+
+	switch v := stack.Pop(); v.(type) {
+	case Integer, Rational:
+		stack.Push(Boolean(true))
+	default:
+		stack.Push(Boolean(false))
+	}
+	return nil
+}
+
+func FnIsRational(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to number?")
+	}
+
+	switch v := stack.Pop(); v.(type) {
+	case Integer, Rational:
+		stack.Push(Boolean(true))
+	default:
+		stack.Push(Boolean(false))
+	}
+	return nil
+}
+
+func FnIsInteger(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to number?")
+	}
+
+	switch v := stack.Pop(); v.(type) {
+	case Integer, Rational:
+		stack.Push(Boolean(true))
+	default:
+		stack.Push(Boolean(false))
+	}
+	return nil
+}

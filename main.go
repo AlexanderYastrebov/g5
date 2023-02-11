@@ -50,6 +50,7 @@ func Run(code string, quiet bool) {
 		}
 
 		if !quiet {
+			fmt.Println()
 			if len(stack) > 0 {
 				WriteValue(stack.Top(), false, nil)
 			}

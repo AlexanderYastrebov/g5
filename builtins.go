@@ -26,6 +26,12 @@ var SymbolNames = []string{
 	"<",
 	"=",
 
+	"number?",
+	"complex?",
+	"real?",
+	"rational?",
+	"integer?",
+
 	"not",
 	"eqv?",
 	"eq?",
@@ -38,8 +44,12 @@ var SymbolNames = []string{
 	"set-car!",
 	"set-cdr!",
 	"append",
+	"apply",
 
 	"display",
+	"write",
+
+	"make-vector",
 
 	"string=?",
 	"symbol->string",
@@ -71,6 +81,12 @@ const (
 	SymLt
 	SymEqu
 
+	SymIsNumber
+	SymIsComplex
+	SymIsReal
+	SymIsRational
+	SymIsInteger
+
 	SymNot
 	SymEqv
 	SymEq
@@ -83,8 +99,12 @@ const (
 	SymSetCar
 	SymSetCdr
 	SymAppend
+	SymApply
 
 	SymDisplay
+	SymWrite
+
+	SymMakeVector
 
 	SymStringEq
 	SymSymbol2String
@@ -102,6 +122,14 @@ func FnDisplay(nargs int) error {
 	return WriteValue(stack.Top(), true, nil)
 }
 
+func FnWrite(nargs int) error {
+	if nargs != 1 {
+		return errors.New(
+			"Wrong arg count to display (ports not yet implemented)")
+	}
+	return WriteValue(stack.Top(), false, nil)
+}
+
 var TopScope = &Scope{
 	map[Symbol]Value{
 		SymAdd: &Procedure{Builtin: FnAdd},
@@ -112,10 +140,16 @@ var TopScope = &Scope{
 		SymLt:  &Procedure{Builtin: FnLt},
 		SymEqu: &Procedure{Builtin: FnNumEq},
 
-		SymNot:   &Procedure{Builtin: FnNot},
-		SymEqv:   &Procedure{Builtin: FnEqv},
-		SymEq:    &Procedure{Builtin: FnEqv},
-		SymEqual: &Procedure{Builtin: FnEqual},
+		SymNot:        &Procedure{Builtin: FnNot},
+		SymEqv:        &Procedure{Builtin: FnEqv},
+		SymEq:         &Procedure{Builtin: FnEqv},
+		SymEqual:      &Procedure{Builtin: FnEqual},
+
+		SymIsNumber:   &Procedure{Builtin: FnIsNumber},
+		SymIsComplex:  &Procedure{Builtin: FnIsComplex},
+		SymIsReal:     &Procedure{Builtin: FnIsReal},
+		SymIsRational: &Procedure{Builtin: FnIsRational},
+		SymIsInteger:  &Procedure{Builtin: FnIsInteger},
 
 		SymIsNull:  &Procedure{Builtin: FnIsNull},
 		SymCons:    &Procedure{Builtin: FnCons},
@@ -124,8 +158,10 @@ var TopScope = &Scope{
 		SymSetCar:  &Procedure{Builtin: FnSetCar},
 		SymSetCdr:  &Procedure{Builtin: FnSetCdr},
 		SymAppend:  &Procedure{Builtin: FnAppend},
+		SymApply:   &Procedure{Builtin: FnApply},
 
 		SymDisplay: &Procedure{Builtin: FnDisplay},
+		SymWrite:   &Procedure{Builtin: FnWrite},
 
 		SymStringEq:      &Procedure{Builtin: FnStringEq},
 		SymSymbol2String: &Procedure{Builtin: FnSymbol2String},

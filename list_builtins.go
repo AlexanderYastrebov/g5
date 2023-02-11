@@ -90,7 +90,6 @@ func FnAppend(nargs int) error {
 	}
 
 	vec := []Value{}
-
 	for i := nargs; i > 1; i-- {
 		v := stack.Pop()
 		p, ok := v.(*Pair)
@@ -126,4 +125,43 @@ func FnAppend(nargs int) error {
 	last.(*Pair).Cdr = &cdr
 	stack.Push(newp)
 	return nil
+}
+
+func FnApply(nargs int) error {
+	if nargs < 2 {
+		return errors.New("Wrong arg count to apply")
+	}
+
+	p, ok := stack.Pop().(*Procedure)
+	if !ok {
+		return errors.New("Got non-procedure for apply")
+	}
+
+	vec := []Value{}
+	for i := 0; i < nargs - 2; i++ {
+		vec = append(vec, stack.Pop())
+	}
+
+	l, ok := stack.Pop().(*Pair)
+	if !ok {
+		return errors.New("Last argument to apply must be a pair")
+	}
+	lv, err := list2vec(l)
+	if err != nil {
+		return err
+	}
+
+	for _, v := range lv {
+		vec = append(vec, v)
+	}
+
+	for i := len(vec) - 1; i >= 0; i-- {
+		stack.Push(vec[i])
+	}
+
+	stack.Push(p)
+	call := Procedure{Scope: Top.Scope,
+		Ins: []Ins{{Call, nil, len(vec)}},
+	}
+	return call.Eval()
 }

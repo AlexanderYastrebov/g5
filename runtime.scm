@@ -169,3 +169,16 @@
             (if (null? count)
               1
               (+ (car count) 1)))))
+
+(define (zero? z) (= z 0))
+(define (positive? x) (>= x 0))
+(define (negative? x) (< x 0))
+
+(define (maxl x)
+  (if (= (length x) 1)
+    x
+   (if (> (car (cdr x)) (car x))
+     (maxl (cdr x))
+     (maxl (cons (car x) (cdr (cdr x)))))))
+
+(define (max . x) (car (maxl x)))
