@@ -62,8 +62,8 @@ func (ctx *Procedure) Run(code string, quiet bool) {
 func main() {
 	Top.Scope = TopScope // Put builtins into top-level scope
 
-	if int(Last) != len(SymbolNames) {
-		log.Fatalln("Symbol table length mismatch")
+	if int(SymLast) != len(SymbolNames) {
+		panic("Symbol table length mismatch")
 	}
 
 	Top.Run(Runtime, true)

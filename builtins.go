@@ -119,7 +119,7 @@ const (
 	SymNumber2String
 	SymCharEq
 
-	Last
+	SymLast
 )
 
 func FnWritePrim(nargs int) error {

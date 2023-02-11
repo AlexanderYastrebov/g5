@@ -1,3 +1,5 @@
+(define (display x) (write-prim #t x))
+(define (write x) (write-prim #f x))
 (define (newline) (display #\newline))
 
 (define-syntax cond
@@ -117,18 +119,21 @@
     ((do "step" x y)
      y)))
 
-(define (map f x)
-  (if (not (eq? x '()))
-    (begin
-      (f (car x))
-      (map f (cdr x)))))
+(define (list . x) x)
+
+(define (map f . x)
+  (define (map1 f x)
+    (if (not (null? x))
+      (begin
+        (f (car x))
+        (map1 f (cdr x)))))
+  (map1 (lambda (x) (map1 f x) x) x))
 
 (define (print . x)
   (map (lambda (x) (display x) (display #\space)) x)
   (newline))
 
-(define (force object)
-  (object))
+(define (force object) (object))
 
 (define make-promise
   (lambda (proc)
@@ -148,8 +153,6 @@
   (syntax-rules ()
     ((delay expression)
      (make-promise (lambda () expression)))))
-
-(define (list . x) x)
 
 (define (length list . count)
   (if (null? list)
