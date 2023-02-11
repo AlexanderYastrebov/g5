@@ -212,7 +212,7 @@ func (p *Parser) GetValue() (Value, error) {
 			}
 
 			vec, err := list2vec(v.(*Pair))
-			return Vector(vec), err
+			return Vector{&vec}, err
 		} else {
 			return nil, errors.New(fmt.Sprintf(
 				"Line %d: Invalid # sequence", p.line))

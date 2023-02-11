@@ -73,12 +73,12 @@ func IsEqual(v1 Value, v2 Value) bool {
 	case Boolean, Symbol, String, Character, *Procedure, *Scope:
 		return v1 == v2
 	case Vector:
-		if len(v1.(Vector)) != len(v2.(Vector)) {
+		if len(*v1.(Vector).v) != len(*v2.(Vector).v) {
 			return false
 		}
 
-		for i := range v1.(Vector) {
-			if !IsEqual(v1.(Vector)[i], v2.(Vector)[i]) {
+		for i := range *v1.(Vector).v {
+			if !IsEqual((*v1.(Vector).v)[i], (*v2.(Vector).v)[i]) {
 				return false
 			}
 		}

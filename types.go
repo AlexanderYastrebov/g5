@@ -26,7 +26,9 @@ type Character rune
 
 func (Character) isValue() {}
 
-type Vector []Value
+type Vector struct {
+	v *[]Value
+}
 
 func (Vector) isValue() {}
 
@@ -116,7 +118,7 @@ func WriteValue(v Value, display bool, port *Port) error {
 		}
 	case Vector:
 		fmt.Fprint(writer, "#(")
-		for i, item := range v.(Vector) {
+		for i, item := range *v.(Vector).v {
 			if i != 0 {
 				fmt.Fprint(writer, " ")
 			}
