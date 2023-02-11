@@ -26,7 +26,6 @@
          (begin result1 result2 ...)
          (cond clause1 clause2 ...)))))
 
-
 (define-syntax case
   (syntax-rules (else)
     ((case (key ...)
@@ -47,14 +46,12 @@
          (begin result1 result2 ...)
          (case key clause clauses ...)))))
 
-
 (define-syntax and
   (syntax-rules ()
     ((and) #t)
     ((and test) test)
     ((and test1 test2 ...)
      (if test1 (and test2 ...) #f))))
-
 
 (define-syntax or
   (syntax-rules ()
@@ -64,14 +61,12 @@
      (let ((x test1))
        (if x x (or test2 ...))))))
   
-  
 (define-syntax letrec 
   (syntax-rules () 
     ((_ ((var init) ...) body ...)
      (let () 
        (define var init) ... 
        (let () body ...))))) 
- 
 
  (define-syntax let
    (syntax-rules ()
@@ -83,7 +78,6 @@
                       body1 body2 ...)))
         tag)
       val ...))))
-
 
 (define-syntax let*
   (syntax-rules ()
@@ -123,7 +117,6 @@
     ((do "step" x y)
      y)))
 
-
 (define (map f x)
   (if (not (eq? x '()))
     (begin
@@ -134,10 +127,8 @@
   (map (lambda (x) (display x) (display #\space)) x)
   (newline))
 
-
 (define (force object)
   (object))
-
 
 (define make-promise
   (lambda (proc)
@@ -153,12 +144,10 @@
                          (set! result x)
                          result))))))))
 
-
 (define-syntax delay
   (syntax-rules ()
     ((delay expression)
      (make-promise (lambda () expression)))))
-
 
 (define (list . x) x)
 
