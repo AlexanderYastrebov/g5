@@ -172,7 +172,7 @@ func WriteValue(v Value, display bool, port *Port) error {
 }
 
 func PrintValue(v Value) error {
-	return WriteValue(v, true, nil)
+	return WriteValue(v, false, nil)
 }
 
 func Str2Sym(str string) Symbol {

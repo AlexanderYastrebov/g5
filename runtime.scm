@@ -154,18 +154,22 @@
     ((delay expression)
      (make-promise (lambda () expression)))))
 
-(define (length list . count)
-  (if (null? list)
-    (car count)
-    (length (cdr list)
-            (if (null? count)
-              1
-              (+ (car count) 1)))))
+(define (length list)
+  (define (lengthl list . count)
+    (if (null? list)
+      (car count)
+      (lengthl (cdr list)
+              (if (null? count)
+                1
+                (+ (car count) 1)))))
+  (lengthl list 0))
 
 (define (null? x) (eqv? x '()))
 (define (zero? z) (= z 0))
 (define (positive? x) (>= x 0))
 (define (negative? x) (< x 0))
+(define (>= x y) (not (< x y)))
+(define (<= x y) (not (< x y)))
 
 (define (max . x)
   (define (maxl x)
@@ -175,3 +179,46 @@
        (maxl (cdr x))
        (maxl (cons (car x) (cdr (cdr x)))))))
   (car (maxl x)))
+
+(define-syntax case-lambda
+  (syntax-rules ()
+    ((case-lambda)
+     (lambda args
+       (print "CASE-LAMBDA without any clauses.")))
+    ((case-lambda 
+      (?a1 ?e1 ...) 
+      ?clause1 ...)
+     (lambda args
+       (let ((l (length args)))
+         (case-lambda "CLAUSE" args l 
+           (?a1 ?e1 ...)
+           ?clause1 ...))))
+    ((case-lambda "CLAUSE" ?args ?l 
+      ((?a1 ...) ?e1 ...) 
+      ?clause1 ...)
+     (if (= ?l (length '(?a1 ...)))
+         (apply (lambda (?a1 ...) ?e1 ...) ?args)
+         (case-lambda "CLAUSE" ?args ?l 
+           ?clause1 ...)))
+    ((case-lambda "CLAUSE" ?args ?l
+      ((?a1 . ?ar) ?e1 ...) 
+      ?clause1 ...)
+     (case-lambda "IMPROPER" ?args ?l 1 (?a1 . ?ar) (?ar ?e1 ...) 
+       ?clause1 ...))
+    ((case-lambda "CLAUSE" ?args ?l 
+      (?a1 ?e1 ...)
+      ?clause1 ...)
+     (let ((?a1 ?args))
+       ?e1 ...))
+    ((case-lambda "CLAUSE" ?args ?l)
+     (print "Wrong number of arguments to CASE-LAMBDA."))
+    ((case-lambda "IMPROPER" ?args ?l ?k ?al ((?a1 . ?ar) ?e1 ...)
+      ?clause1 ...)
+     (case-lambda "IMPROPER" ?args ?l (+ ?k 1) ?al (?ar ?e1 ...) 
+      ?clause1 ...))
+    ((case-lambda "IMPROPER" ?args ?l ?k ?al (?ar ?e1 ...) 
+      ?clause1 ...)
+     (if (>= ?l ?k)
+         (apply (lambda ?al ?e1 ...) ?args)
+         (case-lambda "CLAUSE" ?args ?l 
+           ?clause1 ...)))))

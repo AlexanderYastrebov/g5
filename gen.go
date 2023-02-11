@@ -31,10 +31,10 @@ func (p *Procedure) Gen(v Value) error {
 		if sym, ok := car.(Symbol); ok {
 			if syntaxrules, ok := p.Macros[sym]; ok {
 				var pattern *Pair
-				form := *v.(*Pair).Cdr
+				form := Unscope(*v.(*Pair).Cdr)
 				i, found := 0, false
 				for i, pattern = range syntaxrules.Patterns {
-					if IsMatch(*pattern.Cdr, form, syntaxrules.Literals) {
+					if IsMatch(Unscope(*pattern.Cdr), form, syntaxrules.Literals) {
 						found = true
 						break
 					}
