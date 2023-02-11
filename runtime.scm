@@ -121,15 +121,13 @@
 
 (define (list . x) x)
 
-(define (map f . x)
-  (define (map1 f x)
+(define (for-each f . x)
+  (define (for-each1 f x)
     (if (not (null? x))
       (begin
         (f (car x))
-        (map1 f (cdr x)))))
-  (map1 (lambda (x) (map1 f x) x) x))
-
-(define for-each map)
+        (for-each1 f (cdr x)))))
+  (for-each1 (lambda (x) (for-each1 f x) x) x))
 
 (define (print . x)
   (for-each (lambda (x) (display x) (display #\space)) x)
