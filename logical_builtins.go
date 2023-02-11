@@ -7,7 +7,7 @@ import (
 
 func FnNot(nargs int) error {
 	if nargs != 1 {
-		errors.New("Wrong arg count to not")
+		return errors.New("Wrong arg count to not")
 	}
 
 	switch val := stack.Pop(); val.(type) {

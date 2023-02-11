@@ -45,8 +45,7 @@ var SymbolNames = []string{
 	"append",
 	"apply",
 
-	"display",
-	"write",
+	"write-prim",
 
 	"make-vector",
 
@@ -99,8 +98,7 @@ const (
 	SymAppend
 	SymApply
 
-	SymDisplay
-	SymWrite
+	SymWritePrim
 
 	SymMakeVector
 
@@ -112,20 +110,18 @@ const (
 	Last
 )
 
-func FnDisplay(nargs int) error {
-	if nargs != 1 {
+func FnWritePrim(nargs int) error {
+	if nargs != 2 {
 		return errors.New(
-			"Wrong arg count to display (ports not yet implemented)")
+			"Wrong arg count to display-internal (ports not yet implemented)")
 	}
-	return WriteValue(stack.Top(), true, nil)
-}
+	
+	isdisplay, ok := stack.Pop().(Boolean)
+	if !ok {
+		return errors.New("Expected bool as first arg to write-prim")
+	}
 
-func FnWrite(nargs int) error {
-	if nargs != 1 {
-		return errors.New(
-			"Wrong arg count to display (ports not yet implemented)")
-	}
-	return WriteValue(stack.Top(), false, nil)
+	return WriteValue(stack.Pop(), bool(isdisplay), nil)
 }
 
 var TopScope = &Scope{
@@ -157,8 +153,7 @@ var TopScope = &Scope{
 		SymAppend: &Procedure{Builtin: FnAppend},
 		SymApply:  &Procedure{Builtin: FnApply},
 
-		SymDisplay: &Procedure{Builtin: FnDisplay},
-		SymWrite:   &Procedure{Builtin: FnWrite},
+		SymWritePrim: &Procedure{Builtin: FnWritePrim},
 
 		SymStringEq:      &Procedure{Builtin: FnStringEq},
 		SymSymbol2String: &Procedure{Builtin: FnSymbol2String},

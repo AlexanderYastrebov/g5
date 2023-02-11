@@ -7,12 +7,13 @@ import (
 
 func (p *Procedure) Gen(v Value) error {
 	switch v.(type) {
-	case Boolean, String, Character, Vector, Integer, Rational:
+	case Vector:
+		panic("Vectors not yet implemented")
+	case Boolean, String, Character, Integer, Rational:
 		p.Ins = append(p.Ins, Ins{Imm, v, 0})
 	case Symbol, Scoped:
 		p.Ins = append(p.Ins, Ins{GetVar, v, 0})
 	case *Pair:
-		var args []Value
 		args, err := list2vec(v.(*Pair))
 		if err != nil {
 			return err
@@ -22,26 +23,18 @@ func (p *Procedure) Gen(v Value) error {
 			return errors.New("Empty expression")
 		}
 
-		issym := false
-		sym, ok := args[0].(Symbol)
-		if ok {
-			issym = true
-		} else {
-			if scoped, ok := args[0].(Scoped); ok {
-				sym = scoped.Symbol
-				issym = true
-			}
+		car := args[0]
+		if scoped, ok := args[0].(Scoped); ok {
+			car = scoped.Symbol
 		}
 
-		if issym {
-			if sr, ok := p.Macros[sym]; ok {
-				i := 0
-				found := false
+		if sym, ok := car.(Symbol); ok {
+			if syntaxrules, ok := p.Macros[sym]; ok {
 				var pattern *Pair
-				f := *v.(*Pair).Cdr
-
-				for i, pattern = range sr.Patterns {
-					if IsMatch(*pattern.Cdr, f, sr.Literals) {
+				form := *v.(*Pair).Cdr
+				i, found := 0, false
+				for i, pattern = range syntaxrules.Patterns {
+					if IsMatch(*pattern.Cdr, form, syntaxrules.Literals) {
 						found = true
 						break
 					}
@@ -53,9 +46,13 @@ func (p *Procedure) Gen(v Value) error {
 				}
 
 				m := MacroMap{}
-				m.parse(*pattern.Cdr, f, sr.Literals, true)
+				m.parse(*pattern.Cdr, form, syntaxrules.Literals, true)
 
-				trans, err := m.transcribe(sr.Templates[i], false, sym)
+				trans, err := m.transcribe(
+					syntaxrules.Templates[i],
+					false,
+					sym,
+				)
 				if err != nil {
 					return err
 				}
@@ -83,17 +80,16 @@ func (p *Procedure) Gen(v Value) error {
 							"least one statement")
 					}
 
-					def := args[1].(*Pair)
-					dest := *def.Car
+					dest, defargs := *args[1].(*Pair).Car, *args[1].(*Pair).Cdr
 
 					lambda := Procedure{
-						Args:   Unscope(*def.Cdr),
+						Args:   Unscope(defargs),
 						Ins:    []Ins{},
 						Macros: p.Macros,
 					}
 
-					for _, arg := range args[2:] {
-						lambda.Gen(Unscope(arg))
+					for _, expr := range args[2:] {
+						lambda.Gen(Unscope(expr))
 					}
 
 					p.Ins = append(p.Ins, Ins{Lambda, lambda, 0})
@@ -120,8 +116,8 @@ func (p *Procedure) Gen(v Value) error {
 					Macros: p.Macros,
 				}
 
-				for _, arg := range args[2:] {
-					lambda.Gen(Unscope(arg))
+				for _, expr := range args[2:] {
+					lambda.Gen(Unscope(expr))
 				}
 				p.Ins = append(p.Ins, Ins{Lambda, lambda, 0})
 				return nil
@@ -154,7 +150,7 @@ func (p *Procedure) Gen(v Value) error {
 			// These are for the implementation of (hygenic) macros
 			case SymSaveScope:
 				if len(args) != 1 {
-					return errors.New("INTERNAL: save-scope takes no args")
+					return errors.New("Wrong number of args to save-scope")
 				}
 				p.Ins = append(p.Ins, Ins{SaveScope, nil, 0})
 				return nil
@@ -163,34 +159,40 @@ func (p *Procedure) Gen(v Value) error {
 					return errors.New("Wrong number of args to define-syntax")
 				}
 
-				macroName, ok := args[1].(Symbol)
-				if !ok {
-					return fmt.Errorf("Expected macro name, got %T", args[1])
+				var name Symbol
+				if _, ok = args[1].(Scoped); ok {
+					name = args[1].(Scoped).Symbol
+				} else {
+					name, ok = args[1].(Symbol)
+					if !ok {
+						return fmt.Errorf("Expected macro name, got %t",
+							args[1])
+					}
 				}
 
-				srl, ok := args[2].(*Pair)
+				_, ok := args[2].(*Pair)
 				if !ok {
-					return fmt.Errorf("Expected list, got %T", args[2])
+					return fmt.Errorf("Expected syntax-rules, got %T", args[2])
 				}
 
-				srv, err := list2vec(srl)
+				syntaxrules_v, err := list2vec(args[2].(*Pair))
 				if err != nil {
 					return err
 				}
 
-				sr, err := ParseSyntaxRules(srv)
+				syntaxrules, err := ParseSyntaxRules(syntaxrules_v)
 				if err != nil {
 					return err
 				}
 
-				if _, ok := p.Macros[macroName]; ok {
+				if _, ok := p.Macros[name]; ok {
 					fmt.Printf("WARNING: Redefining macro %s",
-						SymbolNames[macroName])
+						SymbolNames[name])
 				}
 
-				p.Macros[macroName] = *sr
+				p.Macros[name] = *syntaxrules
 				p.Ins = append(p.Ins, Ins{SaveScope, nil, 0})
-				p.Ins = append(p.Ins, Ins{Define, macroName, 1})
+				p.Ins = append(p.Ins, Ins{Define, name, 1})
 				return nil
 			}
 		}

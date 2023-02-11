@@ -21,18 +21,18 @@ func ParseSyntaxRules(v []Value) (*SyntaxRules, error) {
 		return nil, errors.New("Expected syntax-rules, got other symbol")
 	}
 
-	litl, ok := v[1].(*Pair)
+	_, ok := v[1].(*Pair)
 	if !ok {
 		return nil, errors.New("Got non-list for <literals>")
 	}
 
-	litv, err := list2vec(litl)
+	litvec, err := list2vec(v[1].(*Pair))
 	if err != nil {
 		return nil, errors.New("Got improper list for <literals>")
 	}
 
 	literals := []Symbol{}
-	for _, val := range litv {
+	for _, val := range litvec {
 		s, ok := val.(Symbol)
 		if !ok {
 			return nil, errors.New("Got non-symbol in <literals>")
@@ -70,14 +70,8 @@ func IsEqual(v1 Value, v2 Value) bool {
 	}
 
 	switch v1.(type) {
-	case Boolean:
-		return v1.(Boolean) == v2.(Boolean)
-	case Symbol:
-		return SymbolNames[v1.(Symbol)] == SymbolNames[v2.(Symbol)]
-	case String:
-		return v1.(String) == v2.(String)
-	case Character:
-		return v1.(Character) == v2.(Character)
+	case Boolean, Symbol, String, Character, *Procedure, *Scope:
+		return v1 == v2
 	case Vector:
 		if len(v1.(Vector)) != len(v2.(Vector)) {
 			return false
@@ -101,10 +95,6 @@ func IsEqual(v1 Value, v2 Value) bool {
 	case Rational:
 		b1, b2 := big.Rat(v1.(Rational)), big.Rat(v2.(Rational))
 		return b1.Cmp(&b2) == 0
-	case *Procedure:
-		return v1.(*Procedure) == v2.(*Procedure)
-	case *Scope:
-		return v1.(*Scope) == v2.(*Scope)
 	default:
 		panic("IsEqual: Unknown type")
 	}
@@ -144,12 +134,12 @@ func IsMatch(p Value, f Value, literals []Symbol) bool {
 	case Symbol:
 		isliteral := false
 		for _, s := range literals {
-			if p.(Symbol) == s {
+			if p == s {
 				isliteral = true
 				break
 			}
 		}
-		return !isliteral || p.(Symbol) == f.(Symbol)
+		return !isliteral || p == f
 	case *Pair:
 
 		vp, err := list2vec(p.(*Pair))
@@ -211,6 +201,7 @@ type MacroList struct {
 }
 type MacroMap map[Symbol]*MacroList
 
+// If f == nil, just create empty MacroList
 func (m *MacroMap) parse(p Value,
 	f Value,
 	literals []Symbol,
@@ -223,6 +214,7 @@ func (m *MacroMap) parse(p Value,
 	if scoped, ok := f.(Scoped); ok {
 		f = scoped.Symbol
 	}
+
 	switch p.(type) {
 	case Symbol:
 		isliteral := false
@@ -233,7 +225,7 @@ func (m *MacroMap) parse(p Value,
 			}
 		}
 
-		if isliteral && f != nil && p.(Symbol) == f.(Symbol) {
+		if isliteral && f != nil && p == f {
 			return nil
 		} else if isliteral {
 			return errors.New("Macro mismatch: Literal")
@@ -254,14 +246,14 @@ func (m *MacroMap) parse(p Value,
 			vp = dot2ellipsis(p.(*Pair))
 		}
 
-		var vf []Value
 		if f == nil {
 			for i := range vp {
 				m.parse(vp[i], nil, literals, isSingle)
 			}
 			return nil
 		}
-		vf, err = list2vec(f.(*Pair))
+
+		vf, err := list2vec(f.(*Pair))
 		if err != nil {
 			return errors.New("Macro mismatch: List vs non-list")
 		}

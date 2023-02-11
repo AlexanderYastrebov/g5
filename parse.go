@@ -231,7 +231,8 @@ func (p *Parser) GetValue() (Value, error) {
 			return nil, err
 		}
 
-		var tail Value = &Pair{&val, &Empty}
+		cdr := Empty
+		var tail Value = &Pair{&val, &cdr}
 
 		var res Value
 		switch str {

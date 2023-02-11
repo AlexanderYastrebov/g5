@@ -28,8 +28,8 @@ func validate(code string) bool {
 	return count == 0 && nonws != 0
 }
 
-func Run(code string, quiet bool) {
-	// stack = []Value{}
+func (ctx *Procedure) Run(code string, quiet bool) {
+	stack = []Value{}
 	p := NewParser(code)
 	p.skipWs()
 
@@ -40,12 +40,12 @@ func Run(code string, quiet bool) {
 			log.Fatalf("Error (parse): %v\n", err)
 		}
 
-		Top.Ins = []Ins{}
-		if err := Top.Gen(v); err != nil {
+		ctx.Ins = []Ins{}
+		if err := ctx.Gen(v); err != nil {
 			log.Fatalf("Error (gen): %v\n", err)
 		}
 
-		if err := Top.Eval(); err != nil {
+		if err := ctx.Eval(); err != nil {
 			log.Fatalf("Error (eval): %v\n", err)
 		}
 
@@ -66,7 +66,7 @@ func main() {
 		log.Fatalln("Symbol table length mismatch")
 	}
 
-	Run(Runtime, true)
+	Top.Run(Runtime, true)
 	switch len(os.Args) {
 	case 1:
 		reader := bufio.NewReader(os.Stdin)
@@ -80,14 +80,14 @@ func main() {
 				next, _ := reader.ReadString('\n')
 				code += next
 			}
-			Run(code, false)
+			Top.Run(code, false)
 		}
 	case 2:
 		b, err := os.ReadFile(os.Args[1])
 		if err != nil {
 			log.Fatalln("Error: Could not read file")
 		}
-		Run(string(b), true)
+		Top.Run(string(b), true)
 	default:
 		fmt.Printf("Usage: %s [filename]", os.Args[0])
 	}

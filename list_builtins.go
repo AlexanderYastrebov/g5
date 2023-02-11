@@ -19,11 +19,16 @@ func FnCar(nargs int) error {
 	if nargs != 1 {
 		return errors.New("Wrong arg count to car")
 	}
-	p := stack.Pop().(*Pair)
-	if p == Empty {
+
+	v := stack.Pop()
+	if _, ok := v.(*Pair); !ok {
+		return fmt.Errorf("car takes a pair argument, not %T", v)
+	}
+
+	if v == Empty {
 		stack.Push(Empty)
 	} else {
-		stack.Push(*p.Car)
+		stack.Push(*v.(*Pair).Car)
 	}
 	return nil
 }
@@ -32,11 +37,16 @@ func FnCdr(nargs int) error {
 	if nargs != 1 {
 		return errors.New("Wrong arg count to cdr")
 	}
-	p := stack.Pop().(*Pair)
-	if p == Empty {
+
+	v := stack.Pop()
+	if _, ok := v.(*Pair); !ok {
+		return fmt.Errorf("cdr takes a pair argument, not %T", v)
+	}
+
+	if v == Empty {
 		stack.Push(Empty)
 	} else {
-		stack.Push(*p.Cdr)
+		stack.Push(*v.(*Pair).Cdr)
 	}
 	return nil
 }
@@ -46,14 +56,16 @@ func FnSetCar(nargs int) error {
 		return errors.New("Wrong arg count to set-car!")
 	}
 
-	pair := stack.Pop()
-	obj := stack.Pop()
-
+	pair, obj := stack.Pop(), stack.Pop()
 	if _, ok := pair.(*Pair); !ok {
 		return errors.New("set-car! requires a pair argument")
 	}
 
-	pair.(*Pair).Car = &obj
+	if pair == Empty {
+		return errors.New("Cannot set-car! on Empty list")
+	}
+
+	*pair.(*Pair).Car = obj
 	stack.Push(pair)
 	return nil
 }
@@ -63,14 +75,16 @@ func FnSetCdr(nargs int) error {
 		return errors.New("Wrong arg count to set-cdr!")
 	}
 
-	pair := stack.Pop()
-	obj := stack.Pop()
-
+	pair, obj := stack.Pop(), stack.Pop()
 	if _, ok := pair.(*Pair); !ok {
 		return errors.New("set-car! requires a pair argument")
 	}
 
-	pair.(*Pair).Cdr = &obj
+	if pair == Empty {
+		return errors.New("Cannot set-cdr! on Empty list")
+	}
+
+	*pair.(*Pair).Cdr = obj
 	stack.Push(pair)
 	return nil
 }
@@ -81,14 +95,13 @@ func FnAppend(nargs int) error {
 	}
 
 	vec := []Value{}
-	for i := nargs; i > 1; i-- {
-		v := stack.Pop()
-		p, ok := v.(*Pair)
-		if !ok {
-			return fmt.Errorf("Expected pair argument to append (got %T)", v)
+	for i := nargs - 1; i >= 1; i-- {
+		arg := stack.Pop()
+		if _, ok := arg.(*Pair); !ok {
+			return fmt.Errorf("Expected pair argument to append (got %T)", arg)
 		}
 
-		next, err := list2vec(p)
+		next, err := list2vec(arg.(*Pair))
 		if err != nil {
 			return errors.New(
 				"Expected list argument to append, got improper list")
@@ -98,12 +111,13 @@ func FnAppend(nargs int) error {
 			vec = append(vec, v)
 		}
 	}
-	if len(vec) == 0 {
-		return nil
-	}
-	newp := vec2list(vec)
 
-	cur, last := Value(newp), Value(newp)
+	if len(vec) == 0 {
+		return nil // (append '() x) => x
+	}
+
+	p := vec2list(vec)
+	cur, last := Value(p), Value(p)
 	for cur != Empty {
 		last = cur
 		if _, ok := cur.(*Pair); !ok {
@@ -114,7 +128,7 @@ func FnAppend(nargs int) error {
 
 	cdr := stack.Pop()
 	last.(*Pair).Cdr = &cdr
-	stack.Push(newp)
+	stack.Push(p)
 	return nil
 }
 
@@ -123,37 +137,37 @@ func FnApply(nargs int) error {
 		return errors.New("Wrong arg count to apply")
 	}
 
-	p, ok := stack.Pop().(*Procedure)
+	proc, ok := stack.Pop().(*Procedure)
 	if !ok {
 		return errors.New("Got non-procedure for apply")
 	}
 
-	vec := []Value{}
+	args := []Value{}
 	for i := 0; i < nargs-2; i++ {
-		vec = append(vec, stack.Pop())
+		args = append(args, stack.Pop())
 	}
 
-	l, ok := stack.Pop().(*Pair)
+	lastp, ok := stack.Pop().(*Pair)
 	if !ok {
 		return errors.New("Last argument to apply must be a pair")
 	}
-	lv, err := list2vec(l)
+	last, err := list2vec(lastp)
 	if err != nil {
 		return err
 	}
 
-	for _, v := range lv {
-		vec = append(vec, v)
+	for _, v := range last {
+		args = append(args, v)
 	}
 
-	for i := len(vec) - 1; i >= 0; i-- {
-		stack.Push(vec[i])
+	for i := len(args) - 1; i >= 0; i-- {
+		stack.Push(args[i])
 	}
+	stack.Push(proc)
 
-	stack.Push(p)
 	call := Procedure{
 		Scope: Top.Scope,
-		Ins:   []Ins{{Call, nil, len(vec)}},
+		Ins:   []Ins{{Call, nil, len(args)}},
 	}
 	return call.Eval()
 }

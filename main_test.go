@@ -8,18 +8,18 @@ import (
 
 func TestMain(m *testing.M) {
 	Top.Scope = TopScope // Put builtins into top-level scope
-	Run(Runtime, true)
+	Top.Run(Runtime, true)
 	os.Exit(m.Run())
 }
 
 func TestLambdas(t *testing.T) {
-	Run("(define add (lambda (x y) (+ x y)))", true)
+	Top.Run("(define add (lambda (x y) (+ x y)))", true)
 	result := stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
 
-	Run("(add 2 3)", true)
+	Top.Run("(add 2 3)", true)
 	result, ok := stack.Top().(Integer)
 	if !ok {
 		t.Errorf("Expected integer, got %T", result)
@@ -31,19 +31,19 @@ func TestLambdas(t *testing.T) {
 }
 
 func TestAdder(t *testing.T) {
-	Run("(define make-adder (lambda (x) (lambda (y) (+ x y))))", true)
+	Top.Run("(define make-adder (lambda (x) (lambda (y) (+ x y))))", true)
 	result := stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
 
-	Run("(define add-2 (make-adder 2))", true)
+	Top.Run("(define add-2 (make-adder 2))", true)
 	result = stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
 
-	Run("(add-2 3)", true)
+	Top.Run("(add-2 3)", true)
 	result, ok := stack.Top().(Integer)
 	if !ok {
 		t.Errorf("Expected integer, got %T", result)
@@ -55,19 +55,19 @@ func TestAdder(t *testing.T) {
 }
 
 func TestCounter(t *testing.T) {
-	Run("(define (make-ctr) (set! count 0) (lambda (ctr) (+ count 1)))", true)
+	Top.Run("(define (make-ctr) (set! count 0) (lambda (ctr) (+ count 1)))", true)
 	result := stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
 
-	Run("(define ctr (make-ctr))", true)
+	Top.Run("(define ctr (make-ctr))", true)
 	result = stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
 	}
 
-	Run("(ctr)", true)
+	Top.Run("(ctr)", true)
 	result, ok := stack.Top().(Integer)
 	if !ok {
 		t.Errorf("Expected integer, got %T", result)
@@ -79,7 +79,7 @@ func TestCounter(t *testing.T) {
 }
 
 func TestLet(t *testing.T) {
-	Run("(let ((a 0) (b 1)) b)", true)
+	Top.Run("(let ((a 0) (b 1)) b)", true)
 	result, ok := stack.Top().(Integer)
 	if !ok {
 		t.Errorf("Expected integer, got %T", result)
@@ -91,7 +91,7 @@ func TestLet(t *testing.T) {
 }
 
 func TestAnd(t *testing.T) {
-	Run("(and #t #t)", true)
+	Top.Run("(and #t #t)", true)
 	result, ok := stack.Top().(Boolean)
 	if !ok {
 		t.Errorf("Expected boolean, got %T", result)
@@ -103,7 +103,7 @@ func TestAnd(t *testing.T) {
 }
 
 func TestOr(t *testing.T) {
-	Run("(or #t #f)", true)
+	Top.Run("(or #t #f)", true)
 	result, ok := stack.Top().(Boolean)
 	if !ok {
 		t.Errorf("Expected boolean, got %T", result)
@@ -115,7 +115,7 @@ func TestOr(t *testing.T) {
 }
 
 func TestLetrec(t *testing.T) {
-	Run("(letrec ((a #t)) #t)", true)
+	Top.Run("(letrec ((a #t)) #t)", true)
 	result, ok := stack.Top().(Boolean)
 	if !ok {
 		t.Errorf("Expected boolean, got %T", result)

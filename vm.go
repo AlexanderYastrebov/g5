@@ -111,7 +111,8 @@ begin:
 								cur.Car = &v
 
 								if n == 0 {
-									cur.Cdr = &Empty
+									cdr := Empty
+									cur.Cdr = &cdr
 									break
 								}
 								var next Value = new(Pair)

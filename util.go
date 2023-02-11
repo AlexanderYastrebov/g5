@@ -23,7 +23,8 @@ func vec2list(vec []Value) *Pair {
 			cur = (*cur.Cdr).(*Pair)
 		}
 	}
-	cur.Cdr = &Empty
+	cdr := Empty
+	cur.Cdr = &cdr
 
 	return res
 }
