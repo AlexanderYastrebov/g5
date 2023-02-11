@@ -5,14 +5,6 @@ import (
 	"fmt"
 )
 
-func FnIsNull(nargs int) error {
-	if nargs != 1 {
-		return errors.New("Wrong arg count to null?")
-	}
-	stack.Push(Boolean(stack.Pop() == Empty))
-	return nil
-}
-
 func FnCons(nargs int) error {
 	if nargs != 2 {
 		return errors.New("Wrong arg count to cons")
@@ -48,7 +40,6 @@ func FnCdr(nargs int) error {
 	}
 	return nil
 }
-
 
 func FnSetCar(nargs int) error {
 	if nargs != 2 {
@@ -111,7 +102,7 @@ func FnAppend(nargs int) error {
 		return nil
 	}
 	newp := vec2list(vec)
-	
+
 	cur, last := Value(newp), Value(newp)
 	for cur != Empty {
 		last = cur
@@ -138,7 +129,7 @@ func FnApply(nargs int) error {
 	}
 
 	vec := []Value{}
-	for i := 0; i < nargs - 2; i++ {
+	for i := 0; i < nargs-2; i++ {
 		vec = append(vec, stack.Pop())
 	}
 
@@ -160,8 +151,9 @@ func FnApply(nargs int) error {
 	}
 
 	stack.Push(p)
-	call := Procedure{Scope: Top.Scope,
-		Ins: []Ins{{Call, nil, len(vec)}},
+	call := Procedure{
+		Scope: Top.Scope,
+		Ins:   []Ins{{Call, nil, len(vec)}},
 	}
 	return call.Eval()
 }

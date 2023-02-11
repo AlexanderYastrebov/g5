@@ -29,7 +29,7 @@ func validate(code string) bool {
 }
 
 func Run(code string, quiet bool) {
-	//stack = []Value{}
+	// stack = []Value{}
 	p := NewParser(code)
 	p.skipWs()
 

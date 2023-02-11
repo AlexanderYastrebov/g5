@@ -37,7 +37,6 @@ var SymbolNames = []string{
 	"eq?",
 	"equal?",
 
-	"null?",
 	"cons",
 	"car",
 	"cdr",
@@ -92,7 +91,6 @@ const (
 	SymEq
 	SymEqual
 
-	SymIsNull
 	SymCons
 	SymCar
 	SymCdr
@@ -140,10 +138,10 @@ var TopScope = &Scope{
 		SymLt:  &Procedure{Builtin: FnLt},
 		SymEqu: &Procedure{Builtin: FnNumEq},
 
-		SymNot:        &Procedure{Builtin: FnNot},
-		SymEqv:        &Procedure{Builtin: FnEqv},
-		SymEq:         &Procedure{Builtin: FnEqv},
-		SymEqual:      &Procedure{Builtin: FnEqual},
+		SymNot:   &Procedure{Builtin: FnNot},
+		SymEqv:   &Procedure{Builtin: FnEqv},
+		SymEq:    &Procedure{Builtin: FnEqv},
+		SymEqual: &Procedure{Builtin: FnEqual},
 
 		SymIsNumber:   &Procedure{Builtin: FnIsNumber},
 		SymIsComplex:  &Procedure{Builtin: FnIsComplex},
@@ -151,14 +149,13 @@ var TopScope = &Scope{
 		SymIsRational: &Procedure{Builtin: FnIsRational},
 		SymIsInteger:  &Procedure{Builtin: FnIsInteger},
 
-		SymIsNull:  &Procedure{Builtin: FnIsNull},
-		SymCons:    &Procedure{Builtin: FnCons},
-		SymCar:     &Procedure{Builtin: FnCar},
-		SymCdr:     &Procedure{Builtin: FnCdr},
-		SymSetCar:  &Procedure{Builtin: FnSetCar},
-		SymSetCdr:  &Procedure{Builtin: FnSetCdr},
-		SymAppend:  &Procedure{Builtin: FnAppend},
-		SymApply:   &Procedure{Builtin: FnApply},
+		SymCons:   &Procedure{Builtin: FnCons},
+		SymCar:    &Procedure{Builtin: FnCar},
+		SymCdr:    &Procedure{Builtin: FnCdr},
+		SymSetCar: &Procedure{Builtin: FnSetCar},
+		SymSetCdr: &Procedure{Builtin: FnSetCdr},
+		SymAppend: &Procedure{Builtin: FnAppend},
+		SymApply:  &Procedure{Builtin: FnApply},
 
 		SymDisplay: &Procedure{Builtin: FnDisplay},
 		SymWrite:   &Procedure{Builtin: FnWrite},
