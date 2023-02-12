@@ -304,10 +304,8 @@
   
  (define-syntax quasiquote 
    (syntax-rules (unquote unquote-splicing quasiquote) 
-     ((_ (unquote form)) 
-      form) 
-     ((_ ((unquote-splicing form) . rest)) 
-      (append form (quasiquote rest))) 
+     ((_ (unquote form)) form) 
+     ((_ ((unquote-splicing form) . rest)) (append form (quasiquote rest))) 
      ((_ (quasiquote form) . depth) 
       (list 'quasiquote (quasiquote form #f . depth))) 
      ((_ (unquote form)  x . depth) 
@@ -316,9 +314,6 @@
       (list 'unquote-splicing (quasiquote form . depth))) 
      ((_ (car . cdr) . depth) 
       (cons (quasiquote car . depth) (quasiquote cdr . depth))) 
-     ((_ #(elt ...) . depth) 
-      (list->vector (quasiquote (elt ...) . depth))) 
-     ((_ atom . depth) 
-      'atom))) 
-          
-
+     ;((_ #(elt ...) . depth) 
+     ; (list->vector (quasiquote (elt ...) . depth))) 
+     ((_ atom . depth) 'atom))) 

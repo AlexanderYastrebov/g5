@@ -135,10 +135,9 @@ func WriteValue(v Value, display bool, port *Port) error {
 		for cur != Empty {
 			WriteValue(*cur.Car, display, port)
 			if p, ok := (*cur.Cdr).(*Pair); ok {
-				if p.Car == nil && p.Cdr == nil {
-					break
+				if p != Empty {
+					fmt.Fprint(writer, " ")
 				}
-				fmt.Fprint(writer, " ")
 				cur = (*cur.Cdr).(*Pair)
 			} else {
 				fmt.Fprint(writer, " . ")
