@@ -44,8 +44,9 @@ type Procedure struct {
 	Args    Value
 	Ins     []Ins
 	Builtin func(int) error
+	CallCC  func(*Procedure, int) error
 	Macros  map[Symbol]SyntaxRules
-	KeepScope bool
+	Cont    bool
 }
 
 func (Procedure) isValue() {}

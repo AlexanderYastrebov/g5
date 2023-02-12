@@ -152,7 +152,26 @@ const (
 	SymLast
 )
 
-var ProcCallCC Procedure
+func FnCallCC(p *Procedure, nargs int) error {
+	p.Cont = true
+	proc := stack.Pop()
+	vec := []Value{}
+	for i := 0; i < nargs; i++ {
+		vec = append(vec)
+	}
+	vec = append(vec, p)
+	for i := len(vec) - 1; i >= 0; i-- {
+		stack.Push(vec[i])
+	}
+
+	stack.Push(proc)
+	call := Procedure{
+		Scope: p.Scope,
+		Ins: []Ins{{Call, nil, nargs}},
+	}
+
+	return call.Eval()
+}
 
 func FnWritePrim(nargs int) error {
 	if nargs != 2 {
@@ -189,7 +208,7 @@ func FnExit(nargs int) error {
 
 var TopScope = Scope{
 	map[Symbol]Value{
-		SymCallCC: &ProcCallCC,
+		SymCallCC: &Procedure{CallCC: FnCallCC},
 		SymExit:   &Procedure{Builtin: FnExit},
 
 		SymAdd:          &Procedure{Builtin: FnAdd},

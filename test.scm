@@ -25,7 +25,7 @@
         (reta)))
 
 (define let-inner 1)
-(let () (define let-inner 2) (test 2 let-inner))
+(let () (define let-inner 2) (test "let-inner-inner" 2 let-inner))
 (test "let-inner" 1 let-inner)
 
 (test "cond" 'yes (cond
@@ -42,3 +42,7 @@
 
 
 (test "case-lambda" 6 (plus 1 2 3))
+
+
+(test "call/cc 1" 231 (call/cc (lambda (f) 231)))
+(test "call/cc 2" 123 (call/cc (lambda (f) (f 123))))

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"errors"
 )
 
 type Op uint8
@@ -48,7 +47,11 @@ func (scope *Scope) Lookup(v Value) *Scope {
 
 func (p *Procedure) Eval() error {
 begin:
-	for i, ins := range p.Ins {
+	for len(p.Ins) > 0 {
+		ins := p.Ins[0]
+		p.Ins = p.Ins[1:]
+
+		//ins.Print()
 		switch ins.op {
 		case Imm:
 			stack.Push(ins.imm)
@@ -79,62 +82,76 @@ begin:
 				fmt.Println()
 				return fmt.Errorf("Call to non-procedure (%T)", callee)
 			}
-			newp := new(Procedure)
-			*newp = *newp_template
 
-			if newp.Builtin != nil {
+			var newp *Procedure
+			if newp_template.Cont {
+				newp = newp_template
+			} else {
+				newp = new(Procedure)
+				*newp = *newp_template
+			}
+
+			if newp.CallCC != nil {
+				res := newp.CallCC(p, ins.nargs)
+				if res != nil {
+					return res
+				}
+			} else if newp.Builtin != nil {
 				res := newp.Builtin(ins.nargs)
 				if res != nil {
 					return res
 				}
 			} else {
-				newp.Scope.m = map[Symbol]Value{}
-
-				n := ins.nargs
-				cur := newp.Args
-				_, ispair := newp.Args.(*Pair)
-				for n > 0 && ispair {
-					if cur == Empty {
-						return errors.New("Too few arguments")
-					}
-					sym, ok := Unscope(*cur.(*Pair).Car).(Symbol)
-					if !ok {
-						panic("Non-symbol argument?")
-					}
-					newp.Scope.m[sym] = stack.Pop()
-					n--
-					cur = *cur.(*Pair).Cdr
-					if _, ok := cur.(*Pair); !ok {
-						break
-					}
-				}
-
-				// Dot arg
-				if s, ok := cur.(Symbol); ok {
-					rest := new(Pair)
-					cur := rest
-					if n == 0 {
-						newp.Scope.m[s] = Empty
-					} else {
-						for n > 0 {
-							v := stack.Pop()
-							n--
-							cur.Car = &v
-
-							if n == 0 {
-								cdr := Empty
-								cur.Cdr = &cdr
-								break
-							}
-							var next Value = new(Pair)
-							cur.Cdr = &next
-							cur = next.(*Pair)
+				if newp.Cont {
+					newp.Cont = false
+				} else {
+					newp.Scope.m = map[Symbol]Value{}
+					n := ins.nargs
+					cur := newp.Args
+					_, ispair := newp.Args.(*Pair)
+					for n > 0 && ispair {
+						if cur == Empty {
+							return fmt.Errorf("Wrong arg count (got %d)", n)
 						}
-						newp.Scope.m[s] = rest
+						sym, ok := (*cur.(*Pair).Car).(Symbol)
+						if !ok {
+							panic("Non-symbol argument?")
+						}
+						newp.Scope.m[sym] = stack.Pop()
+						n--
+						cur = *cur.(*Pair).Cdr
+						if _, ok := cur.(*Pair); !ok {
+							break
+						}
+					}
+
+					// Dot arg
+					if s, ok := cur.(Symbol); ok {
+						rest := new(Pair)
+						cur := rest
+						if n == 0 {
+							newp.Scope.m[s] = Empty
+						} else {
+							for n > 0 {
+								v := stack.Pop()
+								n--
+								cur.Car = &v
+
+								if n == 0 {
+									cdr := Empty
+									cur.Cdr = &cdr
+									break
+								}
+								var next Value = new(Pair)
+								cur.Cdr = &next
+								cur = next.(*Pair)
+							}
+							newp.Scope.m[s] = rest
+						}
 					}
 				}
 
-				if i == len(p.Ins)-1 { // Tail call
+				if len(p.Ins) == 0 { // Tail call
 					p = newp
 					goto begin
 				}
@@ -159,7 +176,7 @@ begin:
 			stack.Push(Value(&lambda))
 		case Set:
 			sym := Unscope(ins.imm).(Symbol)
-			scope := p.Scope.Lookup(sym)
+			scope := p.Scope.Lookup(ins.imm)
 			if scope == nil {
 				scope = &p.Scope
 			}
@@ -172,11 +189,23 @@ begin:
 			p.Scope.m[sym] = stack.Top()
 		case If:
 			cond, isbool := stack.Pop().(Boolean)
-			lt := stack.Pop().(Procedure)
+			v := stack.Pop()
+			lt, ok := v.(Procedure)
+			if !ok {
+				PrintValue(v)
+				fmt.Println()
+				panic("Fail")
+			}
 			lf := Procedure{}
 
 			if ins.nargs == 3 {
-				lf = stack.Pop().(Procedure)
+				v := stack.Pop()
+				lf, ok = v.(Procedure)
+				if !ok {
+					PrintValue(v)
+					fmt.Println()
+					panic("Fail")
+				}
 			}
 
 			var res error
