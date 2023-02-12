@@ -9,7 +9,7 @@ func (p *Procedure) Gen(v Value) error {
 	switch v.(type) {
 	case Vector:
 		panic("Vector macros not yet implemented")
-	case Boolean, String, Character, Integer, Rational:
+	case Boolean, String, Char, Integer, Rational:
 		p.Ins = append(p.Ins, Ins{Imm, v, 0})
 	case Symbol, Scoped:
 		p.Ins = append(p.Ins, Ins{GetVar, v, 0})

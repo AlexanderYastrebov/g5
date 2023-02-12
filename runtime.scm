@@ -7,6 +7,12 @@
 (define exact? number?)
 (define (inexact? z) #f)
 
+(define (char=? a b) (= (char->integer a) (char->integer b)))
+(define (char<? a b) (< (char->integer a) (char->integer b)))
+(define (char>? a b) (> (char->integer a) (char->integer b)))
+(define (char=<? a b) (=< (char->integer a) (char->integer b)))
+(define (char=>? a b) (=> (char->integer a) (char->integer b)))
+
 (define (list . x) x)
 
 (define-syntax begin
@@ -262,3 +268,31 @@
 (define (assoc x l) (assf equal? x l))
 (define (assv x l) (assf eqv? x l))
 (define (assq x l) (assf eq? x l))
+
+(define (append . l)
+  (define (append2 l1 l2)
+    (if (null? l1)
+      l2
+      (cons (car l1) (append2 (cdr l1) l2))))
+  (case (length l)
+    ((1) (car l))
+    ((2) (append2 (car l) (car (cdr l))))
+    (else (append2 (car l) (apply append (cdr l))))))
+
+(define (list-ref l n)
+  (if (zero? n)
+    (car n)
+    (list-ref (cdr l) (- n 1))))
+
+(define (write-char c)
+  (if (not (char? c))
+    (error "write-char requires a char"))
+  (display c))
+
+(define (vector-fill! vector fill)
+  (define (fill-n vector fill n)
+    (if (>= n 0)
+      (begin
+        (vector-set! vector n fill)
+        (fill-n vector fill (- n 1)))))
+  (fill-n vector fill (- (vector-length vector) 1)))

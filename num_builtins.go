@@ -576,3 +576,17 @@ func FnRound(nargs int) error {
 	stack.Push(Integer(*res))
 	return nil
 }
+
+func FnChar2Integer(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to char->integer")
+	}
+	
+	v := stack.Pop()
+	c, ok := v.(Char)
+	if !ok {
+		return fmt.Errorf("Got non-char to char->integer (%T)", v)
+	}
+	stack.Push(Integer(*big.NewInt(int64(c))))
+	return nil
+}

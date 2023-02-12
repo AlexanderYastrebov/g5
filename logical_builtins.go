@@ -31,9 +31,14 @@ func FnEqv(nargs int) error {
 
 	// The eqv? procedure returns #t if:
 	switch obj1.(type) {
-	case Boolean:
+	case Boolean, Char, *Procedure:
 		// obj1 and obj2 are both #t or both #f.
-		stack.Push(Boolean(obj1.(Boolean) == obj2.(Boolean)))
+
+		// obj1 and obj2 are both characters and are the same character
+		// according to the char=? procedure
+
+		// obj1 and obj2 are procedures whose location tags are equal
+		stack.Push(Boolean(obj1 == obj2))
 		return nil
 	case Symbol:
 		// obj1 and obj2 are both symbols and
@@ -52,13 +57,6 @@ func FnEqv(nargs int) error {
 		stack.Push(obj2)
 		FnNumEq(2)
 		return nil
-	case Character:
-		// obj1 and obj2 are both characters and are the same character
-		// according to the char=? procedure
-		stack.Push(obj1)
-		stack.Push(obj2)
-		FnCharEq(2)
-		return nil
 	case *Pair:
 		// both obj1 and obj2 are the empty list.
 		if obj1 == Empty && obj2 == Empty {
@@ -67,10 +65,6 @@ func FnEqv(nargs int) error {
 		}
 		// obj1 and obj2 are pairs, vectors, or strings that denote the same
 		// locations in the store
-		stack.Push(Boolean(obj1 == obj2))
-		return nil
-	case *Procedure:
-		// obj1 and obj2 are procedures whose location tags are equal
 		stack.Push(Boolean(obj1 == obj2))
 		return nil
 	}

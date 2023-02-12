@@ -39,11 +39,3 @@ func FnNumber2String(nargs int) error {
 	}
 	return nil
 }
-
-func FnCharEq(nargs int) error {
-	if nargs != 2 {
-		return errors.New("char=? takes 2 arguments")
-	}
-	stack.Push(Boolean(stack.Pop().(Character) == stack.Pop().(Character)))
-	return nil
-}

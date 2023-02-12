@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"errors"
 )
 
 type Op uint8
@@ -84,13 +85,19 @@ begin:
 					newp.Scope = &Scope{super: newp.Scope.super}
 					newp.Scope.m = map[Symbol]Value{}
 
-					var cur Value
-					cur = newp.Args
+					cur := newp.Args
 
 					n := ins.nargs
 					_, ispair := newp.Args.(*Pair)
 					for n > 0 && ispair {
-						newp.Scope.m[(*cur.(*Pair).Car).(Symbol)] = stack.Pop()
+						if cur == Empty {
+							return errors.New("Too few arguments")
+						}
+						sym, ok := Unscope(*cur.(*Pair).Car).(Symbol)
+						if !ok {
+							panic("Non-symbol argument?")
+						}
+						newp.Scope.m[sym] = stack.Pop()
 						n--
 						cur = *cur.(*Pair).Cdr
 						if _, ok := cur.(*Pair); !ok {

@@ -22,9 +22,9 @@ func (Symbol) isValue() {}
 
 // Builtin symbols are listed in builtins.go
 
-type Character rune
+type Char rune
 
-func (Character) isValue() {}
+func (Char) isValue() {}
 
 type Vector struct {
 	v *[]Value
@@ -103,8 +103,8 @@ func WriteValue(v Value, display bool, port *Port) error {
 		} else {
 			fmt.Fprint(writer, v.(String))
 		}
-	case Character:
-		ch := rune(v.(Character))
+	case Char:
+		ch := rune(v.(Char))
 		if display {
 			fmt.Fprintf(writer, "%c", ch)
 		} else {

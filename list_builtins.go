@@ -89,49 +89,6 @@ func FnSetCdr(nargs int) error {
 	return nil
 }
 
-func FnAppend(nargs int) error {
-	if nargs == 0 {
-		return errors.New("Wrong arg count to append")
-	}
-
-	vec := []Value{}
-	for i := nargs - 1; i >= 1; i-- {
-		arg := stack.Pop()
-		if _, ok := arg.(*Pair); !ok {
-			return fmt.Errorf("Expected pair argument to append (got %T)", arg)
-		}
-
-		next, err := list2vec(arg.(*Pair))
-		if err != nil {
-			return errors.New(
-				"Expected list argument to append, got improper list")
-		}
-
-		for _, v := range next {
-			vec = append(vec, v)
-		}
-	}
-
-	if len(vec) == 0 {
-		return nil // (append '() x) => x
-	}
-
-	p := vec2list(vec)
-	cur, last := Value(p), Value(p)
-	for cur != Empty {
-		last = cur
-		if _, ok := cur.(*Pair); !ok {
-			return errors.New("Got improper list for first arg to append")
-		}
-		cur = *cur.(*Pair).Cdr
-	}
-
-	cdr := stack.Pop()
-	last.(*Pair).Cdr = &cdr
-	stack.Push(p)
-	return nil
-}
-
 func FnApply(nargs int) error {
 	if nargs < 2 {
 		return errors.New("Wrong arg count to apply")

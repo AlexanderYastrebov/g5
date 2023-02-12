@@ -186,7 +186,7 @@ func (p *Parser) GetValue() (Value, error) {
 
 			if len(p.data) == 1 || delim[p.data[1]] {
 				ch, p.data = p.data[0], p.data[1:]
-				return Character(ch), nil
+				return Char(ch), nil
 			}
 
 			for _, val := range []string{"space", "newline"} {
@@ -196,9 +196,9 @@ func (p *Parser) GetValue() (Value, error) {
 						str := string(p.data[:slen])
 						p.data = p.data[slen:]
 						if strings.ToLower(str) == "space" {
-							return Character(' '), nil
+							return Char(' '), nil
 						} else if strings.ToLower(str) == "newline" {
-							return Character('\n'), nil
+							return Char('\n'), nil
 						}
 					}
 				}
