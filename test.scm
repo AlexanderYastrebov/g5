@@ -1,15 +1,17 @@
 (define *tests-run* 0)
 (define *tests-passed* 0)
 
-(define-syntax test
-  (syntax-rules ()
-    ((test name expect expr)
+(define (test name expect expr)
+   (set! *tests-run* (+ *tests-run* 1))
+   (if (equal? expect expr)
      (begin
-       (set! *tests-run* (+ *tests-run* 1))
-       (print (if (equal? expect expr) "[PASS]" "[FAIL]")
-              *tests-run* "/"
-              (set! *tests-passed* (+ *tests-passed* 1))
-              name)))))
+       (set! *tests-passed* (+ *tests-passed* 1))
+       (display "[PASS] "))
+     (begin
+       (print "[FAIL]")
+       (print "Expected:" expect)
+       (print "     Got:" expr)))
+     (print *tests-passed* "/" *tests-run* name))
 
 (test "add" 4 (+ 2 2))
 
@@ -55,3 +57,12 @@
                         (exit x)))
                   '(54 0 37 -3 245 19))
         #t)))
+
+(test "quasiquote" '(1 3 1) `(1 ,(+ 1 2) 1))
+
+
+(test "quasiquote 2" '(list 3 4) `(list ,(+ 1 2) 4))
+
+(test "quasiquote 3"
+      '(a `(b ,(+ 1 2) ,(foo 4 d) e) f)
+      `(a `(b ,(+ 1 2) ,(foo ,(+ 1 3) d) e) f))

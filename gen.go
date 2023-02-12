@@ -34,7 +34,9 @@ func (p *Procedure) Gen(v Value) error {
 				form := Unscope(*v.(*Pair).Cdr)
 				i, found := 0, false
 				for i, pattern = range syntaxrules.Patterns {
-					if IsMatch(Unscope(*pattern.Cdr), form, syntaxrules.Literals) {
+					if IsMatch(Unscope(*pattern.Cdr),
+						form,
+						syntaxrules.Literals) {
 						found = true
 						break
 					}
@@ -57,7 +59,9 @@ func (p *Procedure) Gen(v Value) error {
 					return err
 				}
 
-				p.Gen(trans)
+				if err := p.Gen(trans); err != nil {
+					return err
+				}
 				return nil
 			}
 
@@ -69,7 +73,9 @@ func (p *Procedure) Gen(v Value) error {
 				if _, ok := args[1].(Symbol); !ok {
 					return errors.New("First arg to set! must be a symbol")
 				}
-				p.Gen(args[2])
+				if err := p.Gen(args[2]); err != nil {
+					return err
+				}
 				p.Ins = append(p.Ins, Ins{Set, args[1], 1})
 				return nil
 			case SymDefine:
@@ -89,7 +95,9 @@ func (p *Procedure) Gen(v Value) error {
 					}
 
 					for _, expr := range args[2:] {
-						lambda.Gen(Unscope(expr))
+						if err := lambda.Gen(Unscope(expr)); err != nil {
+							return err
+						}
 					}
 
 					p.Ins = append(p.Ins, Ins{Lambda, lambda, 0})
@@ -98,7 +106,9 @@ func (p *Procedure) Gen(v Value) error {
 					if len(args) != 3 {
 						return errors.New("define takes 2 args")
 					}
-					p.Gen(args[2])
+					if err := p.Gen(args[2]); err != nil {
+						return err
+					}
 					p.Ins = append(p.Ins, Ins{Define, args[1], 1})
 				default:
 					return fmt.Errorf("First arg to define must be a symbol"+
@@ -117,7 +127,9 @@ func (p *Procedure) Gen(v Value) error {
 				}
 
 				for _, expr := range args[2:] {
-					lambda.Gen(Unscope(expr))
+					if err := lambda.Gen(Unscope(expr)); err != nil {
+						return err
+					}
 				}
 				p.Ins = append(p.Ins, Ins{Lambda, lambda, 0})
 				return nil
@@ -129,17 +141,23 @@ func (p *Procedure) Gen(v Value) error {
 				}
 				lf := lt
 
-				lt.Gen(args[2])
+				if err := lt.Gen(args[2]); err != nil {
+					return err
+				}
 				if len(args) > 4 {
 					return errors.New("Too many args to if")
 				} else if len(args) == 4 {
-					lf.Gen(args[3])
+					if err := lf.Gen(args[3]); err != nil {
+						return err
+					}
 					p.Ins = append(p.Ins, Ins{Imm, lf, 0})
 				} else if len(args) < 3 {
 					return errors.New("Too few args to if")
 				}
 				p.Ins = append(p.Ins, Ins{Imm, lt, 0})
-				p.Gen(args[1])
+				if err := p.Gen(args[1]); err != nil {
+					return err
+				}
 				p.Ins = append(p.Ins, Ins{If, nil, len(args) - 1})
 				return nil
 			case Quote:
@@ -201,7 +219,9 @@ func (p *Procedure) Gen(v Value) error {
 
 		// first arg is the callee
 		for i := len(args) - 1; i >= 0; i-- {
-			p.Gen(args[i])
+			if err := p.Gen(args[i]); err != nil {
+				return err
+			}
 		}
 		p.Ins = append(p.Ins, Ins{Call, nil, len(args) - 1})
 	}
