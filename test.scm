@@ -59,6 +59,7 @@
         #t)))
 
 (test "quasiquote" '(1 3 1) `(1 ,(+ 1 2) 1))
-
-
 (test "quasiquote 2" '(list 3 4) `(list ,(+ 1 2) 4))
+
+(test "vector->list" (vector->list '#(1 2 3)) '(1 2 3))
+(test "list->vector" (list->vector '(1 2 3)) '#(1 2 3))

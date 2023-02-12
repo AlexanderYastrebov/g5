@@ -128,3 +128,16 @@ func FnApply(nargs int) error {
 	}
 	return call.Eval()
 }
+
+func FnVector2List(nargs int) error {
+	if nargs != 1 {
+		return errors.New("Wrong arg count to vector->list")
+	}
+
+	l, ok := stack.Pop().(Vector)
+	if !ok {
+		return errors.New("vector->list takes a vector as the argument")
+	}
+	stack.Push(vec2list(*l.v))
+	return nil
+}

@@ -58,6 +58,7 @@ var SymbolNames = []string{
 	"set-car!",
 	"set-cdr!",
 	"apply",
+	"vector->list",
 
 	"vector?",
 	"make-vector",
@@ -131,6 +132,7 @@ const (
 	SymSetCar
 	SymSetCdr
 	SymApply
+	SymVector2List
 
 	SymIsVector
 	SymMakeVector
@@ -242,12 +244,13 @@ var TopScope = Scope{
 		SymIsRational: &Procedure{Builtin: FnIsRational},
 		SymIsInteger:  &Procedure{Builtin: FnIsInteger},
 
-		SymCons:   &Procedure{Builtin: FnCons},
-		SymCar:    &Procedure{Builtin: FnCar},
-		SymCdr:    &Procedure{Builtin: FnCdr},
-		SymSetCar: &Procedure{Builtin: FnSetCar},
-		SymSetCdr: &Procedure{Builtin: FnSetCdr},
-		SymApply:  &Procedure{Builtin: FnApply},
+		SymCons:        &Procedure{Builtin: FnCons},
+		SymCar:         &Procedure{Builtin: FnCar},
+		SymCdr:         &Procedure{Builtin: FnCdr},
+		SymSetCar:      &Procedure{Builtin: FnSetCar},
+		SymSetCdr:      &Procedure{Builtin: FnSetCdr},
+		SymApply:       &Procedure{Builtin: FnApply},
+		SymVector2List: &Procedure{Builtin: FnVector2List},
 
 		SymIsVector:     &Procedure{Builtin: FnIsVector},
 		SymMakeVector:   &Procedure{Builtin: FnMakeVector},
