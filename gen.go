@@ -164,7 +164,7 @@ func (p *Procedure) Gen(v Value) error {
 				if len(args) != 2 {
 					return errors.New("Wrong number of args to quote")
 				}
-				p.Ins = append(p.Ins, Ins{Imm, args[1], 0})
+				p.Ins = append(p.Ins, Ins{Imm, Unscope(args[1]), 0})
 				return nil
 
 			// These are for the implementation of (hygenic) macros

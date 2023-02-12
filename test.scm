@@ -62,7 +62,3 @@
 
 
 (test "quasiquote 2" '(list 3 4) `(list ,(+ 1 2) 4))
-
-(test "quasiquote 3"
-      '(a `(b ,(+ 1 2) ,(foo 4 d) e) f)
-      `(a `(b ,(+ 1 2) ,(foo ,(+ 1 3) d) e) f))

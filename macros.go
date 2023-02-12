@@ -96,7 +96,8 @@ func IsEqual(v1 Value, v2 Value) bool {
 		b1, b2 := big.Rat(v1.(Rational)), big.Rat(v2.(Rational))
 		return b1.Cmp(&b2) == 0
 	default:
-		panic("IsEqual: Unknown type")
+		fmt.Printf("IsEqual: Unknown type (%T)", v1)
+		panic("")
 	}
 }
 
