@@ -1,3 +1,4 @@
+(define call-with-current-continuation call/cc)
 (define (null? x) (eqv? x '()))
 (define (zero? z) (= z 0))
 (define (positive? x) (>= x 0))

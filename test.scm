@@ -45,4 +45,4 @@
 
 
 (test "call/cc 1" 231 (call/cc (lambda (f) 231)))
-(test "call/cc 2" 123 (call/cc (lambda (f) (f 123))))
+(test "call/cc 2" 123 (call-with-current-continuation (lambda (f) (f 123))))
