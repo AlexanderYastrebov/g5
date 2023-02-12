@@ -91,19 +91,17 @@ begin:
 			}
 
 			if newp.CallCC != nil {
-				res := newp.CallCC(p, ins.nargs)
-				if res != nil {
+				if res := newp.CallCC(p, ins.nargs); res != nil {
 					return res
 				}
 			} else if newp.Builtin != nil {
-				res := newp.Builtin(ins.nargs)
-				if res != nil {
+				if res := newp.Builtin(ins.nargs); res != nil {
 					return res
 				}
 			} else {
 				if newp.Cont {
 					top := stack.Top()
-					stack = stack[0:newp.StackPos]
+					stack = stack[0:newp.StackPos] // Restore stack position
 					stack.Push(top)
 					newp.Cont = false
 				} else {
