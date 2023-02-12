@@ -51,7 +51,6 @@ begin:
 		ins := p.Ins[0]
 		p.Ins = p.Ins[1:]
 
-		//ins.Print()
 		switch ins.op {
 		case Imm:
 			stack.Push(ins.imm)
@@ -103,6 +102,9 @@ begin:
 				}
 			} else {
 				if newp.Cont {
+					top := stack.Top()
+					stack = stack[0:newp.StackPos]
+					stack.Push(top)
 					newp.Cont = false
 				} else {
 					newp.Scope.m = map[Symbol]Value{}

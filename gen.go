@@ -135,6 +135,8 @@ func (p *Procedure) Gen(v Value) error {
 				} else if len(args) == 4 {
 					lf.Gen(args[3])
 					p.Ins = append(p.Ins, Ins{Imm, lf, 0})
+				} else if len(args) < 3 {
+					return errors.New("Too few args to if")
 				}
 				p.Ins = append(p.Ins, Ins{Imm, lt, 0})
 				p.Gen(args[1])

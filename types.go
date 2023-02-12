@@ -47,6 +47,7 @@ type Procedure struct {
 	CallCC  func(*Procedure, int) error
 	Macros  map[Symbol]SyntaxRules
 	Cont    bool
+	StackPos int
 }
 
 func (Procedure) isValue() {}

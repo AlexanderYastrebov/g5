@@ -160,6 +160,8 @@ func FnCallCC(p *Procedure, nargs int) error {
 		vec = append(vec)
 	}
 	vec = append(vec, p)
+
+	p.StackPos = len(stack)
 	for i := len(vec) - 1; i >= 0; i-- {
 		stack.Push(vec[i])
 	}
