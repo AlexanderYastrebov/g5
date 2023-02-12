@@ -46,3 +46,12 @@
 
 (test "call/cc 1" 231 (call/cc (lambda (f) 231)))
 (test "call/cc 2" 123 (call-with-current-continuation (lambda (f) (f 123))))
+
+(test "call/cc 3" -3
+    (call-with-current-continuation
+      (lambda (exit)
+        (for-each (lambda (x)
+                    (if (negative? x)
+                        (exit x)))
+                  '(54 0 37 -3 245 19))
+        #t)))

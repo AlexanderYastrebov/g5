@@ -189,23 +189,11 @@ begin:
 			p.Scope.m[sym] = stack.Top()
 		case If:
 			cond, isbool := stack.Pop().(Boolean)
-			v := stack.Pop()
-			lt, ok := v.(Procedure)
-			if !ok {
-				PrintValue(v)
-				fmt.Println()
-				panic("Fail")
-			}
+			lt := stack.Pop().(Procedure)
 			lf := Procedure{}
 
 			if ins.nargs == 3 {
-				v := stack.Pop()
-				lf, ok = v.(Procedure)
-				if !ok {
-					PrintValue(v)
-					fmt.Println()
-					panic("Fail")
-				}
+				lf = stack.Pop().(Procedure)
 			}
 
 			var res error
