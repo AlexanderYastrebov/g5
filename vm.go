@@ -72,81 +72,81 @@ begin:
 			stack.Push(scope.m[sym])
 		case Call:
 			callee := stack.Pop()
-			if newp_template, ok := callee.(*Procedure); ok {
-				newp := new(Procedure)
-				*newp = *newp_template
-
-				if newp.Builtin != nil {
-					res := newp.Builtin(ins.nargs)
-					if res != nil {
-						return res
-					}
-				} else {
-					newp.Scope.m = map[Symbol]Value{}
-
-					n := ins.nargs
-					cur := newp.Args
-					_, ispair := newp.Args.(*Pair)
-					for n > 0 && ispair {
-						if cur == Empty {
-							return errors.New("Too few arguments")
-						}
-						sym, ok := Unscope(*cur.(*Pair).Car).(Symbol)
-						if !ok {
-							panic("Non-symbol argument?")
-						}
-						newp.Scope.m[sym] = stack.Pop()
-						n--
-						cur = *cur.(*Pair).Cdr
-						if _, ok := cur.(*Pair); !ok {
-							break
-						}
-					}
-
-					// Dot arg
-					if s, ok := cur.(Symbol); ok {
-						rest := new(Pair)
-						cur := rest
-						if n == 0 {
-							newp.Scope.m[s] = Empty
-						} else {
-							for n > 0 {
-								v := stack.Pop()
-								n--
-								cur.Car = &v
-
-								if n == 0 {
-									cdr := Empty
-									cur.Cdr = &cdr
-									break
-								}
-								var next Value = new(Pair)
-								cur.Cdr = &next
-								cur = next.(*Pair)
-							}
-							newp.Scope.m[s] = rest
-						}
-					}
-
-					if i == len(p.Ins)-1 { // Tail call
-						p = newp
-						goto begin
-					}
-
-					stack_pos := len(stack)
-					res := newp.Eval()
-					// Clear temps from stack
-					top := stack.Top()
-					stack = append(stack[:stack_pos], top)
-					if res != nil {
-						return res
-					}
-				}
-			} else {
+			newp_template, ok := callee.(*Procedure)
+			if !ok {
 				fmt.Println("CALL:")
 				PrintValue(callee)
 				fmt.Println()
 				return fmt.Errorf("Call to non-procedure (%T)", callee)
+			}
+			newp := new(Procedure)
+			*newp = *newp_template
+
+			if newp.Builtin != nil {
+				res := newp.Builtin(ins.nargs)
+				if res != nil {
+					return res
+				}
+			} else {
+				newp.Scope.m = map[Symbol]Value{}
+
+				n := ins.nargs
+				cur := newp.Args
+				_, ispair := newp.Args.(*Pair)
+				for n > 0 && ispair {
+					if cur == Empty {
+						return errors.New("Too few arguments")
+					}
+					sym, ok := Unscope(*cur.(*Pair).Car).(Symbol)
+					if !ok {
+						panic("Non-symbol argument?")
+					}
+					newp.Scope.m[sym] = stack.Pop()
+					n--
+					cur = *cur.(*Pair).Cdr
+					if _, ok := cur.(*Pair); !ok {
+						break
+					}
+				}
+
+				// Dot arg
+				if s, ok := cur.(Symbol); ok {
+					rest := new(Pair)
+					cur := rest
+					if n == 0 {
+						newp.Scope.m[s] = Empty
+					} else {
+						for n > 0 {
+							v := stack.Pop()
+							n--
+							cur.Car = &v
+
+							if n == 0 {
+								cdr := Empty
+								cur.Cdr = &cdr
+								break
+							}
+							var next Value = new(Pair)
+							cur.Cdr = &next
+							cur = next.(*Pair)
+						}
+						newp.Scope.m[s] = rest
+					}
+				}
+
+				if i == len(p.Ins)-1 { // Tail call
+					p = newp
+					goto begin
+				}
+
+				stack_pos := len(stack)
+				res := newp.Eval()
+				// Clear temps from stack
+				top := stack.Top()
+				stack = append(stack[:stack_pos], top)
+				if res != nil {
+					return res
+				}
 			}
 		case Lambda: // Procedure -> *Procedure
 			lambda := ins.imm.(Procedure)

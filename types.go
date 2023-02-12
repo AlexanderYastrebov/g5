@@ -45,6 +45,7 @@ type Procedure struct {
 	Ins     []Ins
 	Builtin func(int) error
 	Macros  map[Symbol]SyntaxRules
+	KeepScope bool
 }
 
 func (Procedure) isValue() {}

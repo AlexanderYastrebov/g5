@@ -20,6 +20,7 @@ var SymbolNames = []string{
 	"define-syntax",
 	"save-scope",
 
+	"call/cc",
 	"exit",
 
 	"+",
@@ -92,6 +93,7 @@ const (
 	SymSaveScope
 
 	// Builtin procedures
+	SymCallCC
 	SymExit
 
 	SymAdd
@@ -150,6 +152,8 @@ const (
 	SymLast
 )
 
+var ProcCallCC Procedure
+
 func FnWritePrim(nargs int) error {
 	if nargs != 2 {
 		return errors.New(
@@ -185,7 +189,8 @@ func FnExit(nargs int) error {
 
 var TopScope = Scope{
 	map[Symbol]Value{
-		SymExit: &Procedure{Builtin: FnExit},
+		SymCallCC: &ProcCallCC,
+		SymExit:   &Procedure{Builtin: FnExit},
 
 		SymAdd:          &Procedure{Builtin: FnAdd},
 		SymSub:          &Procedure{Builtin: FnSub},
