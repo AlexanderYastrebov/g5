@@ -183,7 +183,7 @@ func FnExit(nargs int) error {
 	return nil
 }
 
-var TopScope = &Scope{
+var TopScope = Scope{
 	map[Symbol]Value{
 		SymExit: &Procedure{Builtin: FnExit},
 

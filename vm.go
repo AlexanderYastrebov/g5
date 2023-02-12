@@ -82,12 +82,10 @@ begin:
 						return res
 					}
 				} else {
-					newp.Scope = &Scope{super: newp.Scope.super}
 					newp.Scope.m = map[Symbol]Value{}
 
-					cur := newp.Args
-
 					n := ins.nargs
+					cur := newp.Args
 					_, ispair := newp.Args.(*Pair)
 					for n > 0 && ispair {
 						if cur == Empty {
@@ -152,18 +150,18 @@ begin:
 			}
 		case Lambda: // Procedure -> *Procedure
 			lambda := ins.imm.(Procedure)
-			lambda.Scope = &Scope{}
+			lambda.Scope = Scope{}
 			lambda.Scope.m = map[Symbol]Value{}
 
 			scope := p.Scope
-			lambda.Scope.super = scope
+			lambda.Scope.super = &scope
 
 			stack.Push(Value(&lambda))
 		case Set:
 			sym := Unscope(ins.imm).(Symbol)
 			scope := p.Scope.Lookup(sym)
 			if scope == nil {
-				scope = p.Scope
+				scope = &p.Scope
 			}
 			scope.m[sym] = stack.Top()
 		case Define:
@@ -197,7 +195,7 @@ begin:
 				return res
 			}
 		case SaveScope:
-			stack.Push(p.Scope)
+			stack.Push(&p.Scope)
 		}
 	}
 	return nil

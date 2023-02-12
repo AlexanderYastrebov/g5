@@ -55,7 +55,8 @@ func TestAdder(t *testing.T) {
 }
 
 func TestCounter(t *testing.T) {
-	Top.Run("(define (make-ctr) (set! count 0) (lambda (ctr) (+ count 1)))", true)
+	Top.Run("(define (make-ctr) (set! count 0)" +
+		"(lambda (ctr) (set! count (+ count 1)) count))", true)
 	result := stack.Top()
 	if _, ok := result.(*Procedure); !ok {
 		t.Errorf("Expected procedure, got %T", result)
