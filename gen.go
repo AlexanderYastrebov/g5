@@ -227,7 +227,7 @@ func (p *Procedure) Gen(v Value) error {
 				p.Ins = append(p.Ins, Ins{SaveScope, nil, 0})
 				p.Ins = append(p.Ins, Ins{Define, name, 1})
 				return nil
-			case SymLetrecSyntax:
+			case SymLetrecSyntax, SymLetSyntax:
 				if len(args) != 3 {
 					return errors.New("Wrong number of args to letrec-syntax")
 				}
@@ -278,10 +278,29 @@ func (p *Procedure) Gen(v Value) error {
 					lambda.Macros[k] = v
 				}
 
-				for i := range names {
-					lambda.Macros[names[i]] = rules[i]
-					lambda.Ins = append(lambda.Ins, Ins{SaveScope, nil, 0})
-					lambda.Ins = append(lambda.Ins, Ins{Define, names[i], 1})
+				if sym == SymLetrecSyntax {
+					for i := range names {
+						lambda.Macros[names[i]] = rules[i]
+						lambda.Ins = append(lambda.Ins, Ins{SaveScope, nil, 0})
+						lambda.Ins = append(lambda.Ins, Ins{Define, names[i], 1})
+					}
+				} else {
+					for i := range names {
+						mlambda := Procedure{
+							Ins: []Ins{},
+							Macros: map[Symbol]SyntaxRules{},
+						}
+						for k, v := range p.Macros {
+							mlambda.Macros[k] = v
+						}
+
+						mlambda.Macros[names[i]] = rules[i]
+						mlambda.Ins = append(mlambda.Ins, Ins{SaveScope, nil, 0})
+
+						lambda.Ins = append(lambda.Ins, Ins{Lambda, lambda, 0})
+						lambda.Ins = append(lambda.Ins, Ins{Call, nil, 0})
+						lambda.Ins = append(lambda.Ins, Ins{Define, names[i], 1})
+					}
 				}
 
 				if err := lambda.Gen(args[2]); err != nil {

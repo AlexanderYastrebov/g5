@@ -64,12 +64,12 @@
 (test "vector->list" (vector->list '#(1 2 3)) '(1 2 3))
 (test "list->vector" (list->vector '(1 2 3)) '#(1 2 3))
 
-(test "letrec-syntax 1-1" 1234
+(test "letrec-syntax 1" 1234
       (letrec-syntax ((test1 (syntax-rules () ((test1) (test))))
                       (test (syntax-rules () ((test) 1234))))
       (test1)))
 
-(test "letrec-syntax 1-2" #t (procedure? test))
+(test "letrec-syntax 2" #t (procedure? test))
 
 (define (thing) 4321)
 (test "let-syntax" 4321
