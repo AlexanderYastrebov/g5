@@ -76,3 +76,8 @@
       (let-syntax ((test1 (syntax-rules () ((test1) (thing))))
                    (thing (syntax-rules () ((thing) 1234))))
       (test1)))
+
+
+(test "call-with-values" 5
+      (call-with-values (lambda () (values 4 5))
+                        (lambda (a b) b)))

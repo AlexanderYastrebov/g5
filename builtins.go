@@ -19,6 +19,9 @@ var SymbolNames = []string{
 
 	"call/cc",
 	"exit",
+	"dynamic-wind",
+	"values",
+	"call-with-values",
 
 	"+",
 	"-",
@@ -100,6 +103,9 @@ const (
 	// Builtin procedures
 	SymCallCC
 	SymExit
+	SymDynamicWind
+	SymValues
+	SymCallWithValues
 
 	SymAdd
 	SymSub
@@ -164,8 +170,11 @@ const (
 
 var TopScope = Scope{
 	map[Symbol]Value{
-		SymCallCC: &Procedure{CallCC: FnCallCC},
-		SymExit:   &Procedure{Builtin: FnExit},
+		SymCallCC:         &Procedure{CallCC: FnCallCC},
+		SymExit:           &Procedure{Builtin: FnExit},
+		SymDynamicWind:    &Procedure{Builtin: FnDynamicWind},
+		SymValues:         &Procedure{Builtin: FnValues},
+		SymCallWithValues: &Procedure{Builtin: FnCallWithValues},
 
 		SymAdd:          &Procedure{Builtin: FnAdd},
 		SymSub:          &Procedure{Builtin: FnSub},

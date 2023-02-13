@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/big"
 )
 
 type Op uint8
@@ -82,8 +83,16 @@ begin:
 				return fmt.Errorf("Call to non-procedure (%T)", callee)
 			}
 
+			var nargs int
+			if ins.nargs == -1 { // (call-with-values ...) will use nargs of -1
+				nargs_bi := big.Int(stack.Pop().(Integer))
+				nargs = int(nargs_bi.Int64())
+			} else {
+				nargs = ins.nargs
+			}
+
 			var newp *Procedure
-			if newp_template.Cont {
+			if newp_template.IsCont {
 				newp = newp_template
 			} else {
 				newp = &Procedure{}
@@ -91,22 +100,22 @@ begin:
 			}
 
 			if newp.CallCC != nil {
-				if res := newp.CallCC(p, ins.nargs); res != nil {
+				if res := newp.CallCC(p, nargs); res != nil {
 					return res
 				}
 			} else if newp.Builtin != nil {
-				if res := newp.Builtin(ins.nargs); res != nil {
+				if res := newp.Builtin(nargs); res != nil {
 					return res
 				}
 			} else {
-				if newp.Cont {
+				if newp.IsCont {
 					top := stack.Top()
-					stack = stack[0:newp.StackPos] // Restore stack position
+					stack = *newp.StackRest
 					stack.Push(top)
-					newp.Cont = false
+					newp.IsCont = false
 				} else {
 					newp.Scope.m = map[Symbol]Value{}
-					n := ins.nargs
+					n := nargs
 					cur := newp.Args
 					_, ispair := newp.Args.(*Pair)
 					for n > 0 && ispair {
