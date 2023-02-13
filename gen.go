@@ -266,8 +266,8 @@ func (p *Procedure) Gen(v Value) error {
 
 				for i := range names {
 					lambda.Macros[names[i]] = rules[i]
-					lambda.Ins = append(p.Ins, Ins{SaveScope, nil, 0})
-					lambda.Ins = append(p.Ins, Ins{Define, names[i], 1})
+					lambda.Ins = append(lambda.Ins, Ins{SaveScope, nil, 0})
+					lambda.Ins = append(lambda.Ins, Ins{Define, names[i], 1})
 				}
 
 				if err := lambda.Gen(args[2]); err != nil {
