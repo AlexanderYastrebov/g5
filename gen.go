@@ -279,12 +279,23 @@ func (p *Procedure) Gen(v Value) error {
 				}
 
 				if sym == SymLetrecSyntax {
+					// letrec-syntax is easy, we just need to put everything in
+					// one new lambda
 					for i := range names {
 						lambda.Macros[names[i]] = rules[i]
 						lambda.Ins = append(lambda.Ins, Ins{SaveScope, nil, 0})
-						lambda.Ins = append(lambda.Ins, Ins{Define, names[i], 1})
+						lambda.Ins = append(lambda.Ins, Ins{
+							Define,
+							names[i],
+						1})
 					}
 				} else {
+					// let-syntax is a bit more difficult.  We need to isolate
+					// the macros from recursion.  To do this, we create a
+					// lambda for each macro that returns its scope, and assign
+					// that scope to the lambda.  Once the lambda is called,
+					// that scope is used, which excludes the other scopes
+					// since they are encapsulated in other lambdas
 					for i := range names {
 						mlambda := Procedure{
 							Ins: []Ins{},
@@ -295,11 +306,19 @@ func (p *Procedure) Gen(v Value) error {
 						}
 
 						mlambda.Macros[names[i]] = rules[i]
-						mlambda.Ins = append(mlambda.Ins, Ins{SaveScope, nil, 0})
+						mlambda.Ins = append(mlambda.Ins, Ins{
+							SaveScope,
+							nil,
+							0,
+						})
 
 						lambda.Ins = append(lambda.Ins, Ins{Lambda, lambda, 0})
 						lambda.Ins = append(lambda.Ins, Ins{Call, nil, 0})
-						lambda.Ins = append(lambda.Ins, Ins{Define, names[i], 1})
+						lambda.Ins = append(lambda.Ins, Ins{
+							Define,
+							names[i],
+							1,
+						})
 					}
 				}
 
