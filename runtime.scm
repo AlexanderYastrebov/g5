@@ -115,8 +115,7 @@
  (define-syntax let
    (syntax-rules ()
      ((let ((name val) ...) body1 body2 ...)
-     ((lambda (name ...) body1 body2 ...)
-      val ...))
+     ((lambda (name ...) body1 body2 ...) val ...))
     ((let tag ((name val) ...) body1 body2 ...)
      ((letrec ((tag (lambda (name ...)
                       body1 body2 ...)))
@@ -152,10 +151,8 @@
                  (loop (do "step" var step ...)
                        ...))))))
        (loop init ...)))
-    ((do "step" x)
-     x)
-    ((do "step" x y)
-     y)))
+    ((do "step" x) x)
+    ((do "step" x y) y)))
 
 (define (force object) (object))
 
@@ -302,18 +299,18 @@
 
 
   
- (define-syntax quasiquote 
-   (syntax-rules (unquote unquote-splicing quasiquote) 
-     ((_ (unquote form)) form) 
-     ((_ ((unquote-splicing form) . rest)) (append form (quasiquote rest))) 
-     ((_ (quasiquote form) . depth) 
-      (list 'quasiquote (quasiquote form #f . depth))) 
-     ((_ (unquote form)  x . depth) 
-      (list 'unquote (quasiquote form . depth))) 
-     ((_ (unquote-splicing form) x . depth) 
-      (list 'unquote-splicing (quasiquote form . depth))) 
-     ((_ (car . cdr) . depth) 
-      (cons (quasiquote car . depth) (quasiquote cdr . depth))) 
-     ;((_ #(elt ...) . depth) 
-     ; (list->vector (quasiquote (elt ...) . depth))) 
-     ((_ atom . depth) 'atom))) 
+(define-syntax quasiquote 
+  (syntax-rules (unquote unquote-splicing quasiquote) 
+    ((_ (unquote form)) form) 
+    ((_ ((unquote-splicing form) . rest)) (append form (quasiquote rest))) 
+    ((_ (quasiquote form) . depth) 
+     (list 'quasiquote (quasiquote form #f . depth))) 
+    ((_ (unquote form)  x . depth) 
+     (list 'unquote (quasiquote form . depth))) 
+    ((_ (unquote-splicing form) x . depth) 
+     (list 'unquote-splicing (quasiquote form . depth))) 
+    ((_ (car . cdr) . depth) 
+     (cons (quasiquote car . depth) (quasiquote cdr . depth))) 
+    ;((_ #(elt ...) . depth) 
+    ; (list->vector (quasiquote (elt ...) . depth))) 
+    ((_ atom . depth) 'atom))) 

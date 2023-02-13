@@ -43,8 +43,9 @@ func (p *Procedure) Gen(v Value) error {
 				}
 
 				if !found {
-					return fmt.Errorf("No match found for macro %s",
-						SymbolNames[sym])
+					return fmt.Errorf(
+						"No match found for macro %s", SymbolNames[sym],
+					)
 				}
 
 				m := MacroMap{}
@@ -82,8 +83,10 @@ func (p *Procedure) Gen(v Value) error {
 				switch args[1].(type) {
 				case *Pair:
 					if len(args) < 2 {
-						return errors.New("Function definition requires at " +
-							"least one statement")
+						return errors.New(
+							"Function definition requires at least one " +
+								"statement",
+						)
 					}
 
 					dest, defargs := *args[1].(*Pair).Car, *args[1].(*Pair).Cdr
@@ -111,8 +114,9 @@ func (p *Procedure) Gen(v Value) error {
 					}
 					p.Ins = append(p.Ins, Ins{Define, args[1], 1})
 				default:
-					return fmt.Errorf("First arg to define must be a symbol"+
-						": %T", args[1])
+					return fmt.Errorf(
+						"First arg to define must be a symbol: %T", args[1],
+					)
 				}
 				return nil
 			case SymLambda:
@@ -185,8 +189,9 @@ func (p *Procedure) Gen(v Value) error {
 				} else {
 					name, ok = args[1].(Symbol)
 					if !ok {
-						return fmt.Errorf("Expected macro name, got %t",
-							args[1])
+						return fmt.Errorf(
+							"Expected macro name, got %t", args[1],
+						)
 					}
 				}
 
@@ -195,12 +200,7 @@ func (p *Procedure) Gen(v Value) error {
 					return fmt.Errorf("Expected syntax-rules, got %T", args[2])
 				}
 
-				syntaxrules_v, err := list2vec(args[2].(*Pair))
-				if err != nil {
-					return err
-				}
-
-				syntaxrules, err := ParseSyntaxRules(syntaxrules_v)
+				syntaxrules, err := ParseSyntaxRules(args[2].(*Pair))
 				if err != nil {
 					return err
 				}
@@ -213,6 +213,69 @@ func (p *Procedure) Gen(v Value) error {
 				p.Macros[name] = *syntaxrules
 				p.Ins = append(p.Ins, Ins{SaveScope, nil, 0})
 				p.Ins = append(p.Ins, Ins{Define, name, 1})
+				return nil
+			case SymLetrecSyntax:
+				if len(args) != 3 {
+					return errors.New("Wrong number of args to letrec-syntax")
+				}
+
+				for i := range args {
+					args[i] = Unscope(args[i])
+				}
+
+				if _, ok := args[1].(*Pair); !ok {
+					return errors.New(
+						"First argument to letrec-syntax must be a list of " +
+							"bindings",
+					)
+				}
+				bindings, err := list2vec(args[1].(*Pair))
+				if err != nil {
+					return err
+				}
+
+				names := []Symbol{}
+				rules := []SyntaxRules{}
+				for _, binding := range bindings {
+					p, ok := binding.(*Pair)
+					if !ok {
+						return errors.New(
+							"letrec-syntax bindings must be lists",
+						)
+					}
+					if _, ok := (*p.Car).(Symbol); !ok {
+						return errors.New("Binding names must be symbols")
+					}
+					names = append(names, (*p.Car).(Symbol))
+
+					if _, ok := (*p.Cdr).(*Pair); !ok {
+						return errors.New("syntax-rules must be pairs")
+					}
+					syntaxrules, err := ParseSyntaxRules(*(*p.Cdr).(*Pair).Car)
+					if err != nil {
+						return err
+					}
+					rules = append(rules, *syntaxrules)
+				}
+
+				lambda := Procedure{
+					Args:   p.Args,
+					Ins:    []Ins{},
+					Macros: p.Macros,
+				}
+
+				for i := range names {
+					lambda.Macros[names[i]] = rules[i]
+					lambda.Ins = append(p.Ins, Ins{SaveScope, nil, 0})
+					lambda.Ins = append(p.Ins, Ins{Define, names[i], 1})
+				}
+
+				if err := lambda.Gen(args[2]); err != nil {
+					return nil
+				}
+
+				p.Ins = append(p.Ins, Ins{Lambda, lambda, 0})
+				p.Ins = append(p.Ins, Ins{Call, nil, 0})
 				return nil
 			}
 		}

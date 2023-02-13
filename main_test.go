@@ -55,7 +55,7 @@ func TestAdder(t *testing.T) {
 }
 
 func TestCounter(t *testing.T) {
-	Top.Run("(define (make-ctr) (set! count 0)" +
+	Top.Run("(define (make-ctr) (set! count 0)"+
 		"(lambda (ctr) (set! count (+ count 1)) count))", true)
 	result := stack.Top()
 	if _, ok := result.(*Procedure); !ok {
@@ -87,7 +87,6 @@ func TestCounter(t *testing.T) {
 	if result := big.Int(result.(Integer)); result.Cmp(big.NewInt(2)) != 0 {
 		t.Errorf("Expected 2, got %v", result.String())
 	}
-		
 }
 
 func TestLet(t *testing.T) {

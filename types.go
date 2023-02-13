@@ -40,13 +40,13 @@ type Scope struct {
 func (*Scope) isValue() {}
 
 type Procedure struct {
-	Scope   Scope
-	Args    Value
-	Ins     []Ins
-	Builtin func(int) error
-	CallCC  func(*Procedure, int) error
-	Macros  map[Symbol]SyntaxRules
-	Cont    bool
+	Scope    Scope
+	Args     Value
+	Ins      []Ins
+	Builtin  func(int) error
+	CallCC   func(*Procedure, int) error
+	Macros   map[Symbol]SyntaxRules
+	Cont     bool
 	StackPos int
 }
 

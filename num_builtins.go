@@ -581,7 +581,7 @@ func FnChar2Integer(nargs int) error {
 	if nargs != 1 {
 		return errors.New("Wrong arg count to char->integer")
 	}
-	
+
 	v := stack.Pop()
 	c, ok := v.(Char)
 	if !ok {

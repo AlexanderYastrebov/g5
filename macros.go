@@ -13,15 +13,27 @@ type SyntaxRules struct {
 	Templates []Value
 }
 
-func ParseSyntaxRules(v []Value) (*SyntaxRules, error) {
+func ParseSyntaxRules(vp Value) (*SyntaxRules, error) {
+	p, ok := vp.(*Pair)
+	if !ok {
+		return nil, errors.New("Expected syntax-rules, got non-pair")
+	}
+	v, err := list2vec(p)
+	if err != nil {
+		return nil, err
+	}
+
 	// (syntax-rules <literals> <syntax-rule> ...)
 	if s, ok := v[0].(Symbol); !ok {
-		return nil, errors.New("Expected syntax-rules, got non-symbol")
-	} else if s != Str2Sym("syntax-rules") {
+		return nil, fmt.Errorf(
+			"Expected syntax-rules, got non-symbol (%T)",
+			v[0],
+		)
+	} else if s != SymSyntaxRules {
 		return nil, errors.New("Expected syntax-rules, got other symbol")
 	}
 
-	_, ok := v[1].(*Pair)
+	_, ok = v[1].(*Pair)
 	if !ok {
 		return nil, errors.New("Got non-list for <literals>")
 	}

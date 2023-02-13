@@ -18,7 +18,10 @@ var SymbolNames = []string{
 	"lambda",
 	"if",
 	"define-syntax",
+	"let-syntax",
+	"letrec-syntax",
 	"save-scope",
+	"syntax-rules",
 
 	"call/cc",
 	"exit",
@@ -91,7 +94,10 @@ const (
 	SymLambda
 	SymIf
 	SymDefineSyntax
+	SymLetSyntax
+	SymLetrecSyntax
 	SymSaveScope
+	SymSyntaxRules
 
 	// Builtin procedures
 	SymCallCC
@@ -171,7 +177,7 @@ func FnCallCC(p *Procedure, nargs int) error {
 	stack.Push(proc)
 	call := Procedure{
 		Scope: p.Scope,
-		Ins: []Ins{{Call, nil, nargs}},
+		Ins:   []Ins{{Call, nil, nargs}},
 	}
 
 	return call.Eval()
@@ -182,7 +188,7 @@ func FnWritePrim(nargs int) error {
 		return errors.New(
 			"Wrong arg count to display-internal (ports not yet implemented)")
 	}
-	
+
 	isdisplay, ok := stack.Pop().(Boolean)
 	if !ok {
 		return errors.New("Expected bool as first arg to write-prim")
@@ -195,7 +201,7 @@ func FnExit(nargs int) error {
 	if nargs > 1 {
 		return errors.New("Wrong arg count to exit")
 	}
-	
+
 	code := 0
 	if nargs == 1 {
 		v, ok := stack.Pop().(Integer)

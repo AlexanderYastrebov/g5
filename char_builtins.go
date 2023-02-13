@@ -2,8 +2,8 @@ package main
 
 import (
 	"errors"
-	"math/big"
 	"fmt"
+	"math/big"
 )
 
 func FnIsChar(nargs int) error {
@@ -27,6 +27,4 @@ func FnInteger2Char(nargs int) error {
 	bi := big.Int(i)
 	stack.Push(Char(rune(bi.Int64())))
 	return nil
-
-
 }

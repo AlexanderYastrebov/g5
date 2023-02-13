@@ -73,7 +73,7 @@ func FnVectorRef(nargs int) error {
 	if nargs != 2 {
 		return errors.New("vector-ref takes 2 args")
 	}
-	
+
 	vec, ok := stack.Pop().(Vector)
 	if !ok {
 		return errors.New("vector-ref requires a vector as the first argument")
@@ -94,7 +94,7 @@ func FnVectorSet(nargs int) error {
 	if nargs != 3 {
 		return errors.New("vector-set! takes 3 args")
 	}
-	
+
 	vec, ok := stack.Pop().(Vector)
 	if !ok {
 		return errors.New("vector-set requires a vector as the first argument")

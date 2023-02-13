@@ -63,3 +63,8 @@
 
 (test "vector->list" (vector->list '#(1 2 3)) '(1 2 3))
 (test "list->vector" (list->vector '(1 2 3)) '#(1 2 3))
+
+(test "letrec-syntax" 1234
+      (letrec-syntax ((test1 (syntax-rules () ((test1) (test))))
+                      (test (syntax-rules () ((test) 1234))))
+      (test1)))
