@@ -9,14 +9,14 @@ func vec2list(vec []Value) *Pair {
 		return Empty.(*Pair)
 	}
 
-	res := new(Pair)
+	res := &Pair{}
 	cur := res
 
 	for i := range vec {
 		v := vec[i]
 		cur.Car = &v
 
-		var next Value = new(Pair)
+		var next Value = &Pair{}
 
 		if i != len(vec)-1 {
 			cur.Cdr = &next

@@ -32,7 +32,7 @@ func FnMakeVector(nargs int) error {
 		fill = stack.Pop()
 	}
 
-	vec := Vector{new([]Value)}
+	vec := Vector{&[]Value{}}
 
 	n := int(k_bi.Int64())
 	for i := 0; i < n; i++ {
@@ -61,7 +61,7 @@ func FnVector(nargs int) error {
 		return errors.New("vector takes at least 1 args")
 	}
 
-	vec := Vector{new([]Value)}
+	vec := Vector{&[]Value{}}
 	for i := 0; i < nargs; i++ {
 		*vec.v = append(*vec.v, stack.Pop())
 	}

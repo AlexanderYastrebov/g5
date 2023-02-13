@@ -86,7 +86,7 @@ begin:
 			if newp_template.Cont {
 				newp = newp_template
 			} else {
-				newp = new(Procedure)
+				newp = &Procedure{}
 				*newp = *newp_template
 			}
 
@@ -127,7 +127,7 @@ begin:
 
 					// Dot arg
 					if s, ok := cur.(Symbol); ok {
-						rest := new(Pair)
+						rest := &Pair{}
 						cur := rest
 						if n == 0 {
 							newp.Scope.m[s] = Empty
@@ -142,7 +142,7 @@ begin:
 									cur.Cdr = &cdr
 									break
 								}
-								var next Value = new(Pair)
+								var next Value = &Pair{}
 								cur.Cdr = &next
 								cur = next.(*Pair)
 							}

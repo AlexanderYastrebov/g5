@@ -155,7 +155,7 @@ func (p *Parser) GetValue() (Value, error) {
 				return res, nil
 			}
 
-			var next Value = new(Pair)
+			var next Value = &Pair{}
 			*cur = &Pair{&car, &next}
 			cur = &next
 		}

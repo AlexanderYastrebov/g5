@@ -506,7 +506,7 @@ func FnFloor(nargs int) error {
 
 	s := nb.FloatString(1)
 	s = s[:len(s)-2]
-	res := new(big.Int)
+	res := &big.Int{}
 	res.SetString(s, 10)
 
 	if !nb.IsInt() && res.Cmp(big.NewInt(0)) < 0 {
@@ -529,7 +529,7 @@ func FnCeiling(nargs int) error {
 
 	s := nb.FloatString(1)
 	s = s[:len(s)-2]
-	res := new(big.Int)
+	res := &big.Int{}
 	res.SetString(s, 10)
 
 	if !nb.IsInt() && res.Cmp(big.NewInt(0)) > 0 {
@@ -552,7 +552,7 @@ func FnTruncate(nargs int) error {
 
 	s := nb.FloatString(1)
 	s = s[:len(s)-2]
-	res := new(big.Int)
+	res := &big.Int{}
 	res.SetString(s, 10)
 
 	stack.Push(Integer(*res))
@@ -570,7 +570,7 @@ func FnRound(nargs int) error {
 	nb := big.Rat(n)
 
 	s := nb.FloatString(0)
-	res := new(big.Int)
+	res := &big.Int{}
 	res.SetString(s, 10)
 
 	stack.Push(Integer(*res))
