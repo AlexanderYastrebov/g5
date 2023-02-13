@@ -79,6 +79,8 @@ var SymbolNames = []string{
 	"string=?",
 	"symbol->string",
 	"number->string",
+
+	"procedure?",
 }
 
 const (
@@ -157,8 +159,16 @@ const (
 	SymSymbol2String
 	SymNumber2String
 
+	SymIsProcedure
+
 	SymLast
 )
+
+func FnIsProcedure(nargs int) error {
+	_, ok := stack.Pop().(*Procedure)
+	stack.Push(Boolean(ok))
+	return nil
+}
 
 func FnCallCC(p *Procedure, nargs int) error {
 	p.Cont = true
@@ -274,6 +284,8 @@ var TopScope = Scope{
 		SymStringEq:      &Procedure{Builtin: FnStringEq},
 		SymSymbol2String: &Procedure{Builtin: FnSymbol2String},
 		SymNumber2String: &Procedure{Builtin: FnNumber2String},
+
+		SymIsProcedure: &Procedure{Builtin: FnIsProcedure},
 	},
 	nil,
 }

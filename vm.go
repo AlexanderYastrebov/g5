@@ -184,7 +184,7 @@ begin:
 		case Define:
 			sym := ins.imm.(Symbol)
 			if _, ok := p.Scope.m[sym]; ok {
-				fmt.Printf("WARNING: Redefining binding %s", SymbolNames[sym])
+				fmt.Printf("WARNING: Redefining binding %s\n", SymbolNames[sym])
 			}
 			p.Scope.m[sym] = stack.Top()
 		case If:

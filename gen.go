@@ -94,7 +94,10 @@ func (p *Procedure) Gen(v Value) error {
 					lambda := Procedure{
 						Args:   Unscope(defargs),
 						Ins:    []Ins{},
-						Macros: p.Macros,
+						Macros: map[Symbol]SyntaxRules{},
+					}
+					for k, v := range p.Macros {
+						lambda.Macros[k] = v
 					}
 
 					for _, expr := range args[2:] {
@@ -127,7 +130,10 @@ func (p *Procedure) Gen(v Value) error {
 				lambda := Procedure{
 					Args:   Unscope(args[1]),
 					Ins:    []Ins{},
-					Macros: p.Macros,
+					Macros: map[Symbol]SyntaxRules{},
+				}
+				for k, v := range p.Macros {
+					lambda.Macros[k] = v
 				}
 
 				for _, expr := range args[2:] {
@@ -141,9 +147,16 @@ func (p *Procedure) Gen(v Value) error {
 				lt := Procedure{
 					Args:   p.Args,
 					Ins:    []Ins{},
-					Macros: p.Macros,
+					Macros: map[Symbol]SyntaxRules{},
+				}
+				for k, v := range p.Macros {
+					lt.Macros[k] = v
 				}
 				lf := lt
+				lf.Macros = map[Symbol]SyntaxRules{}
+				for k, v := range p.Macros {
+					lf.Macros[k] = v
+				}
 
 				if err := lt.Gen(args[2]); err != nil {
 					return err
@@ -225,7 +238,7 @@ func (p *Procedure) Gen(v Value) error {
 
 				if _, ok := args[1].(*Pair); !ok {
 					return errors.New(
-						"First argument to letrec-syntax must be a list of " +
+						"First argument to let-syntax must be a list of " +
 							"bindings",
 					)
 				}
@@ -239,9 +252,7 @@ func (p *Procedure) Gen(v Value) error {
 				for _, binding := range bindings {
 					p, ok := binding.(*Pair)
 					if !ok {
-						return errors.New(
-							"letrec-syntax bindings must be lists",
-						)
+						return errors.New("let-syntax bindings must be lists")
 					}
 					if _, ok := (*p.Car).(Symbol); !ok {
 						return errors.New("Binding names must be symbols")
@@ -259,13 +270,17 @@ func (p *Procedure) Gen(v Value) error {
 				}
 
 				lambda := Procedure{
-					Args:   p.Args,
 					Ins:    []Ins{},
-					Macros: p.Macros,
+					Macros: map[Symbol]SyntaxRules{},
+				}
+
+				for k, v := range p.Macros {
+					lambda.Macros[k] = v
 				}
 
 				for i := range names {
 					lambda.Macros[names[i]] = rules[i]
+
 					lambda.Ins = append(lambda.Ins, Ins{SaveScope, nil, 0})
 					lambda.Ins = append(lambda.Ins, Ins{Define, names[i], 1})
 				}
