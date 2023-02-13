@@ -115,9 +115,7 @@ func TestParseSyntaxRules(t *testing.T) {
 		t.Errorf("Error occurred while parsing input: %v", err)
 	}
 
-	valv, _ := list2vec(val.(*Pair))
-
-	result, err := ParseSyntaxRules(valv)
+	result, err := ParseSyntaxRules(val)
 	if err != nil {
 		t.Errorf("Error occurred while parsing syntax rules: %v", err)
 	}

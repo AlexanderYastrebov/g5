@@ -1,11 +1,5 @@
 package main
 
-import (
-	"errors"
-	"math/big"
-	"os"
-)
-
 var SymbolNames = []string{
 	"quote",
 	"unquote",
@@ -81,6 +75,8 @@ var SymbolNames = []string{
 	"number->string",
 
 	"procedure?",
+
+	"get-environment-variables",
 }
 
 const (
@@ -161,70 +157,10 @@ const (
 
 	SymIsProcedure
 
+	SymGetEnvironmentVariables
+
 	SymLast
 )
-
-func FnIsProcedure(nargs int) error {
-	_, ok := stack.Pop().(*Procedure)
-	stack.Push(Boolean(ok))
-	return nil
-}
-
-func FnCallCC(p *Procedure, nargs int) error {
-	p.Cont = true
-	proc := stack.Pop()
-	vec := []Value{}
-	for i := 0; i < nargs; i++ {
-		vec = append(vec)
-	}
-	vec = append(vec, p)
-
-	p.StackPos = len(stack)
-	for i := len(vec) - 1; i >= 0; i-- {
-		stack.Push(vec[i])
-	}
-
-	stack.Push(proc)
-	call := Procedure{
-		Scope: p.Scope,
-		Ins:   []Ins{{Call, nil, nargs}},
-	}
-
-	return call.Eval()
-}
-
-func FnWritePrim(nargs int) error {
-	if nargs != 2 {
-		return errors.New(
-			"Wrong arg count to display-internal (ports not yet implemented)")
-	}
-
-	isdisplay, ok := stack.Pop().(Boolean)
-	if !ok {
-		return errors.New("Expected bool as first arg to write-prim")
-	}
-
-	return WriteValue(stack.Top(), bool(isdisplay), nil)
-}
-
-func FnExit(nargs int) error {
-	if nargs > 1 {
-		return errors.New("Wrong arg count to exit")
-	}
-
-	code := 0
-	if nargs == 1 {
-		v, ok := stack.Pop().(Integer)
-		if !ok {
-			return errors.New("exit takes an integer as the arg")
-		}
-		bi := big.Int(v)
-		code = int(bi.Int64())
-	}
-
-	os.Exit(code)
-	return nil
-}
 
 var TopScope = Scope{
 	map[Symbol]Value{
@@ -286,6 +222,10 @@ var TopScope = Scope{
 		SymNumber2String: &Procedure{Builtin: FnNumber2String},
 
 		SymIsProcedure: &Procedure{Builtin: FnIsProcedure},
+
+		SymGetEnvironmentVariables: &Procedure{
+			Builtin: FnGetEnvironmentVariables,
+		},
 	},
 	nil,
 }

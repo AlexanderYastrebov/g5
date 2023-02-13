@@ -314,3 +314,12 @@
     ;((_ #(elt ...) . depth) 
     ; (list->vector (quasiquote (elt ...) . depth))) 
     ((_ atom . depth) 'atom))) 
+
+(define (get-environment-variable k)
+  (define (get-var k env)
+    (if (null? env)
+      #f
+      (if (string=? (car (car env)) k)
+        (cdr (car env))
+        (get-var k (cdr env)))))
+  (get-var k (get-environment-variables)))
