@@ -69,20 +69,6 @@
 (define (record-type record)
   (record-ref record 0))
 
-;----------------
-; Record types are themselves records, so we first define the type for
-; them.  Except for problems with circularities, this could be defined as:
-;  (define-record-type :record-type
-;    (make-record-type name field-tags)
-;    record-type?
-;    (name record-type-name)
-;    (field-tags record-type-field-tags))
-; As it is, we need to define everything by hand.
-
-(define :record-type (make-record 3))
-(record-set! :record-type 0 :record-type)	; Its type is itself.
-(record-set! :record-type 1 ':record-type)
-(record-set! :record-type 2 '(name field-tags))
 
 ; Now that :record-type exists we can define a procedure for making more
 ; record types.
@@ -180,11 +166,12 @@
 
 (define real-vector? vector?)
 
-(define (vector? x)
-  (and (real-vector? x)
-       (or (= 0 (vector-length x))
-	   (not (eq? (vector-ref x 0)
-		record-marker)))))
+(set! vector?
+  (lambda (x)
+    (and (real-vector? x)
+         (or (= 0 (vector-length x))
+             (not (eq? (vector-ref x 0)
+                       record-marker))))))
 
 ; This won't work if ENV is the interaction environment and someone has
 ; redefined LAMBDA there.
@@ -213,3 +200,19 @@
 
 (define (record-set! record index value)
   (vector-set! record (+ index 1) value))
+
+
+;----------------
+; Record types are themselves records, so we first define the type for
+; them.  Except for problems with circularities, this could be defined as:
+;  (define-record-type :record-type
+;    (make-record-type name field-tags)
+;    record-type?
+;    (name record-type-name)
+;    (field-tags record-type-field-tags))
+; As it is, we need to define everything by hand.
+
+(define :record-type (make-record 3))
+(record-set! :record-type 0 :record-type)	; Its type is itself.
+(record-set! :record-type 1 ':record-type)
+(record-set! :record-type 2 '(name field-tags))
