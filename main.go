@@ -12,6 +12,9 @@ import (
 //go:embed runtime.scm
 var Runtime string
 
+//go:embed srfi/case-lambda.scm
+var CaseLambdaSRFI string
+
 func validate(code string) bool {
 	nonws := 0
 	count := 0
@@ -67,6 +70,7 @@ func main() {
 	}
 
 	Top.Run(Runtime, true)
+	Top.Run(CaseLambdaSRFI, true)
 	switch len(os.Args) {
 	case 1:
 		reader := bufio.NewReader(os.Stdin)
