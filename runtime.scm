@@ -255,21 +255,15 @@
         (fill-n vector fill (- n 1)))))
   (fill-n vector fill (- (vector-length vector) 1)))
 
-(define-syntax quasiquote 
-  (syntax-rules (unquote unquote-splicing quasiquote) 
-    ((_ (unquote form)) form) 
-    ((_ ((unquote-splicing form) . rest)) (append form (quasiquote rest))) 
-    ((_ (quasiquote form) . depth) 
-     (list 'quasiquote (quasiquote form #f . depth))) 
-    ((_ (unquote form)  x . depth) 
-     (list 'unquote (quasiquote form . depth))) 
-    ((_ (unquote-splicing form) x . depth) 
-     (list 'unquote-splicing (quasiquote form . depth))) 
-    ((_ (car . cdr) . depth) 
-     (cons (quasiquote car . depth) (quasiquote cdr . depth))) 
-    ;((_ #(elt ...) . depth) 
-    ; (list->vector (quasiquote (elt ...) . depth))) 
-    ((_ atom . depth) 'atom))) 
+
+(define-syntax quasiquote
+  (syntax-rules (unquote unquote-splicing)
+    ((_ ((unquote x) . xs))          (cons x (quasiquote xs)))
+    ((_ ((unquote-splicing x) . xs)) (append x (quasiquote xs)))
+    ((_ (x . xs))                    (cons (quasiquote x) (quasiquote xs)))
+    ((_ (unquote x)) x)
+    ((_ x) (quote x))))
+
 
 (define (get-environment-variable k)
   (define (get-var k env)
