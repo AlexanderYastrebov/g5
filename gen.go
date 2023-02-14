@@ -69,13 +69,6 @@ func (p *Procedure) Gen(v Value) error {
 			}
 
 			switch sym {
-			case SymProgn:
-				for _, expr := range args[1:] {
-					if err := p.Gen(expr); err != nil {
-						return err
-					}
-				}
-				return nil
 			case SymSet:
 				if len(args) != 3 {
 					return errors.New("set! takes 2 args")

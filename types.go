@@ -70,7 +70,9 @@ type Integer big.Int
 
 func (Integer) isValue() {}
 
-type String string
+type String struct {
+	s *string
+}
 
 func (String) isValue() {}
 
@@ -103,9 +105,9 @@ func WriteValue(v Value, display bool, port *Port) error {
 		fmt.Fprint(writer, SymbolNames[v.(Symbol)])
 	case String:
 		if !display {
-			fmt.Fprintf(writer, "\"%s\"", v.(String))
+			fmt.Fprintf(writer, "\"%s\"", *v.(String).s)
 		} else {
-			fmt.Fprint(writer, v.(String))
+			fmt.Fprint(writer, *v.(String).s)
 		}
 	case Char:
 		ch := rune(v.(Char))

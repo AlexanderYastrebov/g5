@@ -81,13 +81,14 @@ func FnGetEnvironmentVariables(nargs int) error {
 
 	for _, e := range os.Environ() {
 		kv := strings.SplitN(e, "=", 2)
-		var k Value = String(kv[0])
+		var k Value = String{&kv[0]}
 
 		var v Value
 		if len(kv) == 2 {
-			v = String(kv[1])
+			v = String{&kv[1]}
 		} else {
-			v = String("")
+			s := ""
+			v = String{&s}
 		}
 		env_vals = append(env_vals, &Pair{&k, &v})
 	}

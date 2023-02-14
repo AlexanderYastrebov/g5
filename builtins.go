@@ -7,8 +7,6 @@ var SymbolNames = []string{
 	"unquote-splicing",
 	"...",
 
-	"progn", // Generates multiple expressions without creating new scope,
-	         // so defines are not local, unlike begin
 	"set!",
 	"define",
 	"lambda",
@@ -61,6 +59,7 @@ var SymbolNames = []string{
 	"set-cdr!",
 	"apply",
 	"vector->list",
+	"string->list",
 
 	"vector?",
 	"make-vector",
@@ -75,9 +74,19 @@ var SymbolNames = []string{
 
 	"write-prim",
 
+	"string?",
+	"make-string",
+	"string",
+	"string-length",
+	"string-ref",
+	"string-set!",
+	"string-downcase",
+	"substring",
+	"string-append",
 	"string=?",
 	"symbol->string",
 	"number->string",
+	"list->string",
 
 	"procedure?",
 
@@ -92,7 +101,6 @@ const (
 	UnquoteSplicing
 	Ellipsis
 
-	SymProgn
 	SymSet
 	SymDefine
 	SymLambda
@@ -146,6 +154,7 @@ const (
 	SymSetCdr
 	SymApply
 	SymVector2List
+	SymString2List
 
 	SymIsVector
 	SymMakeVector
@@ -160,9 +169,19 @@ const (
 
 	SymWritePrim
 
+	SymIsString
+	SymMakeString
+	SymString
+	SymStringLength
+	SymStringRef
+	SymStringSet
+	SymStringDowncase
+	SymSubstring
+	SymStringAppend
 	SymStringEq
 	SymSymbol2String
 	SymNumber2String
+	SymList2String
 
 	SymIsProcedure
 
@@ -215,6 +234,7 @@ var TopScope = Scope{
 		SymSetCdr:      &Procedure{Builtin: FnSetCdr},
 		SymApply:       &Procedure{Builtin: FnApply},
 		SymVector2List: &Procedure{Builtin: FnVector2List},
+		SymString2List: &Procedure{Builtin: FnString2List},
 
 		SymIsVector:     &Procedure{Builtin: FnIsVector},
 		SymMakeVector:   &Procedure{Builtin: FnMakeVector},
@@ -229,9 +249,19 @@ var TopScope = Scope{
 		SymIsChar:       &Procedure{Builtin: FnIsChar},
 		SymInteger2Char: &Procedure{Builtin: FnInteger2Char},
 
-		SymStringEq:      &Procedure{Builtin: FnStringEq},
-		SymSymbol2String: &Procedure{Builtin: FnSymbol2String},
-		SymNumber2String: &Procedure{Builtin: FnNumber2String},
+		SymIsString:       &Procedure{Builtin: FnIsString},
+		SymMakeString:     &Procedure{Builtin: FnMakeString},
+		SymString:         &Procedure{Builtin: FnString},
+		SymStringLength:   &Procedure{Builtin: FnStringLength},
+		SymStringRef:      &Procedure{Builtin: FnStringRef},
+		SymStringSet:      &Procedure{Builtin: FnStringSet},
+		SymStringDowncase: &Procedure{Builtin: FnStringDowncase},
+		SymSubstring:      &Procedure{Builtin: FnSubstring},
+		SymStringAppend:   &Procedure{Builtin: FnStringAppend},
+		SymStringEq:       &Procedure{Builtin: FnStringEq},
+		SymSymbol2String:  &Procedure{Builtin: FnSymbol2String},
+		SymNumber2String:  &Procedure{Builtin: FnNumber2String},
+		SymList2String:    &Procedure{Builtin: FnList2String},
 
 		SymIsProcedure: &Procedure{Builtin: FnIsProcedure},
 

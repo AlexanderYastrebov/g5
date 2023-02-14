@@ -141,3 +141,22 @@ func FnVector2List(nargs int) error {
 	stack.Push(vec2list(*l.v))
 	return nil
 }
+
+func FnString2List(nargs int) error {
+	if nargs != 1 {
+		return errors.New("string->list takes 1 argument")
+	}
+	str, ok := stack.Pop().(String)
+	if !ok {
+		return errors.New("string->list takes a string as the argument")
+	}
+
+	v := []Value{}
+	rs := []rune(*str.s)
+	for i := range rs {
+		v = append(v, Char(rs[i]))
+	}
+	stack.Push(vec2list(v))
+	return nil
+}
+

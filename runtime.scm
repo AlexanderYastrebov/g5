@@ -15,6 +15,15 @@
 (define (char=<? a b) (=< (char->integer a) (char->integer b)))
 (define (char=>? a b) (=> (char->integer a) (char->integer b)))
 
+(define (string=<? a b) (not (string>? a b)))
+(define (string=>? a b) (not (string<? a b)))
+
+(define (string-ci<? a b)  (string<? (string-downcase a) (string-downcase b)))
+(define (string-ci>? a b)  (string>? (string-downcase a) (string-downcase b)))
+(define (string-ci<=? a b) (string<=? (string-downcase a) (string-downcase b)))
+(define (string-ci>=? a b) (string>=? (string-downcase a) (string-downcase b)))
+(define (string-ci=? a b)  (string=? (string-downcase a) (string-downcase b)))
+
 (define (display x) (write-prim #t x))
 (define (write x) (write-prim #f x))
 (define (newline) (display #\newline))
@@ -117,10 +126,7 @@
      ((let ((name val) ...) body1 body2 ...)
      ((lambda (name ...) body1 body2 ...) val ...))
     ((let tag ((name val) ...) body1 body2 ...)
-     ((letrec ((tag (lambda (name ...)
-                      body1 body2 ...)))
-        tag)
-      val ...))))
+     ((letrec ((tag (lambda (name ...) body1 body2 ...))) tag) val ...))))
 
 (define-syntax let*
   (syntax-rules ()
@@ -147,13 +153,10 @@
                (begin
                  command
                  ...
-                 (loop (do "step" var step ...)
-                       ...))))))
+                 (loop (do "step" var step ...) ...))))))
        (loop init ...)))
-    ((do "step" x)
-     x)
-    ((do "step" x . y)
-     y)))
+    ((do "step" x) x)
+    ((do "step" x y) y)))
 
 (define (force object) (object))
 
@@ -214,7 +217,7 @@
 ;(define (member x l) (memf equal? x l))
 ;(define (memv x l) (memf eqv? x l))
 ;(define (memq x l) (memf eq? x l))
-; ^^ Defined in lists.scm
+;;;; Defined in lists.scm
 
 (define (assf f? thing alist)
    (if (null? alist)
@@ -223,7 +226,7 @@
            (car alist)
            (assoc thing (cdr alist)))))
 
-; (define (assoc x l) (assf equal? x l)) ; also defined in lists.scm
+; (define (assoc x l) (assf equal? x l)) ;;;; also defined in lists.scm
 (define (assv x l) (assf eqv? x l))
 (define (assq x l) (assf eq? x l))
 
@@ -310,3 +313,8 @@
     ((receive formals expression body ...)
      (call-with-values (lambda () expression)
                        (lambda formals body ...)))))
+
+(define (string-fill! str ch)
+  (do ((n (- (string-length str) 1) (- n 1)))
+       ((= n -1) str)
+    (string-set! str n ch)))

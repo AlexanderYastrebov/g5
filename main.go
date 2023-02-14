@@ -74,7 +74,7 @@ func main() {
 
 	Top.Run(Runtime, true)
 	Top.Run(CaseLambdaSRFI, true)
-	Top.Run(ListsSRFI, true)
+	//Top.Run(ListsSRFI, true)
 	switch len(os.Args) {
 	case 1:
 		reader := bufio.NewReader(os.Stdin)

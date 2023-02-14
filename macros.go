@@ -82,8 +82,10 @@ func IsEqual(v1 Value, v2 Value) bool {
 	}
 
 	switch v1.(type) {
-	case Boolean, Symbol, String, Char, *Procedure, *Scope:
+	case Boolean, Symbol, Char, *Procedure, *Scope:
 		return v1 == v2
+	case String:
+		return *v1.(String).s == *v2.(String).s
 	case Vector:
 		if len(*v1.(Vector).v) != len(*v2.(Vector).v) {
 			return false

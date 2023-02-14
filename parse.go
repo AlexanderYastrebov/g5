@@ -111,7 +111,7 @@ func (p *Parser) GetValue() (Value, error) {
 			return nil, errors.New(fmt.Sprintf(
 				"Line %d: Early EOF, non-terminated string", p.line))
 		}
-		return String(str), nil
+		return String{&str}, nil
 
 	case p.data[0] == ')':
 		return nil, errors.New(fmt.Sprintf("Line %d: Paren mismatch", p.line))
