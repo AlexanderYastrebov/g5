@@ -15,16 +15,16 @@
 (define (char=<? a b) (=< (char->integer a) (char->integer b)))
 (define (char=>? a b) (=> (char->integer a) (char->integer b)))
 
+(define (display x) (write-prim #t x))
+(define (write x) (write-prim #f x))
+(define (newline) (display #\newline))
+
 (define (list . x) x)
 
 (define-syntax begin
   (syntax-rules ()
     ((begin exp ...)
      ((lambda () exp ...)))))
-
-(define (display x) (write-prim #t x))
-(define (write x) (write-prim #f x))
-(define (newline) (display #\newline))
 
 (define (for-each f . x)
   (define (for-each1 f x)
@@ -132,7 +132,6 @@
        (let* ((name2 val2) ...)
          body1 body2 ...)))))
 
-
 (define-syntax do
   (syntax-rules ()
     ((do ((var init step ...) ...)
@@ -151,8 +150,10 @@
                  (loop (do "step" var step ...)
                        ...))))))
        (loop init ...)))
-    ((do "step" x) x)
-    ((do "step" x y) y)))
+    ((do "step" x)
+     x)
+    ((do "step" x . y)
+     y)))
 
 (define (force object) (object))
 
@@ -199,20 +200,21 @@
     '()
     (append (reverse (cdr l)) (list (car l)))))
 
-(define (list-tail x k)
-                  (if (zero? k)
+(define (list-tail x k)
+                  (if (zero? k)
                     x
-                    (list-tail (cdr x) (- k 1))))
-(define (memf f? x l)
-   (if (null? l)
-       #f
-       (if (f? (car l) x)
-           l
-           (member x (cdr l)))))
+                    (list-tail (cdr x) (- k 1))))
 
-(define (member x l) (memf equal? x l))
-(define (memv x l) (memf eqv? x l))
-(define (memq x l) (memf eq? x l))
+;(define (memf f? x l)
+;  (cond
+;    ((null? l) #f)
+;    ((f? (car l) x) l)
+;    (member x (cdr l))))
+;
+;(define (member x l) (memf equal? x l))
+;(define (memv x l) (memf eqv? x l))
+;(define (memq x l) (memf eq? x l))
+; ^^ Defined in lists.scm
 
 (define (assf f? thing alist)
    (if (null? alist)
@@ -221,7 +223,7 @@
            (car alist)
            (assoc thing (cdr alist)))))
 
-(define (assoc x l) (assf equal? x l))
+; (define (assoc x l) (assf equal? x l)) ; also defined in lists.scm
 (define (assv x l) (assf eqv? x l))
 (define (assq x l) (assf eq? x l))
 
@@ -277,3 +279,40 @@
         (cdr (car env))
         (get-var k (cdr env)))))
   (get-var k (get-environment-variables)))
+
+(define (caar   x) (car (car x)))
+(define (cadr   x) (car (cdr x)))
+(define (cdar   x) (cdr (car x)))
+(define (cddr   x) (cdr (cdr x)))
+
+(define (caaar  x) (caar (car x)))
+(define (caadr  x) (caar (cdr x)))
+(define (cadar  x) (cadr (car x)))
+(define (caddr  x) (cadr (cdr x)))
+(define (cdaar  x) (cdar (car x)))
+(define (cdadr  x) (cdar (cdr x)))
+(define (cddar  x) (cddr (car x)))
+(define (cdddr  x) (cddr (cdr x)))
+
+(define (caaaar x) (caaar (car x)))
+(define (caaadr x) (caaar (cdr x)))
+(define (caadar x) (caadr (car x)))
+(define (caaddr x) (caadr (cdr x)))
+(define (cadaar x) (cadar (car x)))
+(define (cadadr x) (cadar (cdr x)))
+(define (caddar x) (caddr (car x)))
+(define (cadddr x) (caddr (cdr x)))
+(define (cdaaar x) (cdaar (car x)))
+(define (cdaadr x) (cdaar (cdr x)))
+(define (cdadar x) (cdadr (car x)))
+(define (cdaddr x) (cdadr (cdr x)))
+(define (cddaar x) (cddar (car x)))
+(define (cddadr x) (cddar (cdr x)))
+(define (cdddar x) (cdddr (car x)))
+(define (cddddr x) (cdddr (cdr x)))
+
+(define-syntax receive
+  (syntax-rules ()
+    ((receive formals expression body ...)
+     (call-with-values (lambda () expression)
+                       (lambda formals body ...)))))

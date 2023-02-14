@@ -224,15 +224,15 @@
 
 ;;; Make a list of length LEN.
 
-(define (make-list len . maybe-elt)
-  (check-arg (lambda (n) (and (integer? n) (>= n 0))) len make-list)
-  (let ((elt (cond ((null? maybe-elt) #f) ; Default value
-		   ((null? (cdr maybe-elt)) (car maybe-elt))
-		   (else (error "Too many arguments to MAKE-LIST"
-				(cons len maybe-elt))))))
-    (do ((i len (- i 1))
-	 (ans '() (cons elt ans)))
-	((<= i 0) ans))))
+;(define (make-list len . maybe-elt)
+;  (check-arg (lambda (n) (and (integer? n) (>= n 0))) len make-list)
+;  (let ((elt (cond ((null? maybe-elt) #f) ; Default value
+;		   ((null? (cdr maybe-elt)) (car maybe-elt))
+;		   (else (error "Too many arguments to MAKE-LIST"
+;				(cons len maybe-elt))))))
+;    (do ((i len (- i 1))
+;	 (ans '() (cons elt ans)))
+;	((<= i 0) ans))))
 
 
 ;(define (list . ans) ans)	; R4RS
@@ -243,8 +243,7 @@
 (define (list-tabulate len proc)
   (check-arg (lambda (n) (and (integer? n) (>= n 0))) len list-tabulate)
   (check-arg procedure? proc list-tabulate)
-  (do ((i (- len 1) (- i 1))
-       (ans '() (cons (proc i) ans)))
+  (do ((i (- len 1) (- i 1)) (ans '() (cons (proc i) ans)))
       ((< i 0) ans)))
 
 ;;; (cons* a1 a2 ... an) = (cons a1 (cons a2 (cons ... an)))
@@ -436,7 +435,7 @@
 ;(define (cadr   x) (car (cdr x)))
 ;(define (cdar   x) (cdr (car x)))
 ;(define (cddr   x) (cdr (cdr x)))
-;
+
 ;(define (caaar  x) (caar (car x)))
 ;(define (caadr  x) (caar (cdr x)))
 ;(define (cadar  x) (cadr (car x)))
@@ -445,7 +444,7 @@
 ;(define (cdadr  x) (cdar (cdr x)))
 ;(define (cddar  x) (cddr (car x)))
 ;(define (cdddr  x) (cddr (cdr x)))
-;
+
 ;(define (caaaar x) (caaar (car x)))
 ;(define (caaadr x) (caaar (cdr x)))
 ;(define (caadar x) (caadr (car x)))
@@ -1215,8 +1214,8 @@
 ;;; R4RS, hence we don't bother to define.
 ;;; The MEMBER and then FIND-TAIL call should definitely
 ;;; be inlined for MEMQ & MEMV.
-;(define (memq    x lis) (member x lis eq?))
-;(define (memv    x lis) (member x lis eqv?))
+(define (memq    x lis) (member x lis eq?))
+(define (memv    x lis) (member x lis eqv?))
 
 
 ;;; right-duplicate deletion

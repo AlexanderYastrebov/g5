@@ -43,6 +43,8 @@ func (p *Procedure) Gen(v Value) error {
 				}
 
 				if !found {
+					PrintValue(v)
+					fmt.Println()
 					return fmt.Errorf(
 						"No match found for macro %s", SymbolNames[sym],
 					)
@@ -67,6 +69,13 @@ func (p *Procedure) Gen(v Value) error {
 			}
 
 			switch sym {
+			case SymProgn:
+				for _, expr := range args[1:] {
+					if err := p.Gen(expr); err != nil {
+						return err
+					}
+				}
+				return nil
 			case SymSet:
 				if len(args) != 3 {
 					return errors.New("set! takes 2 args")

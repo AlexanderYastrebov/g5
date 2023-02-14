@@ -7,6 +7,8 @@ var SymbolNames = []string{
 	"unquote-splicing",
 	"...",
 
+	"progn", // Generates multiple expressions without creating new scope,
+	         // so defines are not local, unlike begin
 	"set!",
 	"define",
 	"lambda",
@@ -90,6 +92,7 @@ const (
 	UnquoteSplicing
 	Ellipsis
 
+	SymProgn
 	SymSet
 	SymDefine
 	SymLambda
