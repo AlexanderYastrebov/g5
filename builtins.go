@@ -72,8 +72,6 @@ var SymbolNames = []string{
 	"char?",
 	"integer->char",
 
-	"write-prim",
-
 	"string?",
 	"make-string",
 	"string",
@@ -95,6 +93,13 @@ var SymbolNames = []string{
 	"open-output-file",
 	"close-input-port",
 	"close-output-port",
+	"read",
+	"read-char",
+	"peek-char",
+	"eof-object?",
+	"char-ready?",
+	"write",
+	"display",
 
 	"procedure?",
 
@@ -175,8 +180,6 @@ const (
 	SymIsChar
 	SymInteger2Char
 
-	SymWritePrim
-
 	SymIsString
 	SymMakeString
 	SymString
@@ -198,6 +201,14 @@ const (
 	SymOpenOutputFile
 	SymCloseInputPort
 	SymCloseOutputPort
+	SymRead
+	SymReadChar
+	SymPeekChar
+	SymIsEofObject
+	SymIsCharReady
+	SymWrite
+	SymDisplay
+
 
 	SymIsProcedure
 
@@ -260,8 +271,6 @@ var TopScope = Scope{
 		SymVectorSet:    &Procedure{Builtin: FnVectorSet},
 		SymList2Vector:  &Procedure{Builtin: FnList2Vector},
 
-		SymWritePrim: &Procedure{Builtin: FnWritePrim},
-
 		SymIsChar:       &Procedure{Builtin: FnIsChar},
 		SymInteger2Char: &Procedure{Builtin: FnInteger2Char},
 
@@ -286,6 +295,12 @@ var TopScope = Scope{
 		SymOpenOutputFile:     &Procedure{Builtin: FnOpenOutputFile},
 		SymCloseInputPort:     &Procedure{Builtin: FnCloseInputPort},
 		SymCloseOutputPort:    &Procedure{Builtin: FnCloseOutputPort},
+		SymRead:               &Procedure{Builtin: FnRead},
+		SymReadChar:           &Procedure{Builtin: FnReadChar},
+		SymPeekChar:           &Procedure{Builtin: FnPeekChar},
+		SymIsEofObject:        &Procedure{Builtin: FnIsEofObject},
+		SymWrite:              &Procedure{Builtin: FnWrite},
+		SymDisplay:            &Procedure{Builtin: FnDisplay},
 
 		SymIsProcedure: &Procedure{Builtin: FnIsProcedure},
 

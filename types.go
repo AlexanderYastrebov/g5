@@ -5,6 +5,7 @@ import (
 	"io"
 	"math/big"
 	"strings"
+	"os"
 )
 
 type Value interface {
@@ -76,7 +77,7 @@ type String struct {
 func (String) isValue() {}
 
 type InputPort struct {
-	io.ReadCloser
+	*os.File
 }
 
 func (InputPort) isValue() {}
@@ -93,6 +94,9 @@ type Scoped struct {
 }
 
 func (Scoped) isValue() {}
+
+type Eof struct {}
+func (Eof) isValue() {}
 
 func WriteValue(v Value, display bool) error {
 	port := OutputPortStack[len(OutputPortStack) - 1]
@@ -171,6 +175,9 @@ func WriteValue(v Value, display bool) error {
 
 	case Scoped:
 		WriteValue(v.(Scoped).Symbol, display)
+	
+	case Eof:
+		fmt.Fprint(port, "[EOF]")
 
 	default:
 		fmt.Fprintf(port, "[??? (%T)]", v)

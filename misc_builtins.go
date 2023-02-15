@@ -38,21 +38,6 @@ func FnCallCC(p *Procedure, nargs int) error {
 	return call.Eval()
 }
 
-func FnWritePrim(nargs int) error {
-	if nargs != 2 {
-		return errors.New(
-			"Wrong arg count to display-internal (ports not yet implemented)",
-		)
-	}
-
-	isdisplay, ok := stack.Pop().(Boolean)
-	if !ok {
-		return errors.New("Expected bool as first arg to write-prim")
-	}
-
-	return WriteValue(stack.Top(), bool(isdisplay))
-}
-
 func FnExit(nargs int) error {
 	if nargs > 1 {
 		return errors.New("Wrong arg count to exit")

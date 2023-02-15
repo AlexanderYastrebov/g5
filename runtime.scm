@@ -24,8 +24,11 @@
 (define (string-ci>=? a b) (string>=? (string-downcase a) (string-downcase b)))
 (define (string-ci=? a b)  (string=? (string-downcase a) (string-downcase b)))
 
-(define (display x) (write-prim #t x))
-(define (write x) (write-prim #f x))
+(define (write-char ch . x)
+  (if (not (char? ch))
+    (error "write-char takes a char as the argument")
+    (apply display `(,ch ,@x))))
+
 (define (newline) (display #\newline))
 
 (define (list . x) x)
@@ -244,11 +247,6 @@
   (if (zero? n)
     (car n)
     (list-ref (cdr l) (- n 1))))
-
-(define (write-char c)
-  (if (not (char? c))
-    (error "write-char requires a char"))
-  (display c))
 
 (define (vector-fill! vector fill)
   (define (fill-n vector fill n)
