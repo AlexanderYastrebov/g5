@@ -1607,3 +1607,6 @@
 			    (not (any (lambda (lis) (member elt lis =))
 				      lists)))
 			  lis1))))
+
+
+(define list? proper-list?)
