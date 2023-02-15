@@ -1,3 +1,18 @@
+(define-syntax let-optionals
+  (syntax-rules ()
+    ((_ expr ((var default) ...) . body)
+     ($let-optionals () (var ...) (default ...) () f expr body))))
+
+(define-syntax $let-optionals
+  (syntax-rules ()
+    ((_ (vt ...) () _ (cl ...) f expr body)
+     (letrec ((f (case-lambda cl ... ((vt ...) . body))))
+       (apply f expr)))
+    ((_ (vt ...) (vrf . vr*) (df . dr*) (cl ...) f . rest)
+     ($let-optionals
+       (vt ... vrf) vr* dr* (cl ... ((vt ...) (f vt ... df))) f . rest))))
+
+
 ;;; SRFI-1 list-processing library			-*- Scheme -*-
 ;;; Reference implementation
 ;;;

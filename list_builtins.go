@@ -5,6 +5,15 @@ import (
 	"fmt"
 )
 
+func FnIsPair(nargs int) error {
+	if nargs != 1 {
+		return errors.New("pair? takes 1 argument")
+	}
+	v, ok := stack.Pop().(*Pair)
+	stack.Push(Boolean(ok && v != Empty))
+	return nil
+}
+
 func FnCons(nargs int) error {
 	if nargs != 2 {
 		return errors.New("Wrong arg count to cons")

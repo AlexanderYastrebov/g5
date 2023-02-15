@@ -24,13 +24,6 @@
 (define (string-ci>=? a b) (string>=? (string-downcase a) (string-downcase b)))
 (define (string-ci=? a b)  (string=? (string-downcase a) (string-downcase b)))
 
-(define (write-char ch . x)
-  (if (not (char? ch))
-    (error "write-char takes a char as the argument")
-    (apply display `(,ch ,@x))))
-
-(define (newline) (display #\newline))
-
 (define (list . x) x)
 
 (define-syntax begin
@@ -321,3 +314,15 @@
 (define (check-arg pred val caller)
   (let lp ((val val))
     (if (pred val) val (lp (error "Bad argument" val pred caller)))))
+
+(define-syntax :optional
+   (syntax-rules ()
+     ((_ val default-value)
+      (if (null? val) default-value (car val)))))
+
+(define (write-char ch . port)
+  (if (not (char? ch))
+    (error "write-char takes a char as the argument")
+    (apply display (cons ch port))))
+
+(define (newline . port) (apply write-char (cons #\newline port)))

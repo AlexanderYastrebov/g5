@@ -9,8 +9,8 @@ import (
 	"unicode"
 )
 
-//go:embed runtime.scm
-var Runtime string
+//go:embed init.scm
+var Init string
 
 //go:embed srfi/case-lambda.scm
 var CaseLambdaSRFI string
@@ -71,7 +71,7 @@ func main() {
 		panic("Symbol table length mismatch")
 	}
 
-	Top.Run(Runtime, true)
+	Top.Run(Init, true)
 	Top.Run(CaseLambdaSRFI, true)
 	Top.Run(ListsSRFI, true)
 	switch len(os.Args) {
