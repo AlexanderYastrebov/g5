@@ -7,6 +7,76 @@ import (
 	"strings"
 )
 
+func FnNullEnvironment(nargs int) error {
+	if nargs != 1 {
+		return errors.New("null-environment takes 1 argument")
+	}
+
+	version_v, ok := stack.Pop().(Integer)
+	if !ok {
+		return errors.New("null-environment takes an integer as the argument")
+	}
+
+	version_bi := big.Int(version_v)
+	if version_bi.Cmp(big.NewInt(5)) != 0 {
+		return errors.New("version to null-environment must be 5")
+	}
+
+	stack.Push(&Procedure{
+		Scope: Scope{map[Symbol]Value{}, nil},
+		Args: Empty,
+		Macros: map[Symbol]SyntaxRules{},
+	})
+	return nil
+}
+
+func FnSchemeReportEnvironment(nargs int) error {
+	if nargs != 1 {
+		return errors.New("scheme-report-environment takes 1 argument")
+	}
+
+	version_v, ok := stack.Pop().(Integer)
+	if !ok {
+		return errors.New(
+			"scheme-report-environment takes an integer as the argument",
+		)
+	}
+
+	version_bi := big.Int(version_v)
+	if version_bi.Cmp(big.NewInt(5)) != 0 {
+		return errors.New("version to scheme-report-environment must be 5")
+	}
+
+	scope := map[Symbol]Value{}
+	for k, v := range BaseScope {
+		scope[k] = v
+	}
+
+	stack.Push(&Procedure{
+		Scope: Scope{scope, nil},
+		Args: Empty,
+		Macros: map[Symbol]SyntaxRules{},
+	})
+	return nil
+}
+
+func FnEval(nargs int) error {
+	if nargs != 2 {
+		return errors.New("eval takes 2 arguments")
+	}
+
+	expr := stack.Pop()
+	env, ok := stack.Pop().(*Procedure)
+	if !ok {
+		return errors.New("eval takes a procedure for the environment")
+	}
+	env.Ins = []Ins{}
+	if err := env.Gen(expr); err != nil {
+		return err
+	}
+	env.Eval()
+	return nil
+}
 
 func FnIsProcedure(nargs int) error {
 	_, ok := stack.Pop().(*Procedure)

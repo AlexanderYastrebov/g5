@@ -7,6 +7,10 @@ var SymbolNames = []string{
 	"unquote-splicing",
 	"...",
 
+	"null-environment",
+	"scheme-report-environment",
+	"eval",
+
 	"set!",
 	"define",
 	"lambda",
@@ -115,6 +119,10 @@ const (
 	UnquoteSplicing
 	Ellipsis
 
+	SymNullEnvironment
+	SymSchemeReportEnvironment
+	SymEval
+
 	SymSet
 	SymDefine
 	SymLambda
@@ -219,6 +227,7 @@ const (
 	SymLast
 )
 
+var BaseScope = map[Symbol]Value{}
 var TopScope = Scope{
 	map[Symbol]Value{
 		SymCallCC:         &Procedure{CallCC: FnCallCC},
@@ -226,6 +235,12 @@ var TopScope = Scope{
 		SymDynamicWind:    &Procedure{Builtin: FnDynamicWind},
 		SymValues:         &Procedure{Builtin: FnValues},
 		SymCallWithValues: &Procedure{Builtin: FnCallWithValues},
+
+		SymNullEnvironment: &Procedure{Builtin: FnNullEnvironment},
+		SymSchemeReportEnvironment: &Procedure{
+			Builtin: FnSchemeReportEnvironment,
+		},
+		SymEval: &Procedure{Builtin: FnEval},
 
 		SymAdd:          &Procedure{Builtin: FnAdd},
 		SymSub:          &Procedure{Builtin: FnSub},

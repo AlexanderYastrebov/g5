@@ -8,7 +8,18 @@ import (
 
 func TestMain(m *testing.M) {
 	Top.Scope = TopScope // Put builtins into top-level scope
-	Top.Run(Runtime, true)
+
+	if int(SymLast) != len(SymbolNames) {
+		panic("Symbol table length mismatch")
+	}
+
+	Top.Run(Init, true)
+	Top.Run(CaseLambdaSRFI, true)
+	Top.Run(ListsSRFI, true)
+
+	for k, v := range TopScope.m { // Copy unmodified scope into basescope
+		BaseScope[k] = v
+	}
 	os.Exit(m.Run())
 }
 

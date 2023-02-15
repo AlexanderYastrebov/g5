@@ -74,6 +74,11 @@ func main() {
 	Top.Run(Init, true)
 	Top.Run(CaseLambdaSRFI, true)
 	Top.Run(ListsSRFI, true)
+
+	for k, v := range TopScope.m { // Copy unmodified scope into basescope
+		BaseScope[k] = v
+	}
+
 	switch len(os.Args) {
 	case 1:
 		reader := bufio.NewReader(os.Stdin)
