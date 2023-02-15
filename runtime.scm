@@ -140,7 +140,7 @@
 
 (define-syntax do
   (syntax-rules ()
-    ((do ((var init step ...) ...)
+    ((_ ((var init step) ...)
          (test expr ...)
          command ...)
      (letrec
@@ -153,7 +153,7 @@
                (begin
                  command
                  ...
-                 (loop (do "step" var step ...) ...))))))
+                 (loop (do "step" var step) ...))))))
        (loop init ...)))
     ((do "step" x) x)
     ((do "step" x y) y)))
@@ -318,3 +318,8 @@
   (do ((n (- (string-length str) 1) (- n 1)))
        ((= n -1) str)
     (string-set! str n ch)))
+
+
+(define (check-arg pred val caller)
+  (let lp ((val val))
+    (if (pred val) val (lp (error "Bad argument" val pred caller)))))

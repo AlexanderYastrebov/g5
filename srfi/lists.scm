@@ -244,7 +244,8 @@
   (check-arg (lambda (n) (and (integer? n) (>= n 0))) len list-tabulate)
   (check-arg procedure? proc list-tabulate)
   (do ((i (- len 1) (- i 1)) (ans '() (cons (proc i) ans)))
-      ((< i 0) ans)))
+      ((< i 0) ans)
+    (print ans)))
 
 ;;; (cons* a1 a2 ... an) = (cons a1 (cons a2 (cons ... an)))
 ;;; (cons* a1) = a1	(cons* a1 a2 ...) = (cons a1 (cons* a2 ...))
