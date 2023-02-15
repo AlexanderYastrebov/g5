@@ -50,7 +50,7 @@ func FnWritePrim(nargs int) error {
 		return errors.New("Expected bool as first arg to write-prim")
 	}
 
-	return WriteValue(stack.Top(), bool(isdisplay), nil)
+	return WriteValue(stack.Top(), bool(isdisplay))
 }
 
 func FnExit(nargs int) error {

@@ -88,6 +88,14 @@ var SymbolNames = []string{
 	"number->string",
 	"list->string",
 
+	"port?",
+	"call-with-input-file",
+	"call-with-output-file",
+	"open-input-file",
+	"open-output-file",
+	"close-input-port",
+	"close-output-port",
+
 	"procedure?",
 
 	"get-environment-variables",
@@ -183,6 +191,14 @@ const (
 	SymNumber2String
 	SymList2String
 
+	SymIsPort
+	SymCallWithInputFile
+	SymCallWithOutputFile
+	SymOpenInputFile
+	SymOpenOutputFile
+	SymCloseInputPort
+	SymCloseOutputPort
+
 	SymIsProcedure
 
 	SymGetEnvironmentVariables
@@ -262,6 +278,14 @@ var TopScope = Scope{
 		SymSymbol2String:  &Procedure{Builtin: FnSymbol2String},
 		SymNumber2String:  &Procedure{Builtin: FnNumber2String},
 		SymList2String:    &Procedure{Builtin: FnList2String},
+
+		SymIsPort:             &Procedure{Builtin: FnIsPort},
+		SymCallWithInputFile:  &Procedure{Builtin: FnCallWithInputFile},
+		SymCallWithOutputFile: &Procedure{Builtin: FnCallWithOutputFile},
+		SymOpenInputFile:      &Procedure{Builtin: FnOpenInputFile},
+		SymOpenOutputFile:     &Procedure{Builtin: FnOpenOutputFile},
+		SymCloseInputPort:     &Procedure{Builtin: FnCloseInputPort},
+		SymCloseOutputPort:    &Procedure{Builtin: FnCloseOutputPort},
 
 		SymIsProcedure: &Procedure{Builtin: FnIsProcedure},
 

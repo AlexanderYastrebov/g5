@@ -35,7 +35,6 @@ func validate(code string) bool {
 }
 
 func (ctx *Procedure) Run(code string, quiet bool) {
-	stack = []Value{}
 	p := NewParser(code)
 	p.skipWs()
 
@@ -58,7 +57,7 @@ func (ctx *Procedure) Run(code string, quiet bool) {
 		if !quiet {
 			fmt.Println()
 			if len(stack) > 0 {
-				WriteValue(stack.Top(), false, nil)
+				WriteValue(stack.Top(), false)
 			}
 			fmt.Println()
 		}

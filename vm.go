@@ -3,7 +3,11 @@ package main
 import (
 	"fmt"
 	"math/big"
+	"os"
 )
+
+var OutputPortStack = []OutputPort{{os.Stdout}}
+var InputPortStack = []InputPort{{os.Stdin}}
 
 type Op uint8
 

@@ -2,7 +2,7 @@ package main
 
 type Stack []Value
 
-var stack Stack
+var stack = Stack{}
 
 func (s *Stack) Push(v Value) {
 	*s = append(*s, v)

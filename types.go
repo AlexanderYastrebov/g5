@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"math/big"
-	"os"
 	"strings"
 )
 
@@ -76,11 +75,17 @@ type String struct {
 
 func (String) isValue() {}
 
-type Port struct {
-	io.ReadWriteCloser
+type InputPort struct {
+	io.ReadCloser
 }
 
-func (Port) isValue() {}
+func (InputPort) isValue() {}
+
+type OutputPort struct {
+	io.WriteCloser
+}
+
+func (OutputPort) isValue() {}
 
 type Scoped struct {
 	Symbol Symbol
@@ -89,95 +94,92 @@ type Scoped struct {
 
 func (Scoped) isValue() {}
 
-func WriteValue(v Value, display bool, port *Port) error {
-	var writer io.Writer = port
-	if port == nil {
-		writer = os.Stdout
-	}
+func WriteValue(v Value, display bool) error {
+	port := OutputPortStack[len(OutputPortStack) - 1]
 	switch v.(type) {
 	case Boolean:
 		if v.(Boolean) {
-			writer.Write([]byte("#t"))
+			port.Write([]byte("#t"))
 		} else {
-			writer.Write([]byte("#f"))
+			port.Write([]byte("#f"))
 		}
 	case Symbol:
-		fmt.Fprint(writer, SymbolNames[v.(Symbol)])
+		fmt.Fprint(port, SymbolNames[v.(Symbol)])
 	case String:
 		if !display {
-			fmt.Fprintf(writer, "\"%s\"", *v.(String).s)
+			fmt.Fprintf(port, "\"%s\"", *v.(String).s)
 		} else {
-			fmt.Fprint(writer, *v.(String).s)
+			fmt.Fprint(port, *v.(String).s)
 		}
 	case Char:
 		ch := rune(v.(Char))
 		if display {
-			fmt.Fprintf(writer, "%c", ch)
+			fmt.Fprintf(port, "%c", ch)
 		} else {
 			if ch == '\n' {
-				fmt.Fprint(writer, "#\\newline")
+				fmt.Fprint(port, "#\\newline")
 			} else if ch == ' ' {
-				fmt.Fprint(writer, "#\\space")
+				fmt.Fprint(port, "#\\space")
 			} else {
-				fmt.Fprintf(writer, "#\\%c", ch)
+				fmt.Fprintf(port, "#\\%c", ch)
 			}
 		}
 	case Vector:
-		fmt.Fprint(writer, "#(")
+		fmt.Fprint(port, "#(")
 		for i, item := range *v.(Vector).v {
 			if i != 0 {
-				fmt.Fprint(writer, " ")
+				fmt.Fprint(port, " ")
 			}
-			WriteValue(item, display, port)
+			WriteValue(item, display)
 		}
-		fmt.Fprint(writer, ")")
+		fmt.Fprint(port, ")")
 	case *Pair:
-		fmt.Fprint(writer, "(")
+		fmt.Fprint(port, "(")
 
 		cur := v.(*Pair)
 		for cur != Empty {
-			WriteValue(*cur.Car, display, port)
+			WriteValue(*cur.Car, display)
 			if p, ok := (*cur.Cdr).(*Pair); ok {
 				if p != Empty {
-					fmt.Fprint(writer, " ")
+					fmt.Fprint(port, " ")
 				}
 				cur = (*cur.Cdr).(*Pair)
 			} else {
-				fmt.Fprint(writer, " . ")
-				WriteValue(*cur.Cdr, display, port)
+				fmt.Fprint(port, " . ")
+				WriteValue(*cur.Cdr, display)
 				break
 			}
 		}
-		fmt.Fprint(writer, ")")
+		fmt.Fprint(port, ")")
 
 	case Integer:
 		i := big.Int(v.(Integer))
-		fmt.Fprint(writer, i.String())
+		fmt.Fprint(port, i.String())
 
 	case Rational:
 		r := big.Rat(v.(Rational))
-		fmt.Fprint(writer, r.String())
+		fmt.Fprint(port, r.String())
 
 	case *Procedure:
-		fmt.Fprint(writer, "[procedure]")
+		fmt.Fprint(port, "[procedure]")
 
 	case Procedure:
-		fmt.Fprint(writer, "[imm_procedure]")
+		fmt.Fprint(port, "[imm_procedure]")
 
 	case *Scope:
-		fmt.Fprint(writer, "[scope]")
+		fmt.Fprint(port, "[scope]")
 
 	case Scoped:
-		WriteValue(v.(Scoped).Symbol, display, port)
+		WriteValue(v.(Scoped).Symbol, display)
 
 	default:
-		fmt.Fprintf(writer, "[??? (%T)]", v)
+		fmt.Fprintf(port, "[??? (%T)]", v)
 	}
 	return nil
 }
 
 func PrintValue(v Value) error {
-	return WriteValue(v, false, nil)
+	return WriteValue(v, false)
 }
 
 func Str2Sym(str string) Symbol {
