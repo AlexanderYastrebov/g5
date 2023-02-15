@@ -326,3 +326,15 @@
     (apply display (cons ch port))))
 
 (define (newline . port) (apply write-char (cons #\newline port)))
+
+(define (gcd a . b) ; Recursive euclidian algorithm for calculating GCD
+  (if (pair? b)
+    (if (= (car b) 0)
+      (max a (-a))
+      (gcd (car b) (modulo a (car b))))
+    (gcd a (apply gcd b))))
+
+(define (lcm a . b)
+  (if (pair? b)
+    (/ (* a (car b)) (gcd a b))
+    (lcm (lcm a (car b)) (apply lcm (cdr b)))))
