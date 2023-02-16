@@ -4,6 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"math"
+	"strings"
+	"strconv"
 )
 
 func FnAdd(nargs int) error {
@@ -588,5 +591,281 @@ func FnChar2Integer(nargs int) error {
 		return fmt.Errorf("Got non-char to char->integer (%T)", v)
 	}
 	stack.Push(Integer(*big.NewInt(int64(c))))
+	return nil
+}
+
+func FnRExpt(nargs int) error {
+	if nargs != 2 {
+		return errors.New("rexpt takes 2 arguments")
+	}
+
+	var n float64
+	nv := stack.Pop()
+	nr, ok := nv.(Rational)
+	if ok {
+		nbr := big.Rat(nr)
+		n, _ = nbr.Float64()
+	} else {
+		ni, ok := nv.(Integer)
+		if !ok {
+			return errors.New("rexpt takes a number as the first argument")
+		}
+		nbi := big.Int(ni)
+		n = float64(nbi.Int64())
+	}
+
+	pr := stack.Pop().(Rational)
+	pbr := big.Rat(pr)
+	p, _ := pbr.Float64()
+
+	res := big.Rat{}
+	res.SetFloat64(math.Pow(n, p))
+	stack.Push(Rational(res))
+	return nil
+}
+
+func FnLog(nargs int) error {
+	if nargs != 1 {
+		return errors.New("log takes 1 argument")
+	}
+
+	var n float64
+	nv := stack.Pop()
+	nr, ok := nv.(Rational)
+	if ok {
+		nbr := big.Rat(nr)
+		n, _ = nbr.Float64()
+	} else {
+		ni, ok := nv.(Integer)
+		if !ok {
+			return errors.New("log takes a number as the argument")
+		}
+		nbi := big.Int(ni)
+		n = float64(nbi.Int64())
+	}
+
+	if n <= 0 {
+		return errors.New("logarithm of non-positive number")
+	}
+
+	res := big.Rat{}
+	res.SetFloat64(math.Log(n))
+	stack.Push(Rational(res))
+	return nil
+}
+
+func FnSin(nargs int) error {
+	if nargs != 1 {
+		return errors.New("sin takes 1 argument")
+	}
+
+	var n float64
+	nv := stack.Pop()
+	nr, ok := nv.(Rational)
+	if ok {
+		nbr := big.Rat(nr)
+		n, _ = nbr.Float64()
+	} else {
+		ni, ok := nv.(Integer)
+		if !ok {
+			return errors.New("sin takes a number as the argument")
+		}
+		nbi := big.Int(ni)
+		n = float64(nbi.Int64())
+	}
+
+	res := big.Rat{}
+	res.SetFloat64(math.Sin(n))
+	stack.Push(Rational(res))
+	return nil
+}
+
+
+func FnCos(nargs int) error {
+	if nargs != 1 {
+		return errors.New("cos takes 1 argument")
+	}
+
+	var n float64
+	nv := stack.Pop()
+	nr, ok := nv.(Rational)
+	if ok {
+		nbr := big.Rat(nr)
+		n, _ = nbr.Float64()
+	} else {
+		ni, ok := nv.(Integer)
+		if !ok {
+			return errors.New("cos takes a number as the argument")
+		}
+		nbi := big.Int(ni)
+		n = float64(nbi.Int64())
+	}
+
+	res := big.Rat{}
+	res.SetFloat64(math.Cos(n))
+	stack.Push(Rational(res))
+	return nil
+}
+
+func FnAsin(nargs int) error {
+	if nargs != 1 {
+		return errors.New("asin takes 1 argument")
+	}
+
+	var n float64
+	nv := stack.Pop()
+	nr, ok := nv.(Rational)
+	if ok {
+		nbr := big.Rat(nr)
+		n, _ = nbr.Float64()
+	} else {
+		ni, ok := nv.(Integer)
+		if !ok {
+			return errors.New("asin takes a number as the argument")
+		}
+		nbi := big.Int(ni)
+		n = float64(nbi.Int64())
+	}
+
+	if n < -1 || n > 1 {
+		return errors.New("asin argument out of range [-1, 1]")
+	}
+
+	res := big.Rat{}
+	res.SetFloat64(math.Asin(n))
+	stack.Push(Rational(res))
+	return nil
+}
+
+func FnAcos(nargs int) error {
+	if nargs != 1 {
+		return errors.New("acos takes 1 argument")
+	}
+
+	var n float64
+	nv := stack.Pop()
+	nr, ok := nv.(Rational)
+	if ok {
+		nbr := big.Rat(nr)
+		n, _ = nbr.Float64()
+	} else {
+		ni, ok := nv.(Integer)
+		if !ok {
+			return errors.New("acos takes a number as the argument")
+		}
+		nbi := big.Int(ni)
+		n = float64(nbi.Int64())
+	}
+
+	if n < -1 || n > 1 {
+		return errors.New("acos argument out of range [-1, 1]")
+	}
+
+	res := big.Rat{}
+	res.SetFloat64(math.Acos(n))
+	stack.Push(Rational(res))
+	return nil
+}
+
+func FnAtan(nargs int) error {
+	if nargs != 1 && nargs != 2 {
+		return errors.New("atan takes 1 or 2 arguments")
+	}
+
+	var y, x float64
+	nx := stack.Pop()
+	switch nr := nx.(type) {
+	case Rational:
+		nbr := big.Rat(nr)
+		x, _ = nbr.Float64()
+	case Integer:
+		nbi := big.Int(nr)
+		x = float64(nbi.Int64())
+	default:
+		return errors.New("atan takes numbers as arguments")
+	}
+	if nargs == 2 {
+		ny := stack.Pop()
+		switch nr := ny.(type) {
+		case Rational:
+			nbr := big.Rat(nr)
+			y, _ = nbr.Float64()
+		case Integer:
+			nbi := big.Int(nr)
+			y = float64(nbi.Int64())
+		default:
+			return errors.New("atan takes numbers as arguments")
+		}
+	} else {
+		x = 1.0
+	}
+
+	res := big.Rat{}
+	res.SetFloat64(math.Atan2(y, x))
+	stack.Push(Rational(res))
+	return nil
+}
+
+
+func FnString2Number(nargs int) error {
+	if nargs != 1 && nargs != 2 {
+		return errors.New("string->number takes 1 or 2 arguments")
+	}
+
+	nv := stack.Pop()
+	ns, ok := nv.(String)
+	if !ok {
+		return errors.New("string->number takes a string as the first argument")
+	}
+
+	str := *ns.s
+	radix := 10
+	if nargs == 2 {
+		nr, ok := stack.Pop().(Integer)
+		if !ok {
+			return errors.New("string->number takes an integer as the second argument")
+		}
+
+		nbi := big.Int(nr)
+		radix = int(nbi.Int64())
+	}
+
+	if radix < 2 || radix > 36 {
+		return errors.New("invalid radix")
+	}
+
+	var num Value
+	if strings.Contains(str, "/") {
+		// rational number
+		parts := strings.Split(str, "/")
+		if len(parts) != 2 {
+			return errors.New("invalid rational number")
+		}
+		numerator, err := strconv.ParseInt(parts[0], radix, 64)
+		if err != nil {
+			return errors.New("failed to convert string to number")
+		}
+		denominator, err := strconv.ParseInt(parts[1], radix, 64)
+		if err != nil {
+			return errors.New("failed to convert string to number")
+		}
+		num = Rational(*big.NewRat(numerator, denominator))
+	} else if strings.Contains(str, ".") {
+		f, err := strconv.ParseFloat(str, 64)
+		if err != nil {
+			return errors.New("failed to convert string to number")
+		}
+		res := big.Rat{}
+		res.SetFloat64(f)
+		num = Rational(res)
+	} else {
+		i, err := strconv.ParseInt(str, radix, 64)
+		if err != nil {
+			return errors.New("failed to convert string to number")
+		}
+		num = Integer(*big.NewInt(i))
+	}
+
+	stack.Push(num)
 	return nil
 }

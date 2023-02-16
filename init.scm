@@ -338,3 +338,39 @@
   (if (pair? b)
     (/ (* a (car b)) (gcd a b))
     (lcm (lcm a (car b)) (apply lcm (cdr b)))))
+
+(define (iexpt x y)
+  (let loop ((count y) (res 1))
+    (cond
+      ((zero? count) res)
+      ((> count 0) (loop (- count 1) (* res x)))
+      ((< count 0) (loop (+ count 1) (/ res x))))))
+
+(define (expt x y)
+  (if (integer? y)
+    (iexpt x y)
+    (rexpt x y)))
+
+(define (sqrt x) (expt x 0.5))
+(define pi 3.141592654)
+(define (tan x) (/ (sin x) (cos x)))
+(define (exp x) (expt 2.718281828 x))
+
+(define (char-alphabetic? ch)
+  (and (char-ci>=? ch #\a) (char-ci<=? ch #\z)))
+
+(define (char-numeric? ch)
+  (and (char-ci>=? ch #\0) (char-ci<=? ch #\9)))
+
+(define (char-whitespace? ch)
+  (or
+    (== ch #\space)
+    (== ch #\newline)
+    (== ch #\tab)
+    (== ch #\cr)))
+
+(define (char-upper-case? ch)
+  (and (char>=? ch #\A) (char<=? ch #\Z)))
+
+(define (char-lower-case? ch)
+  (and (char>=? ch #\a) (char<=? ch #\z)))

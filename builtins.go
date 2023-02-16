@@ -44,6 +44,14 @@ var SymbolNames = []string{
 	"trunacte",
 	"round",
 	"char->integer",
+	"rexpt",
+	"log",
+	"sin",
+	"cos",
+	"asin",
+	"acos",
+	"atan",
+	"string->number",
 
 	"number?",
 	"complex?",
@@ -76,6 +84,8 @@ var SymbolNames = []string{
 
 	"char?",
 	"integer->char",
+	"char-upcase",
+	"char-downcase",
 
 	"string?",
 	"make-string",
@@ -157,6 +167,14 @@ const (
 	SymTruncate
 	SymRound
 	SymChar2Integer
+	SymRExpt
+	SymLog
+	SymSin
+	SymCos
+	SymAsin
+	SymAcos
+	SymAtan
+	SymString2Number
 
 	SymIsNumber
 	SymIsComplex
@@ -189,6 +207,8 @@ const (
 
 	SymIsChar
 	SymInteger2Char
+	SymCharUpcase
+	SymCharDowncase
 
 	SymIsString
 	SymMakeString
@@ -242,23 +262,31 @@ var TopScope = Scope{
 		},
 		SymEval: &Procedure{Builtin: FnEval},
 
-		SymAdd:          &Procedure{Builtin: FnAdd},
-		SymSub:          &Procedure{Builtin: FnSub},
-		SymMul:          &Procedure{Builtin: FnMul},
-		SymDiv:          &Procedure{Builtin: FnDiv},
-		SymGt:           &Procedure{Builtin: FnGt},
-		SymLt:           &Procedure{Builtin: FnLt},
-		SymEqu:          &Procedure{Builtin: FnNumEq},
-		SymQuotient:     &Procedure{Builtin: FnQuotient},
-		SymRemainder:    &Procedure{Builtin: FnRemainder},
-		SymModulo:       &Procedure{Builtin: FnModulo},
-		SymNumerator:    &Procedure{Builtin: FnNumerator},
-		SymDenominator:  &Procedure{Builtin: FnDenominator},
-		SymFloor:        &Procedure{Builtin: FnFloor},
-		SymCeiling:      &Procedure{Builtin: FnCeiling},
-		SymTruncate:     &Procedure{Builtin: FnTruncate},
-		SymRound:        &Procedure{Builtin: FnRound},
-		SymChar2Integer: &Procedure{Builtin: FnChar2Integer},
+		SymAdd:           &Procedure{Builtin: FnAdd},
+		SymSub:           &Procedure{Builtin: FnSub},
+		SymMul:           &Procedure{Builtin: FnMul},
+		SymDiv:           &Procedure{Builtin: FnDiv},
+		SymGt:            &Procedure{Builtin: FnGt},
+		SymLt:            &Procedure{Builtin: FnLt},
+		SymEqu:           &Procedure{Builtin: FnNumEq},
+		SymQuotient:      &Procedure{Builtin: FnQuotient},
+		SymRemainder:     &Procedure{Builtin: FnRemainder},
+		SymModulo:        &Procedure{Builtin: FnModulo},
+		SymNumerator:     &Procedure{Builtin: FnNumerator},
+		SymDenominator:   &Procedure{Builtin: FnDenominator},
+		SymFloor:         &Procedure{Builtin: FnFloor},
+		SymCeiling:       &Procedure{Builtin: FnCeiling},
+		SymTruncate:      &Procedure{Builtin: FnTruncate},
+		SymRound:         &Procedure{Builtin: FnRound},
+		SymChar2Integer:  &Procedure{Builtin: FnChar2Integer},
+		SymRExpt:         &Procedure{Builtin: FnRExpt},
+		SymLog:           &Procedure{Builtin: FnLog},
+		SymSin:           &Procedure{Builtin: FnSin},
+		SymCos:           &Procedure{Builtin: FnCos},
+		SymAsin:          &Procedure{Builtin: FnAsin},
+		SymAcos:          &Procedure{Builtin: FnAcos},
+		SymAtan:          &Procedure{Builtin: FnAtan},
+		SymString2Number: &Procedure{Builtin: FnString2Number},
 
 		SymNot:   &Procedure{Builtin: FnNot},
 		SymEqv:   &Procedure{Builtin: FnEqv},
@@ -291,6 +319,8 @@ var TopScope = Scope{
 
 		SymIsChar:       &Procedure{Builtin: FnIsChar},
 		SymInteger2Char: &Procedure{Builtin: FnInteger2Char},
+		SymCharUpcase:   &Procedure{Builtin: FnCharUpcase},
+		SymCharDowncase: &Procedure{Builtin: FnCharDowncase},
 
 		SymIsString:       &Procedure{Builtin: FnIsString},
 		SymMakeString:     &Procedure{Builtin: FnMakeString},

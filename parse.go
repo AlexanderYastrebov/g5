@@ -106,11 +106,11 @@ func (p *Parser) GetValue() (Value, error) {
 				ended = true
 			}
 		}
-		p.data = p.data[1:] // End quote
 		if !ended {
 			return nil, errors.New(fmt.Sprintf(
 				"Line %d: Early EOF, non-terminated string", p.line))
 		}
+		p.data = p.data[1:] // End quote
 		return String{&str}, nil
 
 	case p.data[0] == ')':
@@ -189,16 +189,22 @@ func (p *Parser) GetValue() (Value, error) {
 				return Char(ch), nil
 			}
 
-			for _, val := range []string{"space", "newline"} {
+			for _, val := range []string{"space", "newline", "tab", "cr"} {
 				slen := len(val)
 				if len(p.data) >= slen-1 {
 					if len(p.data) == slen || delim[p.data[slen]] {
 						str := string(p.data[:slen])
 						p.data = p.data[slen:]
-						if strings.ToLower(str) == "space" {
+
+						switch strings.ToLower(str) {
+						case "space":
 							return Char(' '), nil
-						} else if strings.ToLower(str) == "newline" {
+						case "newline":
 							return Char('\n'), nil
+						case "tab":
+							return Char('\t'), nil
+						case "cr":
+							return Char('\r'), nil
 						}
 					}
 				}
