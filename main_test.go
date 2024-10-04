@@ -1,10 +1,14 @@
 package main
 
 import (
+	_ "embed"
 	"math/big"
 	"os"
 	"testing"
 )
+
+//go:embed test.scm
+var Suite string
 
 func TestMain(m *testing.M) {
 	Top.Scope = TopScope // Put builtins into top-level scope
@@ -146,4 +150,8 @@ func TestLetrec(t *testing.T) {
 	if result != true {
 		t.Errorf("Expected true, got false")
 	}
+}
+
+func TestSuite(t *testing.T) {
+	Top.Run(Suite, true)
 }

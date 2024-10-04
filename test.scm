@@ -10,7 +10,8 @@
      (begin
        (print "[FAIL]")
        (print "Expected:" expect)
-       (print "     Got:" expr)))
+       (print "     Got:" expr)
+       (exit 1)))
      (print *tests-passed* "/" *tests-run* name))
 
 (test "add" 4 (+ 2 2))
@@ -81,3 +82,6 @@
 (test "call-with-values" 5
       (call-with-values (lambda () (values 4 5))
                         (lambda (a b) b)))
+
+(test "char-whitespace?" #t
+      (char-whitespace? #\space))

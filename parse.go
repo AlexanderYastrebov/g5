@@ -191,12 +191,11 @@ func (p *Parser) GetValue() (Value, error) {
 
 			for _, val := range []string{"space", "newline", "tab", "cr"} {
 				slen := len(val)
-				if len(p.data) >= slen-1 {
-					if len(p.data) == slen || delim[p.data[slen]] {
-						str := string(p.data[:slen])
+				if len(p.data) >= slen {
+					str := strings.ToLower(string(p.data[:slen]))
+					if str == val {
 						p.data = p.data[slen:]
-
-						switch strings.ToLower(str) {
+						switch str {
 						case "space":
 							return Char(' '), nil
 						case "newline":
@@ -205,6 +204,8 @@ func (p *Parser) GetValue() (Value, error) {
 							return Char('\t'), nil
 						case "cr":
 							return Char('\r'), nil
+						default:
+							panic("Unreachable")
 						}
 					}
 				}

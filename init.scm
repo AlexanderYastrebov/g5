@@ -364,10 +364,10 @@
 
 (define (char-whitespace? ch)
   (or
-    (== ch #\space)
-    (== ch #\newline)
-    (== ch #\tab)
-    (== ch #\cr)))
+    (eqv? ch #\space)
+    (eqv? ch #\newline)
+    (eqv? ch #\tab)
+    (eqv? ch #\cr)))
 
 (define (char-upper-case? ch)
   (and (char>=? ch #\A) (char<=? ch #\Z)))
